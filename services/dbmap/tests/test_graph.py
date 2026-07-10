@@ -74,6 +74,23 @@ class GraphEngineTests(unittest.TestCase):
         column_results = search_snapshot(snapshot, "customer_id")
         self.assertEqual(column_results[0]["kind"], "column")
 
+    def test_search_prioritizes_exact_relation_name_over_matching_columns(self):
+        metadata = sample_metadata()
+        metadata["columns"].append(
+            {
+                "schema": "public",
+                "table": "orders",
+                "name": "customers_archive_id",
+                "data_type": "uuid",
+                "is_nullable": "YES",
+            }
+        )
+        snapshot = GraphEngine("testdb").build(metadata)
+
+        results = search_snapshot(snapshot, "customers")
+
+        self.assertEqual(results[0]["id"], "table:public.customers")
+
     def test_neighbors_returns_bounded_subgraph(self):
         snapshot = GraphEngine("testdb").build(sample_metadata())
         neighbors = GraphEngine.neighbors(snapshot, "table:public.orders", depth=1, max_nodes=4)

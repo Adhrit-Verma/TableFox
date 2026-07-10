@@ -8,6 +8,15 @@ def search_snapshot(snapshot: GraphSnapshot, query: str, limit: int = 25) -> lis
     if not needle:
         return []
 
+    kind_priority = {
+        "table": 0,
+        "view": 1,
+        "materialized_view": 2,
+        "column": 3,
+        "constraint": 4,
+        "index": 5,
+        "schema": 6,
+    }
     scored: list[tuple[int, GraphNode]] = []
     for node in snapshot.nodes:
         haystack = " ".join(
@@ -25,16 +34,36 @@ def search_snapshot(snapshot: GraphSnapshot, query: str, limit: int = 25) -> lis
         ).lower()
         if needle not in haystack:
             continue
-        score = 10 if node.label.lower() == needle else 5 if node.label.lower().startswith(needle) else 1
+        name = (node.name or "").lower()
+        label = node.label.lower()
+        if name == needle:
+            score = 100
+        elif label == needle:
+            score = 95
+        elif name.startswith(needle):
+            score = 60
+        elif label.startswith(needle):
+            score = 55
+        else:
+            score = 10
+        if node.kind in {"table", "view", "materialized_view"}:
+            score += 20
         scored.append((score, node))
 
-    scored.sort(key=lambda item: (-item[0], item[1].kind, item[1].label))
+    scored.sort(
+        key=lambda item: (
+            -item[0],
+            kind_priority.get(item[1].kind, 99),
+            item[1].label,
+        )
+    )
     return [
         {
             "id": node.id,
             "kind": node.kind,
             "label": node.label,
             "schema": node.schema,
+            "parent_id": node.parent_id,
             "metadata": node.metadata,
             "score": score,
         }

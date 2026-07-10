@@ -114,7 +114,8 @@ class PostgresIntrospector:
             conn.execute("set transaction read only")
             conn.execute(f"set statement_timeout = {int(self.settings.statement_timeout_ms)}")
             row = conn.execute(
-                "select current_database(), current_user, version(), pg_is_in_recovery()"
+                "select current_database(), current_user, version(), pg_is_in_recovery(), "
+                "current_setting('default_transaction_read_only')::boolean"
             ).fetchone()
             return {
                 "ok": True,
@@ -122,7 +123,8 @@ class PostgresIntrospector:
                 "user": row[1],
                 "version": row[2],
                 "read_replica": row[3],
-                "read_only_default": True,
+                "read_only_default": row[4],
+                "session_enforced_read_only": True,
             }
 
     def snapshot(self, use_cache: bool = True, refresh: bool = False) -> GraphSnapshot:

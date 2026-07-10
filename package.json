@@ -5,6 +5,8 @@
     "apps/web"
   ],
   "scripts": {
+    "dev": "python scripts/dev.py",
+    "check": "python scripts/dev.py --check",
     "web": "npm --workspace apps/web run dev",
     "web:build": "npm --workspace apps/web run build"
   }

@@ -5,6 +5,19 @@ import os
 from pathlib import Path
 
 
+def _env_file() -> Path | None:
+    configured = os.getenv("DBMAP_ENV_FILE")
+    if configured:
+        return Path(configured).expanduser().resolve()
+
+    search_roots = (Path.cwd(), *Path.cwd().parents, *Path(__file__).resolve().parents)
+    for root in search_roots:
+        candidate = root / ".env"
+        if candidate.is_file():
+            return candidate
+    return None
+
+
 @dataclass(frozen=True)
 class Settings:
     database_url: str | None
@@ -25,7 +38,9 @@ class Settings:
         try:
             from dotenv import load_dotenv
 
-            load_dotenv()
+            env_file = _env_file()
+            if env_file:
+                load_dotenv(env_file, override=True)
         except ImportError:
             pass
 

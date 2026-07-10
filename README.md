@@ -17,11 +17,35 @@ The project contains a Python graph engine with FastAPI and MCP stdio entry poin
 ```text
 apps/web              Next.js local browser UI
 services/dbmap        Python graph engine, FastAPI API, MCP server
-examples/postgres     Sample PostgreSQL database
 scripts               Local PowerShell helpers
 ```
 
-## Setup
+## One-command Start
+
+For a database already configured in `.env`:
+
+```powershell
+.\run.cmd
+```
+
+The launcher validates the database, starts the API and web UI, opens `http://localhost:3000`, and keeps both services attached to the terminal. Press Ctrl+C to stop the services it started.
+
+For a first installation, configure `.env`, then install dependencies and start everything:
+
+```powershell
+.\run.cmd -Install
+```
+
+Useful launcher modes:
+
+```powershell
+.\run.cmd -Check       # Validate credentials and build a graph, then exit
+.\run.cmd -NoBrowser   # Start without opening a browser
+```
+
+The first install can take a few minutes. Later runs only need `.\run.cmd`.
+
+## Manual Setup
 
 Create a Python environment and install the backend:
 
@@ -45,19 +69,7 @@ Copy-Item .env.example .env
 
 Real credentials should stay in `.env`, which is ignored by Git.
 
-## Sample PostgreSQL Database
-
-Start the local sample database:
-
-```powershell
-.\scripts\run_sample_postgres.ps1
-```
-
-Use this demo connection string in `.env`:
-
-```text
-DATABASE_URL=postgresql://dbmap_reader:change-me-demo-only@localhost:55432/dbmap_demo
-```
+Configure either `DATABASE_URL` or the individual `PG*` variables, not both. If `DATABASE_URL` is present, PostgreSQL uses it instead of `PGHOST`, `PGDATABASE`, `PGUSER`, and `PGPASSWORD`. The launcher and MCP server load the repository-root `.env` explicitly.
 
 ## Run Locally
 
@@ -90,14 +102,13 @@ Example local MCP client command:
   "mcpServers": {
     "dbmap-postgres": {
       "command": "powershell",
-      "args": ["-ExecutionPolicy", "Bypass", "-File", "C:\\Code\\AI Agents\\Database Agent\\scripts\\run_mcp.ps1"],
-      "env": {
-        "DATABASE_URL": "postgresql://dbmap_reader:change-me-demo-only@localhost:55432/dbmap_demo"
-      }
+      "args": ["-ExecutionPolicy", "Bypass", "-File", "C:\\Code\\AI Agents\\Database Agent\\scripts\\run_mcp.ps1"]
     }
   }
 }
 ```
+
+The MCP process reads the repository's local `.env`; credentials do not need to be duplicated in client configuration. See [MCP_AGENT_GUIDE.md](MCP_AGENT_GUIDE.md) for the recommended agent workflow, tool-selection guidance, safety rules, and example prompts.
 
 ## MCP Tools
 

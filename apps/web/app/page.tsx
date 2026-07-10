@@ -15,7 +15,10 @@ import {
   Search,
   Table2,
   Wifi,
-  WifiOff
+  WifiOff,
+  X,
+  ZoomIn,
+  ZoomOut
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -52,6 +55,7 @@ type SearchResult = {
   kind: string;
   label: string;
   schema: string | null;
+  parent_id: string | null;
   metadata: Record<string, unknown>;
 };
 
@@ -78,14 +82,24 @@ const API_URL = process.env.NEXT_PUBLIC_DBMAP_API_URL ?? "http://127.0.0.1:8000"
 
 const visibleKinds = new Set(["schema", "table", "view", "materialized_view"]);
 
+function graphSignature(snapshot: GraphSnapshot) {
+  return `${snapshot.nodes.map((node) => node.id).join("|")}::${snapshot.edges.map((edge) => edge.id).join("|")}`;
+}
+
 export default function Home() {
   const cyRef = useRef<Core | null>(null);
   const graphEl = useRef<HTMLDivElement | null>(null);
+  const searchEl = useRef<HTMLDivElement | null>(null);
+  const searchAbortRef = useRef<AbortController | null>(null);
+  const graphSignatureRef = useRef("");
+  const focusRequestedRef = useRef(false);
   const [graph, setGraph] = useState<GraphSnapshot | null>(null);
   const [selected, setSelected] = useState<NodeExplanation | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
   const [activeSchemas, setActiveSchemas] = useState<Set<string>>(new Set());
   const [showColumns, setShowColumns] = useState(false);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
@@ -100,11 +114,21 @@ export default function Home() {
       .sort((a, b) => a.localeCompare(b));
   }, [graph]);
 
+  const columnParentId = useMemo(() => {
+    if (!showColumns || !selectedId || !graph) return null;
+    const node = graph.nodes.find((item) => item.id === selectedId);
+    if (!node) return null;
+    if (["table", "view", "materialized_view"].includes(node.kind)) return node.id;
+    return node.parent_id;
+  }, [graph, selectedId, showColumns]);
+
   const visibleGraph = useMemo(() => {
     if (!graph) return { nodes: [], edges: [] };
     const schemaFilterActive = activeSchemas.size > 0;
     const nodes = graph.nodes.filter((node) => {
-      if (!showColumns && !visibleKinds.has(node.kind)) return false;
+      const isVisibleObject = visibleKinds.has(node.kind);
+      const isSelectedColumn = node.kind === "column" && node.parent_id === columnParentId;
+      if (!isVisibleObject && !isSelectedColumn) return false;
       if (!schemaFilterActive) return true;
       return node.kind === "schema" || (node.schema ? activeSchemas.has(node.schema) : true);
     });
@@ -112,10 +136,17 @@ export default function Home() {
     const edges = graph.edges.filter((edge) => {
       if (!nodeIds.has(edge.source) || !nodeIds.has(edge.target)) return false;
       if (edge.kind === "foreign_key" || edge.kind === "contains") return true;
-      return showColumns && ["has_column", "has_constraint", "has_index"].includes(edge.kind);
+      return Boolean(columnParentId) && edge.kind === "has_column";
     });
     return { nodes, edges };
-  }, [activeSchemas, graph, showColumns]);
+  }, [activeSchemas, columnParentId, graph]);
+
+  const applyGraph = useCallback((payload: GraphSnapshot, force = false) => {
+    const signature = graphSignature(payload);
+    if (!force && signature === graphSignatureRef.current) return;
+    graphSignatureRef.current = signature;
+    setGraph(payload);
+  }, []);
 
   const loadGraph = useCallback(async (refresh = false) => {
     setStatus("loading");
@@ -124,15 +155,16 @@ export default function Home() {
       const response = await fetch(`${API_URL}/graph${refresh ? "?refresh=true" : ""}`);
       if (!response.ok) throw new Error(`Graph request failed with ${response.status}`);
       const payload = (await response.json()) as GraphSnapshot;
-      setGraph(payload);
+      applyGraph(payload, refresh);
       setStatus("ready");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to load graph.");
       setStatus("error");
     }
-  }, []);
+  }, [applyGraph]);
 
-  const loadNode = useCallback(async (id: string) => {
+  const loadNode = useCallback(async (id: string, focus = false) => {
+    focusRequestedRef.current = focus;
     setSelectedId(id);
     try {
       const response = await fetch(`${API_URL}/graph/node/${encodeURIComponent(id)}`);
@@ -147,24 +179,53 @@ export default function Home() {
     }
   }, []);
 
+  const clearSelection = useCallback(() => {
+    focusRequestedRef.current = false;
+    setSelectedId(null);
+    setSelected(null);
+  }, []);
+
   useEffect(() => {
     loadGraph();
   }, [loadGraph]);
 
   useEffect(() => {
     if (!searchQuery.trim()) {
+      searchAbortRef.current?.abort();
       setSearchResults([]);
+      setSearchLoading(false);
       return;
     }
+    setSearchLoading(true);
+    searchAbortRef.current?.abort();
+    const controller = new AbortController();
+    searchAbortRef.current = controller;
     const timer = window.setTimeout(async () => {
-      const response = await fetch(`${API_URL}/graph/search?q=${encodeURIComponent(searchQuery)}&limit=12`);
-      if (response.ok) {
-        const payload = (await response.json()) as { results: SearchResult[] };
-        setSearchResults(payload.results);
+      try {
+        const response = await fetch(`${API_URL}/graph/search?q=${encodeURIComponent(searchQuery)}&limit=12`, {
+          signal: controller.signal
+        });
+        if (response.ok) {
+          const payload = (await response.json()) as { results: SearchResult[] };
+          setSearchResults(payload.results);
+        }
+      } finally {
+        if (!controller.signal.aborted) setSearchLoading(false);
       }
-    }, 180);
-    return () => window.clearTimeout(timer);
+    }, 250);
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
   }, [searchQuery]);
+
+  useEffect(() => {
+    const closeSearch = (event: PointerEvent) => {
+      if (searchEl.current && !searchEl.current.contains(event.target as Node)) setSearchOpen(false);
+    };
+    document.addEventListener("pointerdown", closeSearch);
+    return () => document.removeEventListener("pointerdown", closeSearch);
+  }, []);
 
   useEffect(() => {
     const wsUrl = API_URL.replace(/^http/, "ws");
@@ -176,11 +237,17 @@ export default function Home() {
     socket.onmessage = (event) => {
       const payload = JSON.parse(event.data) as { type: string; graph?: GraphSnapshot };
       if (payload.type === "graph_snapshot" && payload.graph) {
-        setGraph(payload.graph);
+        applyGraph(payload.graph);
         setStatus("ready");
       }
     };
     return () => socket.close();
+  }, [applyGraph]);
+
+  useEffect(() => () => {
+    searchAbortRef.current?.abort();
+    cyRef.current?.destroy();
+    cyRef.current = null;
   }, []);
 
   useEffect(() => {
@@ -213,9 +280,12 @@ export default function Home() {
       cyRef.current = cytoscape({
         container: graphEl.current,
         elements,
-        wheelSensitivity: 0.18,
+        boxSelectionEnabled: false,
+        hideEdgesOnViewport: true,
+        pixelRatio: 1,
+        wheelSensitivity: 0.42,
         minZoom: 0.12,
-        maxZoom: 2.2,
+        maxZoom: 3,
         style: [
           {
             selector: "node",
@@ -300,21 +370,61 @@ export default function Home() {
               "border-color": "oklch(0.18 0.018 40)",
               "border-width": 3
             }
+          },
+          {
+            selector: ".faded",
+            style: {
+              opacity: 0.13,
+              "text-opacity": 0.08
+            }
+          },
+          {
+            selector: ".connected",
+            style: {
+              opacity: 1,
+              "z-index": 8
+            }
           }
         ],
-        layout: { name: "cose", animate: false, idealEdgeLength: 140, nodeRepulsion: 9000 }
+        layout: visibleGraph.nodes.length > 180
+          ? { name: "grid", animate: false, avoidOverlap: true, spacingFactor: 1.15 }
+          : { name: "cose", animate: false, idealEdgeLength: 120, nodeRepulsion: 7200, numIter: 600 }
       });
       cyRef.current.on("tap", "node", (event: EventObject) => loadNode(event.target.id()));
+      cyRef.current.on("tap", (event: EventObject) => {
+        if (event.target === cyRef.current) clearSelection();
+      });
     } else {
-      cyRef.current.elements().remove();
-      cyRef.current.add(elements);
-      cyRef.current.layout({ name: "cose", animate: false, idealEdgeLength: 140, nodeRepulsion: 9000 }).run();
+      cyRef.current.batch(() => {
+        cyRef.current?.elements().remove();
+        cyRef.current?.add(elements);
+      });
+      const layout = visibleGraph.nodes.length > 180
+        ? { name: "grid", animate: false, avoidOverlap: true, spacingFactor: 1.15 }
+        : { name: "cose", animate: false, idealEdgeLength: 120, nodeRepulsion: 7200, numIter: 600 };
+      cyRef.current.layout(layout).run();
     }
+  }, [clearSelection, graph, loadNode, visibleGraph]);
 
-    if (selectedId) {
-      cyRef.current.getElementById(selectedId).select();
+  useEffect(() => {
+    const cy = cyRef.current;
+    if (!cy) return;
+    cy.batch(() => {
+      cy.elements().removeClass("faded connected").unselect();
+      if (!selectedId) return;
+      const node = cy.getElementById(selectedId);
+      if (!node.length) return;
+      const neighborhood = node.closedNeighborhood();
+      cy.elements().difference(neighborhood).addClass("faded");
+      neighborhood.addClass("connected");
+      node.select();
+    });
+    if (selectedId && focusRequestedRef.current) {
+      const node = cy.getElementById(selectedId);
+      if (node.length) cy.animate({ center: { eles: node }, zoom: 1.2 }, { duration: 160 });
+      focusRequestedRef.current = false;
     }
-  }, [graph, loadNode, selectedId, visibleGraph]);
+  }, [selectedId, visibleGraph]);
 
   const toggleSchema = (schema: string) => {
     setActiveSchemas((current) => {
@@ -331,10 +441,30 @@ export default function Home() {
     if (node.length) cyRef.current.animate({ center: { eles: node }, zoom: 1.15 }, { duration: 180 });
   };
 
+  const zoomBy = (factor: number) => {
+    const cy = cyRef.current;
+    if (!cy) return;
+    const nextZoom = Math.min(cy.maxZoom(), Math.max(cy.minZoom(), cy.zoom() * factor));
+    cy.animate({ zoom: nextZoom }, { duration: 140 });
+  };
+
   const fitGraph = () => {
     const cy = cyRef.current;
     if (!cy) return;
     cy.animate({ fit: { eles: cy.elements(), padding: 42 } }, { duration: 180 });
+  };
+
+  const clearSearch = () => {
+    searchAbortRef.current?.abort();
+    setSearchQuery("");
+    setSearchResults([]);
+    setSearchOpen(false);
+    setSearchLoading(false);
+  };
+
+  const selectSearchResult = (result: SearchResult) => {
+    clearSearch();
+    loadNode(result.id, true);
   };
 
   return (
@@ -348,22 +478,57 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="command">
+        <div className="command" ref={searchEl}>
           <Search aria-hidden="true" size={16} />
           <input
             aria-label="Search database graph"
             value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
+            onChange={(event) => {
+              setSearchQuery(event.target.value);
+              setSearchOpen(true);
+            }}
+            onFocus={() => {
+              if (searchQuery.trim()) setSearchOpen(true);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Escape") {
+                event.preventDefault();
+                clearSearch();
+              }
+            }}
             placeholder="Search tables, columns, comments, constraints"
+            aria-expanded={searchOpen && Boolean(searchQuery.trim())}
+            aria-controls="database-search-results"
           />
-          {searchResults.length > 0 && (
-            <div className="searchResults">
-              {searchResults.map((result) => (
-                <button key={result.id} onClick={() => loadNode(result.id)}>
-                  <span>{result.label}</span>
-                  <small>{result.kind}{result.schema ? ` / ${result.schema}` : ""}</small>
+          {searchQuery && (
+            <button className="searchClear" onClick={clearSearch} aria-label="Clear search" title="Clear search">
+              <X size={15} />
+            </button>
+          )}
+          {searchOpen && searchQuery.trim() && (
+            <div className="searchResults" id="database-search-results" aria-label="Database search results">
+              <div className="searchResultsHeader">
+                <span>{searchLoading ? "Searching" : `${searchResults.length} results`}</span>
+                <button onClick={() => setSearchOpen(false)} aria-label="Close search results" title="Close results">
+                  <X size={14} />
                 </button>
-              ))}
+              </div>
+              <div className="searchResultsList">
+                {!searchLoading && searchResults.length === 0 && (
+                  <p className="searchEmpty">No matching database objects.</p>
+                )}
+                {searchResults.map((result) => (
+                  <button key={result.id} onClick={() => selectSearchResult(result)}>
+                    <span>{result.label}</span>
+                    <small>
+                      {result.kind}
+                      {result.parent_id
+                        ? ` / ${result.parent_id.split(":").slice(1).join(":")}`
+                        : result.schema ? ` / ${result.schema}` : ""}
+                    </small>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -405,7 +570,7 @@ export default function Home() {
           <h2><Eye size={15} /> View</h2>
           <label className="switchRow">
             <input type="checkbox" checked={showColumns} onChange={(event) => setShowColumns(event.target.checked)} />
-            <span>Show column nodes</span>
+            <span>Show selected columns</span>
           </label>
           <button className="wideButton" onClick={fitGraph}>
             <Maximize2 size={15} />
@@ -433,6 +598,21 @@ export default function Home() {
             <span>{error}</span>
           </div>
         )}
+        <div className="canvasMeta" aria-live="polite">
+          <span>{visibleGraph.nodes.length.toLocaleString()} nodes</span>
+          <span>{visibleGraph.edges.length.toLocaleString()} links</span>
+        </div>
+        <div className="zoomControls" aria-label="Graph zoom controls">
+          <button onClick={() => zoomBy(1.25)} aria-label="Zoom in" title="Zoom in">
+            <ZoomIn size={17} />
+          </button>
+          <button onClick={() => zoomBy(0.8)} aria-label="Zoom out" title="Zoom out">
+            <ZoomOut size={17} />
+          </button>
+          <button onClick={fitGraph} aria-label="Fit graph" title="Fit graph">
+            <Maximize2 size={17} />
+          </button>
+        </div>
         <div ref={graphEl} className="graphCanvas" />
       </section>
 
@@ -447,7 +627,12 @@ export default function Home() {
         {selected && (
           <div className="detailStack">
             <div>
-              <span className="kindPill">{selected.kind ?? "object"}</span>
+              <div className="detailHeader">
+                <span className="kindPill">{selected.kind ?? "object"}</span>
+                <button className="iconButton" onClick={clearSelection} aria-label="Close object details" title="Close details">
+                  <X size={15} />
+                </button>
+              </div>
               <h1>{selected.label ?? selected.id}</h1>
               <p>{selected.summary ?? "No object details are available for this ID."}</p>
             </div>
@@ -469,8 +654,8 @@ export default function Home() {
             </InspectorGroup>
 
             <InspectorGroup title="Relationships" icon={<GitBranch size={15} />}>
-              <RelationshipList title="References" items={selected.foreign_keys_to ?? []} onOpen={loadNode} />
-              <RelationshipList title="Referenced by" items={selected.referenced_by ?? []} onOpen={loadNode} />
+              <RelationshipList title="References" items={selected.foreign_keys_to ?? []} onOpen={(id) => loadNode(id, true)} />
+              <RelationshipList title="Referenced by" items={selected.referenced_by ?? []} onOpen={(id) => loadNode(id, true)} />
             </InspectorGroup>
           </div>
         )}

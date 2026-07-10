@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 from typing import Annotated
 
 from fastapi import FastAPI, Query, WebSocket, WebSocketDisconnect
@@ -22,6 +23,17 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+def _structure_signature(snapshot) -> str:
+    digest = hashlib.sha256()
+    for node in snapshot.nodes:
+        digest.update(node.id.encode("utf-8"))
+        digest.update(b"\0")
+    for edge in snapshot.edges:
+        digest.update(edge.id.encode("utf-8"))
+        digest.update(b"\0")
+    return digest.hexdigest()
 
 
 @app.get("/health")
@@ -59,17 +71,32 @@ def graph_node(node_id: str) -> dict:
 @app.websocket("/graph/live")
 async def graph_live(websocket: WebSocket) -> None:
     await websocket.accept()
+    last_signature: str | None = None
     try:
         while True:
-            snapshot = introspector.snapshot(refresh=True)
-            await websocket.send_json(
-                {
-                    "type": "graph_snapshot",
-                    "summary": snapshot.summary,
-                    "generated_at": snapshot.generated_at,
-                    "graph": snapshot.to_dict(),
-                }
-            )
-            await asyncio.sleep(10)
+            try:
+                snapshot = introspector.snapshot(refresh=True)
+                signature = _structure_signature(snapshot)
+                if signature != last_signature:
+                    await websocket.send_json(
+                        {
+                            "type": "graph_snapshot",
+                            "summary": snapshot.summary,
+                            "generated_at": snapshot.generated_at,
+                            "graph": snapshot.to_dict(),
+                        }
+                    )
+                    last_signature = signature
+                else:
+                    await websocket.send_json(
+                        {
+                            "type": "graph_heartbeat",
+                            "summary": snapshot.summary,
+                            "generated_at": snapshot.generated_at,
+                        }
+                    )
+            except Exception as exc:
+                await websocket.send_json({"type": "graph_error", "error": str(exc)})
+            await asyncio.sleep(30)
     except WebSocketDisconnect:
         return
