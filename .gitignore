@@ -1,0 +1,39 @@
+# Environment and credentials
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+build/
+dist/
+*.egg-info/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local app state
+.dbmap-cache/
+.logs/
+*.sqlite
+*.db
+
+# Logs and OS/editor files
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
