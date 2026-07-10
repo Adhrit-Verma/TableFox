@@ -1,108 +1,155 @@
-<div align="center">
+<p align="center">
+  <img src="./assets/tablefox-logo.png" alt="TableFox logo" width="150" />
+</p>
 
-# 🦊 TableFox
+<h1 align="center">TableFox</h1>
 
-### Local PostgreSQL table-map intelligence for AI agents, developers, and database explorers.
+<p align="center">
+  <strong>Local PostgreSQL schema intelligence for AI agents.</strong>
+</p>
 
-<img src="./assets/tablefox-logo.png" width="180" alt="TableFox logo" />
+<p align="center">
+  TableFox maps your database into a searchable graph so humans and AI agents can understand tables, columns, keys, relationships, and safe query paths without dumping the whole schema into every prompt.
+</p>
 
-<img src="https://media.giphy.com/media/9LATKVrWXmlIKovXkE/giphy.gif" width="420" alt="AI robot assistant animation from GIPHY" />
-
-<br />
-
-![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-API-009688?style=for-the-badge&logo=fastapi&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Read--Only-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
-![Next.js](https://img.shields.io/badge/Next.js-UI-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)
-![MCP](https://img.shields.io/badge/MCP-Agent%20Tools-7C3AED?style=for-the-badge)
-![Local First](https://img.shields.io/badge/Local--First-Safe%20by%20Default-22C55E?style=for-the-badge)
-
-</div>
-
----
-
-## ✨ What is TableFox?
-
-**TableFox** is a local-first PostgreSQL map for humans and AI agents that turns your database structure into a searchable, agent-friendly graph.
-
-Think of it as a **fox-fast table explorer**: it maps schemas, tables, columns, indexes, constraints, and relationships so humans and AI agents can understand a database without guessing.
-
-It helps both **humans** and **AI agents** understand a database quickly by mapping:
-
-- schemas
-- tables and views
-- columns
-- indexes
-- constraints
-- primary keys
-- foreign keys
-- object relationships
-
-It includes a **Python graph engine**, a **FastAPI backend**, an **MCP stdio server**, and a **Next.js browser UI** with an interactive 2D schema map.
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python 3.11+" />
+  <img src="https://img.shields.io/badge/FastAPI-Backend-009688?style=flat-square&logo=fastapi&logoColor=white" alt="FastAPI" />
+  <img src="https://img.shields.io/badge/PostgreSQL-Read--Only-4169E1?style=flat-square&logo=postgresql&logoColor=white" alt="PostgreSQL" />
+  <img src="https://img.shields.io/badge/Next.js-UI-000000?style=flat-square&logo=nextdotjs&logoColor=white" alt="Next.js" />
+  <img src="https://img.shields.io/badge/MCP-Agent%20Tools-7C3AED?style=flat-square" alt="MCP tools" />
+  <img src="https://img.shields.io/badge/Local--First-Safe%20by%20Default-16A34A?style=flat-square" alt="Local first" />
+</p>
 
 ---
 
-## 🧠 Why I Built This
+## Why TableFox exists
 
-When an AI agent works with a database, it should not blindly guess table names or relationships.
+AI agents are useful with databases, but they usually struggle with one simple problem: **they do not know the schema unless you give it to them**.
 
-TableFox gives the agent a safe map first.
+The common approach is to paste a giant schema dump into the prompt. That works for small demos, but it becomes expensive, slow, and noisy as the database grows.
+
+TableFox gives agents a better path:
 
 ```text
-Without TableFox:
-Agent guesses tables → writes risky SQL → slow debugging
-
-With TableFox:
-Agent checks schema graph → finds relationships → runs safe read-only queries
+Search only what is needed
+→ inspect related tables
+→ understand joins and constraints
+→ run guarded read-only queries
+→ return a focused answer
 ```
 
-This makes database agents more accurate, safer, and easier to debug.
+That means agents can work with **smaller context**, **fewer retries**, and **less prompt bloat**.
+
+> TableFox is designed to reduce token usage for AI agents by replacing repeated full-schema prompts with targeted MCP tool calls such as search, neighbors, object explanation, and guarded read-only queries.
 
 ---
 
-## 🚀 Core Features
+## What it does
 
-| Feature | What it does |
+TableFox turns a PostgreSQL database into an agent-friendly graph.
+
+It maps:
+
+| Database object | Examples |
 |---|---|
-| 🔐 Read-only database access | Uses safe PostgreSQL credentials by default |
-| 🧩 Schema graph builder | Maps tables, views, columns, indexes, constraints, and foreign keys |
-| 🤖 MCP tools for AI agents | Lets tools like Claude/Cursor-style clients search and traverse schema context |
-| 🌐 FastAPI local API | Exposes graph, search, node details, health, and live refresh endpoints |
-| 🕸️ Interactive Next.js UI | Browser-based Cytoscape 2D graph with filters and inspector panel |
-| 🔍 Search and traversal | Quickly find tables, columns, and related objects |
-| 🛡️ Guarded SQL execution | Allows only protected `SELECT` / `WITH` read-only queries |
-| ⚡ One-command launcher | Starts backend + frontend from a single local command |
+| Schemas | `public`, `auth`, `billing` |
+| Tables and views | `employees`, `attendance`, `orders_view` |
+| Columns | names, types, nullability, defaults |
+| Keys and constraints | primary keys, foreign keys, unique constraints |
+| Indexes | indexed columns and index metadata |
+| Relationships | table-to-table links through foreign keys |
+
+Then it exposes that map through:
+
+| Interface | Purpose |
+|---|---|
+| **Next.js UI** | Browse the schema visually in a local 2D graph |
+| **FastAPI API** | Serve graph, search, node details, and live updates |
+| **MCP server** | Let AI agents search, traverse, explain, and query safely |
+| **Read-only query tool** | Allow guarded `SELECT` / `WITH` queries only |
 
 ---
 
-## 🖼️ Visual Idea
+## Architecture
 
-<div align="center">
+```mermaid
+flowchart LR
+    A[(PostgreSQL)] --> B[TableFox Graph Engine]
+    B --> C[FastAPI API]
+    B --> D[MCP Stdio Server]
+    C --> E[Next.js Graph UI]
+    D --> F[AI Agent / MCP Client]
+    F --> D
+    E --> C
+```
 
-<img src="https://media.giphy.com/media/jLrRvwKSPsf7urOUDq/giphy.gif" width="360" alt="AI work smarter robot animation from GIPHY" />
-
-</div>
+The agent does not need to guess the schema. It can ask TableFox first.
 
 ```text
-PostgreSQL Database
-       ↓
-TableFox Graph Engine
-       ↓
-FastAPI + WebSocket API
-       ↓
-Next.js Interactive Map
-       ↓
-MCP Tools for AI Agents
+User: Which tables are needed for an attendance report?
+Agent: database_search("attendance employee department")
+Agent: database_neighbors("table:attendance")
+Agent: database_explain_object("public.attendance")
+Agent: database_readonly_query("SELECT ... LIMIT 50")
 ```
 
 ---
 
-## 🏗️ Project Structure
+## Token-saving workflow for AI agents
+
+Without a schema map, agents often need this:
 
 ```text
-apps/web              Next.js local browser UI
-services/dbmap        Python graph engine, FastAPI API, MCP server
-scripts               Local PowerShell helpers
+Paste entire database schema
+Paste table definitions again
+Ask model to infer relationships
+Fix hallucinated table names
+Retry broken SQL
+```
+
+With TableFox, the agent can request only the relevant slice:
+
+| Agent need | TableFox tool |
+|---|---|
+| Find matching tables or columns | `database_search` |
+| Inspect relationships | `database_neighbors` |
+| Understand one object | `database_explain_object` |
+| Get graph summary | `database_graph_snapshot` |
+| Validate data through SQL | `database_readonly_query` |
+
+This is useful for:
+
+- smaller prompts
+- lower token usage
+- fewer hallucinated table names
+- safer SQL generation
+- faster debugging
+- better agent reliability on large databases
+
+---
+
+## Core features
+
+| Feature | Description |
+|---|---|
+| **Local-first** | Runs against your local or private PostgreSQL database |
+| **Read-only by default** | Works best with a dedicated PostgreSQL reader role |
+| **Schema graph builder** | Builds a stable graph of tables, views, columns, constraints, indexes, and foreign keys |
+| **MCP-ready** | Exposes database understanding tools for AI agents |
+| **Interactive graph UI** | Cytoscape-powered 2D schema map with search, filters, refresh status, and inspector panel |
+| **Guarded SQL execution** | Allows only protected `SELECT` / `WITH` statements with row limits and timeout controls |
+| **One-command launcher** | Starts API and web UI together on Windows |
+| **WebSocket updates** | Streams local graph refresh/status updates to the UI |
+
+---
+
+## Project structure
+
+```text
+apps/web/             Next.js local browser UI
+services/dbmap/       Python graph engine, FastAPI API, MCP server
+scripts/              Local PowerShell helper scripts
 run.cmd               One-command launcher
 .env.example          Environment template
 MCP_AGENT_GUIDE.md    Agent workflow and safety guide
@@ -110,7 +157,7 @@ MCP_AGENT_GUIDE.md    Agent workflow and safety guide
 
 ---
 
-## ⚡ One-command Start
+## Quick start
 
 For a database already configured in `.env`:
 
@@ -118,23 +165,13 @@ For a database already configured in `.env`:
 .\run.cmd
 ```
 
-This will:
+This starts the local API and web UI, then opens:
 
 ```text
-1. Validate your database connection
-2. Build the schema graph
-3. Start the FastAPI backend
-4. Start the Next.js web UI
-5. Open http://localhost:3000
+http://localhost:3000
 ```
 
-Press `Ctrl + C` to stop the services started by the launcher.
-
----
-
-## 🛠️ First-time Installation
-
-Configure `.env`, then run:
+For first-time setup:
 
 ```powershell
 .\run.cmd -Install
@@ -143,19 +180,13 @@ Configure `.env`, then run:
 Useful launcher modes:
 
 ```powershell
-.\run.cmd -Check       # Validate credentials and build graph, then exit
+.\run.cmd -Check       # Validate credentials and build a graph, then exit
 .\run.cmd -NoBrowser   # Start services without opening the browser
-```
-
-The first install can take a few minutes. After that, normal usage is usually just:
-
-```powershell
-.\run.cmd
 ```
 
 ---
 
-## 🔧 Manual Setup
+## Manual setup
 
 Create and activate a Python environment:
 
@@ -176,27 +207,27 @@ Install the web app dependencies:
 npm install
 ```
 
-Copy the environment file:
+Copy the environment template:
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-Real credentials should stay inside `.env`. Do not commit `.env` to Git.
+Keep real credentials in `.env`. Do not commit `.env`.
 
 ---
 
-## 🔑 Environment Configuration
+## Environment variables
 
 Use either `DATABASE_URL` or individual PostgreSQL variables.
 
-### Option 1: DATABASE_URL
+### Option 1: `DATABASE_URL`
 
 ```env
 DATABASE_URL=postgresql://dbmap_reader:password@localhost:5432/your_database
 ```
 
-### Option 2: Individual PG variables
+### Option 2: individual PostgreSQL variables
 
 ```env
 PGHOST=localhost
@@ -210,7 +241,7 @@ If `DATABASE_URL` is present, it takes priority over the individual `PG*` variab
 
 ---
 
-## 🧪 Run Locally
+## Running services manually
 
 Start the API:
 
@@ -224,28 +255,22 @@ Start the browser UI:
 .\scripts\run_web.ps1
 ```
 
-Open:
-
-```text
-http://localhost:3000
-```
-
----
-
-## 🤖 MCP Server
-
-Start the stdio MCP server:
+Start the MCP stdio server:
 
 ```powershell
 .\scripts\run_mcp.ps1
 ```
 
-Example local MCP client configuration:
+---
+
+## MCP client configuration
+
+Example local MCP configuration:
 
 ```json
 {
   "mcpServers": {
-    "schemapilot-postgres": {
+    "tablefox-postgres": {
       "command": "powershell",
       "args": [
         "-ExecutionPolicy",
@@ -260,15 +285,9 @@ Example local MCP client configuration:
 
 The MCP process loads the repository-root `.env`, so database credentials do not need to be duplicated in the client configuration.
 
-For workflow guidance, see:
-
-```text
-MCP_AGENT_GUIDE.md
-```
-
 ---
 
-## 🧰 MCP Tools
+## MCP tools
 
 | Tool | Purpose |
 |---|---|
@@ -279,13 +298,13 @@ MCP_AGENT_GUIDE.md
 | `database_explain_object` | Explains a selected table, column, view, or constraint |
 | `database_readonly_query` | Runs guarded read-only SQL queries |
 
-`database_readonly_query` only accepts protected `SELECT` or `WITH` statements, applies a row limit, runs inside a read-only transaction, and uses the configured statement timeout.
+`database_readonly_query` accepts only guarded `SELECT` or `WITH` statements, applies a row limit, runs inside a read-only transaction, and uses the configured statement timeout.
 
 ---
 
-## 🔐 Safe Read-only PostgreSQL Role
+## Safe PostgreSQL reader role
 
-For an existing database, create a dedicated reader role:
+For an existing database, create a dedicated read-only role:
 
 ```sql
 create role dbmap_reader login password 'replace-with-a-strong-password';
@@ -295,11 +314,11 @@ grant select on all tables in schema public to dbmap_reader;
 alter default privileges in schema public grant select on tables to dbmap_reader;
 ```
 
-Repeat schema grants for every schema you want TableFox to map.
+Repeat the schema grants for every schema you want TableFox to map.
 
 ---
 
-## 🌐 API Endpoints
+## API endpoints
 
 | Method | Endpoint | Description |
 |---|---|---|
@@ -311,9 +330,7 @@ Repeat schema grants for every schema you want TableFox to map.
 
 ---
 
-## 🧑‍💻 Example Agent Prompts
-
-Use prompts like these with an MCP client:
+## Example agent prompts
 
 ```text
 Find all tables related to employees and explain their relationships.
@@ -333,9 +350,7 @@ Run a safe read-only query to count employees department-wise.
 
 ---
 
-## ✅ Tests
-
-Run backend tests:
+## Tests
 
 ```powershell
 python -m pytest services/dbmap/tests
@@ -343,60 +358,32 @@ python -m pytest services/dbmap/tests
 
 ---
 
-## 🗺️ Roadmap
+## Roadmap
 
-- [ ] Add graph export as JSON
-- [ ] Add Mermaid ER diagram export
-- [ ] Add schema comparison between two database snapshots
-- [ ] Add saved graph history
-- [ ] Add AI-generated table documentation
-- [ ] Add Docker Compose setup
-- [ ] Add role-based UI access
-- [ ] Add query explanation mode
-- [ ] Add PostgreSQL performance hints for indexes and constraints
-
----
-
-## 🎯 Resume Line
-
-> Built **TableFox**, a local-first PostgreSQL database graph intelligence tool using Python, FastAPI, Next.js, Cytoscape, and MCP to help AI agents safely search, traverse, explain, and query relational database structures through guarded read-only workflows.
+- [ ] Docker Compose setup
+- [ ] Graph export as JSON
+- [ ] Mermaid ER diagram export
+- [ ] Schema snapshot history
+- [ ] Schema comparison between two database snapshots
+- [ ] AI-generated table documentation
+- [ ] Query explanation mode
+- [ ] PostgreSQL performance hints for indexes and constraints
+- [ ] Role-based UI access
 
 ---
 
-## ⚠️ Safety Notes
+## Resume line
 
-TableFox is designed for local and read-only usage by default.
-
-Recommended safety practices:
-
-```text
-Use a dedicated read-only PostgreSQL role
-Never commit .env files
-Avoid production credentials for demos
-Use local databases while testing
-Review generated SQL before trusting outputs
-```
+> Built **TableFox**, a local-first PostgreSQL schema intelligence tool using Python, FastAPI, Next.js, Cytoscape, and MCP to help AI agents search, traverse, explain, and safely query relational database structures while reducing full-schema prompt overhead.
 
 ---
 
-## 🙌 Built For
+## Small visual touch
 
-```text
-AI agent builders
-Backend developers
-Database-heavy projects
-MCP experiments
-PostgreSQL exploration
-Schema debugging
-Local-first developer tooling
-```
+<p align="center">
+  <img src="https://media.giphy.com/media/jLrRvwKSPsf7urOUDq/giphy.gif" width="300" alt="AI workflow animation from GIPHY" />
+</p>
 
----
-
-<div align="center">
-
-### 🦊 TableFox
-
-**Give your AI agent a database map before it starts flying.**
-
-</div>
+<p align="center">
+  <strong>Give your AI agent a map before it queries the database.</strong>
+</p>
