@@ -1,8 +1,10 @@
 <div align="center">
 
-# 🧭 SchemaPilot
+# 🦊 TableFox
 
-### Local PostgreSQL schema intelligence for AI agents, developers, and database explorers.
+### Local PostgreSQL table-map intelligence for AI agents, developers, and database explorers.
+
+<img src="./assets/tablefox-logo.png" width="180" alt="TableFox logo" />
 
 <img src="https://media.giphy.com/media/9LATKVrWXmlIKovXkE/giphy.gif" width="420" alt="AI robot assistant animation from GIPHY" />
 
@@ -19,9 +21,11 @@
 
 ---
 
-## ✨ What is SchemaPilot?
+## ✨ What is TableFox?
 
-**SchemaPilot** is a local-first PostgreSQL mapping tool that turns your database structure into a searchable, agent-friendly graph.
+**TableFox** is a local-first PostgreSQL map for humans and AI agents that turns your database structure into a searchable, agent-friendly graph.
+
+Think of it as a **fox-fast table explorer**: it maps schemas, tables, columns, indexes, constraints, and relationships so humans and AI agents can understand a database without guessing.
 
 It helps both **humans** and **AI agents** understand a database quickly by mapping:
 
@@ -42,13 +46,13 @@ It includes a **Python graph engine**, a **FastAPI backend**, an **MCP stdio ser
 
 When an AI agent works with a database, it should not blindly guess table names or relationships.
 
-SchemaPilot gives the agent a safe map first.
+TableFox gives the agent a safe map first.
 
 ```text
-Without SchemaPilot:
+Without TableFox:
 Agent guesses tables → writes risky SQL → slow debugging
 
-With SchemaPilot:
+With TableFox:
 Agent checks schema graph → finds relationships → runs safe read-only queries
 ```
 
@@ -82,7 +86,7 @@ This makes database agents more accurate, safer, and easier to debug.
 ```text
 PostgreSQL Database
        ↓
-SchemaPilot Graph Engine
+TableFox Graph Engine
        ↓
 FastAPI + WebSocket API
        ↓
@@ -247,7 +251,7 @@ Example local MCP client configuration:
         "-ExecutionPolicy",
         "Bypass",
         "-File",
-        "C:\\Code\\AI Agents\\SchemaPilot\\scripts\\run_mcp.ps1"
+        "C:\\Code\\AI Agents\\TableFox\\scripts\\run_mcp.ps1"
       ]
     }
   }
@@ -291,7 +295,7 @@ grant select on all tables in schema public to dbmap_reader;
 alter default privileges in schema public grant select on tables to dbmap_reader;
 ```
 
-Repeat schema grants for every schema you want SchemaPilot to map.
+Repeat schema grants for every schema you want TableFox to map.
 
 ---
 
@@ -355,13 +359,13 @@ python -m pytest services/dbmap/tests
 
 ## 🎯 Resume Line
 
-> Built **SchemaPilot**, a local-first PostgreSQL schema intelligence tool using Python, FastAPI, Next.js, Cytoscape, and MCP to help AI agents safely search, traverse, explain, and query relational database structures through guarded read-only workflows.
+> Built **TableFox**, a local-first PostgreSQL database graph intelligence tool using Python, FastAPI, Next.js, Cytoscape, and MCP to help AI agents safely search, traverse, explain, and query relational database structures through guarded read-only workflows.
 
 ---
 
 ## ⚠️ Safety Notes
 
-SchemaPilot is designed for local and read-only usage by default.
+TableFox is designed for local and read-only usage by default.
 
 Recommended safety practices:
 
@@ -391,7 +395,7 @@ Local-first developer tooling
 
 <div align="center">
 
-### 🧭 SchemaPilot
+### 🦊 TableFox
 
 **Give your AI agent a database map before it starts flying.**
 
