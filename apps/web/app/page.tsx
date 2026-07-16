@@ -78,7 +78,7 @@ type NodeExplanation = {
   referenced_by?: Array<{ id: string; label: string }>;
 };
 
-const API_URL = process.env.NEXT_PUBLIC_DBMAP_API_URL ?? "http://127.0.0.1:8000";
+const API_URL = process.env.NEXT_PUBLIC_DBMAP_API_URL ?? "/dbmap-api";
 
 const visibleKinds = new Set(["schema", "table", "view", "materialized_view"]);
 
@@ -91,6 +91,7 @@ export default function Home() {
   const graphEl = useRef<HTMLDivElement | null>(null);
   const searchEl = useRef<HTMLDivElement | null>(null);
   const searchAbortRef = useRef<AbortController | null>(null);
+  const nodeAbortRef = useRef<AbortController | null>(null);
   const graphSignatureRef = useRef("");
   const focusRequestedRef = useRef(false);
   const [graph, setGraph] = useState<GraphSnapshot | null>(null);
@@ -114,13 +115,20 @@ export default function Home() {
       .sort((a, b) => a.localeCompare(b));
   }, [graph]);
 
-  const columnParentId = useMemo(() => {
-    if (!showColumns || !selectedId || !graph) return null;
+  const selectedRelationId = useMemo(() => {
+    if (!selectedId || !graph) return null;
     const node = graph.nodes.find((item) => item.id === selectedId);
     if (!node) return null;
     if (["table", "view", "materialized_view"].includes(node.kind)) return node.id;
-    return node.parent_id;
-  }, [graph, selectedId, showColumns]);
+    const parent = graph.nodes.find((item) => item.id === node.parent_id);
+    return parent && ["table", "view", "materialized_view"].includes(parent.kind) ? parent.id : null;
+  }, [graph, selectedId]);
+
+  const columnParentId = showColumns ? selectedRelationId : null;
+  const visibleColumnCount = useMemo(
+    () => graph?.nodes.filter((node) => node.kind === "column" && node.parent_id === columnParentId).length ?? 0,
+    [columnParentId, graph]
+  );
 
   const visibleGraph = useMemo(() => {
     if (!graph) return { nodes: [], edges: [] };
@@ -164,13 +172,19 @@ export default function Home() {
   }, [applyGraph]);
 
   const loadNode = useCallback(async (id: string, focus = false) => {
+    nodeAbortRef.current?.abort();
+    const controller = new AbortController();
+    nodeAbortRef.current = controller;
     focusRequestedRef.current = focus;
     setSelectedId(id);
     try {
-      const response = await fetch(`${API_URL}/graph/node/${encodeURIComponent(id)}`);
+      const response = await fetch(`${API_URL}/graph/node/${encodeURIComponent(id)}`, {
+        signal: controller.signal
+      });
       if (!response.ok) throw new Error(`Node request failed with ${response.status}`);
       setSelected((await response.json()) as NodeExplanation);
     } catch (err) {
+      if (controller.signal.aborted) return;
       setSelected({
         found: false,
         id,
@@ -180,7 +194,9 @@ export default function Home() {
   }, []);
 
   const clearSelection = useCallback(() => {
+    nodeAbortRef.current?.abort();
     focusRequestedRef.current = false;
+    setShowColumns(false);
     setSelectedId(null);
     setSelected(null);
   }, []);
@@ -209,6 +225,8 @@ export default function Home() {
           const payload = (await response.json()) as { results: SearchResult[] };
           setSearchResults(payload.results);
         }
+      } catch {
+        if (!controller.signal.aborted) setSearchResults([]);
       } finally {
         if (!controller.signal.aborted) setSearchLoading(false);
       }
@@ -229,23 +247,51 @@ export default function Home() {
 
   useEffect(() => {
     const wsUrl = API_URL.replace(/^http/, "ws");
-    const socket = new WebSocket(`${wsUrl}/graph/live`);
-    setLive("connecting");
-    socket.onopen = () => setLive("connected");
-    socket.onclose = () => setLive("offline");
-    socket.onerror = () => setLive("offline");
-    socket.onmessage = (event) => {
-      const payload = JSON.parse(event.data) as { type: string; graph?: GraphSnapshot };
-      if (payload.type === "graph_snapshot" && payload.graph) {
-        applyGraph(payload.graph);
-        setStatus("ready");
-      }
+    let active = true;
+    let socket: WebSocket | null = null;
+    let reconnectTimer: number | null = null;
+
+    const connect = () => {
+      if (!active) return;
+      setLive("connecting");
+      socket = new WebSocket(`${wsUrl}/graph/live`);
+      socket.onopen = () => setLive("connected");
+      socket.onerror = () => socket?.close();
+      socket.onclose = () => {
+        setLive("offline");
+        if (active) reconnectTimer = window.setTimeout(connect, 2000);
+      };
+      socket.onmessage = (event) => {
+        try {
+          const payload = JSON.parse(event.data) as {
+            type: string;
+            graph?: GraphSnapshot;
+            error?: string;
+          };
+          if (payload.type === "graph_snapshot" && payload.graph) {
+            applyGraph(payload.graph);
+            setError(null);
+            setStatus("ready");
+          } else if (payload.type === "graph_error") {
+            setError(payload.error ?? "Live graph refresh failed.");
+          }
+        } catch {
+          setError("The live graph service returned an invalid update.");
+        }
+      };
     };
-    return () => socket.close();
+
+    connect();
+    return () => {
+      active = false;
+      if (reconnectTimer !== null) window.clearTimeout(reconnectTimer);
+      socket?.close();
+    };
   }, [applyGraph]);
 
   useEffect(() => () => {
     searchAbortRef.current?.abort();
+    nodeAbortRef.current?.abort();
     cyRef.current?.destroy();
     cyRef.current = null;
   }, []);
@@ -260,7 +306,9 @@ export default function Home() {
           label: node.kind === "schema" ? node.label : node.name ?? node.label,
           kind: node.kind,
           schema: node.schema ?? "",
-          parent: node.kind !== "schema" && visibleGraph.nodes.some((item) => item.id === node.parent_id) ? node.parent_id ?? undefined : undefined
+          parent: visibleKinds.has(node.kind) && node.kind !== "schema" && visibleGraph.nodes.some((item) => item.id === node.parent_id)
+            ? node.parent_id ?? undefined
+            : undefined
         },
         classes: node.kind
       })),
@@ -339,10 +387,16 @@ export default function Home() {
           {
             selector: "node.column",
             style: {
-              "background-color": "oklch(0.72 0.045 40)",
-              height: 18,
-              width: 18,
-              "font-size": 9
+              "background-color": "oklch(0.92 0.04 205)",
+              "border-color": "oklch(0.42 0.12 205)",
+              "border-width": 1.5,
+              color: "oklch(0.18 0.018 40)",
+              height: 26,
+              width: 104,
+              "font-size": 9,
+              shape: "round-rectangle",
+              "text-margin-y": 0,
+              "text-valign": "center"
             }
           },
           {
@@ -362,6 +416,16 @@ export default function Home() {
               "line-color": "oklch(0.42 0.12 205)",
               "target-arrow-color": "oklch(0.42 0.12 205)",
               width: 2.2
+            }
+          },
+          {
+            selector: "edge.has_column",
+            style: {
+              "line-color": "oklch(0.42 0.12 205)",
+              "line-style": "dashed",
+              opacity: 0.85,
+              "target-arrow-shape": "none",
+              width: 1.4
             }
           },
           {
@@ -569,8 +633,16 @@ export default function Home() {
         <section>
           <h2><Eye size={15} /> View</h2>
           <label className="switchRow">
-            <input type="checkbox" checked={showColumns} onChange={(event) => setShowColumns(event.target.checked)} />
-            <span>Show selected columns</span>
+            <input
+              type="checkbox"
+              checked={showColumns}
+              disabled={!selectedRelationId}
+              onChange={(event) => {
+                focusRequestedRef.current = event.target.checked;
+                setShowColumns(event.target.checked);
+              }}
+            />
+            <span>Show columns</span>
           </label>
           <button className="wideButton" onClick={fitGraph}>
             <Maximize2 size={15} />
@@ -601,6 +673,7 @@ export default function Home() {
         <div className="canvasMeta" aria-live="polite">
           <span>{visibleGraph.nodes.length.toLocaleString()} nodes</span>
           <span>{visibleGraph.edges.length.toLocaleString()} links</span>
+          {columnParentId && <span>{visibleColumnCount.toLocaleString()} columns</span>}
         </div>
         <div className="zoomControls" aria-label="Graph zoom controls">
           <button onClick={() => zoomBy(1.25)} aria-label="Zoom in" title="Zoom in">

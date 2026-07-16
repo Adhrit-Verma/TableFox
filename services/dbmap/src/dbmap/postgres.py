@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import hashlib
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 from typing import Any
 
 from .config import Settings
@@ -156,7 +157,8 @@ class PostgresIntrospector:
         import psycopg
         from psycopg.rows import dict_row
 
-        row_limit = min(limit or self.settings.max_query_rows, self.settings.max_query_rows)
+        requested_limit = self.settings.max_query_rows if limit is None else limit
+        row_limit = max(1, min(requested_limit, self.settings.max_query_rows))
         guarded_sql = apply_limit(sql, row_limit)
         with psycopg.connect(**self.settings.connection_kwargs(), row_factory=dict_row) as conn:
             conn.execute("set transaction read only")
@@ -170,7 +172,7 @@ class PostgresIntrospector:
             }
 
     def _cache_path(self) -> Path:
-        identity = self.settings.database_url or self.settings.safe_database_label()
+        identity = self.settings.cache_identity()
         key = hashlib.sha256(identity.encode("utf-8")).hexdigest()[:16]
         return self.settings.cache_dir / f"{key}.snapshot.json"
 
@@ -190,4 +192,19 @@ class PostgresIntrospector:
     @staticmethod
     def _write_cache(path: Path, snapshot: GraphSnapshot) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(snapshot.to_dict(), indent=2, default=str), encoding="utf-8")
+        temporary_path: Path | None = None
+        try:
+            with NamedTemporaryFile(
+                mode="w",
+                encoding="utf-8",
+                dir=path.parent,
+                prefix=f".{path.name}.",
+                suffix=".tmp",
+                delete=False,
+            ) as handle:
+                temporary_path = Path(handle.name)
+                json.dump(snapshot.to_dict(), handle, indent=2, default=str)
+            temporary_path.replace(path)
+        finally:
+            if temporary_path:
+                temporary_path.unlink(missing_ok=True)

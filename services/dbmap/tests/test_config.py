@@ -34,6 +34,26 @@ class SettingsTests(unittest.TestCase):
             "postgresql://reader:file-password@db.example.com:5432/real_db",
         )
 
+    def test_database_url_label_and_cache_identity_do_not_expose_password(self):
+        settings = Settings(
+            database_url="postgresql://reader:secret@db.example.com:5433/production",
+            host="ignored",
+            port=5432,
+            database="ignored",
+            user="ignored",
+            password="ignored",
+            sslmode="require",
+            cache_dir=Path(".dbmap-cache"),
+            statement_timeout_ms=5000,
+            max_query_rows=200,
+            api_host="127.0.0.1",
+            api_port=8000,
+        )
+
+        self.assertEqual(settings.safe_database_label(), "db.example.com:5433/production")
+        self.assertEqual(settings.cache_identity(), "db.example.com:5433/production|reader")
+        self.assertNotIn("secret", settings.cache_identity())
+
 
 if __name__ == "__main__":
     unittest.main()

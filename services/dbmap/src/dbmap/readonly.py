@@ -5,7 +5,7 @@ import re
 
 _SELECT_START = re.compile(r"^\s*(select|with)\b", re.IGNORECASE | re.DOTALL)
 _BLOCKED = re.compile(
-    r"\b(insert|update|delete|drop|alter|create|truncate|grant|revoke|copy|call|do|vacuum|analyze|refresh|merge)\b",
+    r"\b(insert|update|delete|drop|alter|create|truncate|grant|revoke|copy|call|do|vacuum|analyze|refresh|merge|into)\b",
     re.IGNORECASE,
 )
 
@@ -25,6 +25,5 @@ def validate_readonly_sql(sql: str) -> str:
 
 def apply_limit(sql: str, limit: int) -> str:
     statement = validate_readonly_sql(sql)
-    if re.search(r"\blimit\s+\d+\b", statement, re.IGNORECASE):
-        return statement
-    return f"{statement}\nLIMIT {max(1, limit)}"
+    row_limit = max(1, limit)
+    return f"SELECT * FROM (\n{statement}\n) AS dbmap_readonly_query\nLIMIT {row_limit}"

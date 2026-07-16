@@ -77,6 +77,11 @@ def validate_database(introspector) -> dict:
         f"({summary.get('table', 0)} tables, {summary.get('view', 0)} views, "
         f"{len(snapshot.nodes)} graph nodes)."
     )
+    if not connection["read_only_default"]:
+        print(
+            "Warning: this database role is not read-only by default. "
+            "The tool enforces read-only transactions, but a dedicated read-only role is safer."
+        )
     return connection
 
 

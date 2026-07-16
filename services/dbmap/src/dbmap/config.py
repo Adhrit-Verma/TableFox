@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import os
 from pathlib import Path
+from urllib.parse import unquote, urlsplit
 
 
 def _env_file() -> Path | None:
@@ -73,5 +74,16 @@ class Settings:
 
     def safe_database_label(self) -> str:
         if self.database_url:
+            parsed = urlsplit(self.database_url)
+            if parsed.hostname:
+                port = f":{parsed.port}" if parsed.port else ""
+                database = unquote(parsed.path.lstrip("/")) or "postgres"
+                return f"{parsed.hostname}{port}/{database}"
             return "database-url"
         return f"{self.host}:{self.port}/{self.database}"
+
+    def cache_identity(self) -> str:
+        if self.database_url:
+            parsed = urlsplit(self.database_url)
+            return f"{self.safe_database_label()}|{unquote(parsed.username or '')}"
+        return f"{self.safe_database_label()}|{self.user}"

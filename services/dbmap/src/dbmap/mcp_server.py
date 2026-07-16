@@ -12,6 +12,7 @@ introspector = PostgresIntrospector()
 
 
 def compact_snapshot(snapshot, max_nodes: int = 200) -> dict[str, Any]:
+    max_nodes = max(1, min(max_nodes, 10000))
     limited = GraphEngine.filter_snapshot(snapshot, max_nodes=max_nodes)
     return {
         "database": limited.database,
@@ -39,6 +40,7 @@ def main() -> None:
         max_nodes: int = 200,
     ) -> dict[str, Any]:
         """Return a bounded graph snapshot of schemas, relations, columns, constraints, indexes, and relationships."""
+        max_nodes = max(1, min(max_nodes, 10000))
         snapshot = introspector.snapshot(refresh=refresh)
         filtered = GraphEngine.filter_snapshot(snapshot, schemas=schemas, max_nodes=max_nodes)
         return compact_snapshot(filtered, max_nodes=max_nodes)
@@ -47,11 +49,16 @@ def main() -> None:
     def database_search(query: str, limit: int = 25) -> dict[str, Any]:
         """Search graph objects by table, column, constraint, index, comment, or data type."""
         snapshot = introspector.snapshot()
-        return {"query": query, "results": search_snapshot(snapshot, query, limit=limit)}
+        return {
+            "query": query,
+            "results": search_snapshot(snapshot, query, limit=max(1, min(limit, 100))),
+        }
 
     @mcp.tool()
     def database_neighbors(node_id: str, depth: int = 1, max_nodes: int = 100) -> dict[str, Any]:
         """Return nearby graph nodes and edges around one stable node ID."""
+        depth = max(0, min(depth, 5))
+        max_nodes = max(1, min(max_nodes, 1000))
         snapshot = introspector.snapshot()
         return compact_snapshot(GraphEngine.neighbors(snapshot, node_id, depth=depth, max_nodes=max_nodes), max_nodes)
 
@@ -64,7 +71,7 @@ def main() -> None:
     @mcp.tool()
     def database_readonly_query(sql: str, limit: int = 200) -> dict[str, Any]:
         """Run a guarded read-only SELECT/WITH query with timeout and row limit."""
-        return introspector.readonly_query(sql, limit=limit)
+        return introspector.readonly_query(sql, limit=max(1, limit))
 
     mcp.run()
 

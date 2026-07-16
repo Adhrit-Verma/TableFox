@@ -2,17 +2,21 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import logging
 from typing import Annotated
 
 from fastapi import FastAPI, Query, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from .explain import explain_object
 from .graph import GraphEngine
+from .models import GraphSnapshot
 from .postgres import PostgresIntrospector
 from .search import search_snapshot
 
 
+logger = logging.getLogger(__name__)
 app = FastAPI(title="Database Graph Map", version="0.1.0")
 introspector = PostgresIntrospector()
 
@@ -25,7 +29,7 @@ app.add_middleware(
 )
 
 
-def _structure_signature(snapshot) -> str:
+def _structure_signature(snapshot: GraphSnapshot) -> str:
     digest = hashlib.sha256()
     for node in snapshot.nodes:
         digest.update(node.id.encode("utf-8"))
@@ -37,12 +41,16 @@ def _structure_signature(snapshot) -> str:
 
 
 @app.get("/health")
-def health() -> dict:
+def health() -> JSONResponse:
     try:
         check = introspector.connectivity_check()
-        return {"ok": True, "database": check}
-    except Exception as exc:  # pragma: no cover - depends on external database
-        return {"ok": False, "error": str(exc)}
+        return JSONResponse(content={"ok": True, "database": check})
+    except Exception:  # pragma: no cover - depends on external database
+        logger.exception("PostgreSQL health check failed")
+        return JSONResponse(
+            status_code=503,
+            content={"ok": False, "error": "PostgreSQL is unavailable."},
+        )
 
 
 @app.get("/graph")
@@ -75,7 +83,7 @@ async def graph_live(websocket: WebSocket) -> None:
     try:
         while True:
             try:
-                snapshot = introspector.snapshot(refresh=True)
+                snapshot = await asyncio.to_thread(introspector.snapshot, refresh=True)
                 signature = _structure_signature(snapshot)
                 if signature != last_signature:
                     await websocket.send_json(
@@ -95,8 +103,13 @@ async def graph_live(websocket: WebSocket) -> None:
                             "generated_at": snapshot.generated_at,
                         }
                     )
-            except Exception as exc:
-                await websocket.send_json({"type": "graph_error", "error": str(exc)})
+            except WebSocketDisconnect:
+                raise
+            except Exception:
+                logger.exception("Live graph refresh failed")
+                await websocket.send_json(
+                    {"type": "graph_error", "error": "Live graph refresh failed."}
+                )
             await asyncio.sleep(30)
     except WebSocketDisconnect:
         return

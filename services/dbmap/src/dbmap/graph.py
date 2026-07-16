@@ -223,10 +223,22 @@ class GraphEngine:
         nodes = [
             node
             for node in snapshot.nodes
-            if not schema_set or node.schema in schema_set or node.kind == "schema"
+            if not schema_set or node.schema in schema_set
         ]
-        if max_nodes:
-            nodes = nodes[:max_nodes]
+        if max_nodes is not None:
+            kind_priority = {
+                "schema": 0,
+                "table": 1,
+                "view": 1,
+                "materialized_view": 1,
+                "constraint": 2,
+                "index": 3,
+                "column": 4,
+            }
+            nodes = sorted(
+                nodes,
+                key=lambda node: (kind_priority.get(node.kind, 5), node.id),
+            )[: max(1, max_nodes)]
         node_ids = {node.id for node in nodes}
         edges = [
             edge
@@ -237,6 +249,8 @@ class GraphEngine:
 
     @staticmethod
     def neighbors(snapshot: GraphSnapshot, node: str, depth: int = 1, max_nodes: int = 100) -> GraphSnapshot:
+        depth = max(0, depth)
+        max_nodes = max(1, max_nodes)
         node_by_id = {item.id: item for item in snapshot.nodes}
         if node not in node_by_id:
             return GraphSnapshot.create(snapshot.database, [], [])

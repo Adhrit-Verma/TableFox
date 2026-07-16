@@ -317,6 +317,11 @@ button:disabled {
   font-size: 0.86rem;
 }
 
+.switchRow:has(input:disabled) {
+  color: var(--muted);
+  opacity: 0.65;
+}
+
 .checkRow input,
 .switchRow input {
   width: 15px;

@@ -7,6 +7,7 @@ def search_snapshot(snapshot: GraphSnapshot, query: str, limit: int = 25) -> lis
     needle = query.strip().lower()
     if not needle:
         return []
+    limit = max(1, min(limit, 100))
 
     kind_priority = {
         "table": 0,

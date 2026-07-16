@@ -97,6 +97,44 @@ class GraphEngineTests(unittest.TestCase):
         self.assertLessEqual(len(neighbors.nodes), 4)
         self.assertTrue(any(node.id == "table:public.orders" for node in neighbors.nodes))
 
+    def test_graph_bounds_reject_unbounded_negative_values(self):
+        snapshot = GraphEngine("testdb").build(sample_metadata())
+
+        filtered = GraphEngine.filter_snapshot(snapshot, max_nodes=-10)
+        neighbors = GraphEngine.neighbors(
+            snapshot,
+            "table:public.orders",
+            depth=-1,
+            max_nodes=-10,
+        )
+
+        self.assertEqual(len(filtered.nodes), 1)
+        self.assertEqual(len(neighbors.nodes), 1)
+
+    def test_bounded_snapshot_keeps_schema_and_relation_context(self):
+        snapshot = GraphEngine("testdb").build(sample_metadata())
+
+        filtered = GraphEngine.filter_snapshot(snapshot, max_nodes=4)
+        node_ids = {node.id for node in filtered.nodes}
+
+        self.assertIn("schema:public", node_ids)
+        self.assertIn("table:public.customers", node_ids)
+        self.assertIn("table:public.orders", node_ids)
+        self.assertTrue(
+            all(not node.parent_id or node.parent_id in node_ids for node in filtered.nodes)
+        )
+
+    def test_schema_filter_excludes_unselected_schema_nodes(self):
+        metadata = sample_metadata()
+        metadata["relations"].append(
+            {"schema": "audit", "name": "events", "kind": "table"}
+        )
+        snapshot = GraphEngine("testdb").build(metadata)
+
+        filtered = GraphEngine.filter_snapshot(snapshot, schemas=["public"])
+
+        self.assertNotIn("schema:audit", {node.id for node in filtered.nodes})
+
     def test_explain_object_includes_relationship_summary(self):
         snapshot = GraphEngine("testdb").build(sample_metadata())
         explanation = explain_object(snapshot, "table:public.orders")
