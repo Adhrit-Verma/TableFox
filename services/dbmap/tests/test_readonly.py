@@ -46,3 +46,11 @@ class ReadonlySqlTests(unittest.TestCase):
     def test_validate_blocks_select_into(self):
         with self.assertRaises(ValueError):
             validate_readonly_sql("select * into copied_customers from public.customers")
+
+    def test_validate_blocks_privileged_functions(self):
+        with self.assertRaises(ValueError):
+            validate_readonly_sql("select pg_read_file('/etc/passwd')")
+
+    def test_validate_blocks_row_locks(self):
+        with self.assertRaises(ValueError):
+            validate_readonly_sql("select id from public.customers for update")

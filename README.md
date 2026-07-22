@@ -139,6 +139,8 @@ This is useful for:
 | **MCP-ready** | Exposes database understanding tools for AI agents |
 | **Interactive graph UI** | Cytoscape-powered 2D schema map with search, filters, refresh status, and inspector panel |
 | **Guarded SQL execution** | Allows only protected `SELECT` / `WITH` statements with row limits and timeout controls |
+| **Non-executing query plans** | Uses `EXPLAIN` without `ANALYZE` and reports cost, row, and scan policy signals |
+| **Sensitive-column guard** | Blocks common credential and PII-like result column names unless an operator opts in |
 | **One-command launcher** | Starts API and web UI together on Windows |
 | **WebSocket updates** | Streams local graph refresh/status updates to the UI |
 
@@ -239,6 +241,18 @@ PGPASSWORD=replace-with-a-strong-password
 
 If `DATABASE_URL` is present, it takes priority over the individual `PG*` variables.
 
+Query safety policy can be tuned without changing code:
+
+```env
+DBMAP_STATEMENT_TIMEOUT_MS=5000
+DBMAP_MAX_QUERY_ROWS=200
+DBMAP_MAX_EXPLAIN_COST=100000
+DBMAP_MAX_EXPLAIN_ROWS=100000
+DBMAP_ALLOW_SENSITIVE_DATA=false
+```
+
+Keep `DBMAP_API_HOST` on `127.0.0.1`, `localhost`, or `::1`. TableFox rejects non-loopback API bindings because the local-only API has no authentication.
+
 ---
 
 ## Running services manually
@@ -296,9 +310,12 @@ The MCP process loads the repository-root `.env`, so database credentials do not
 | `database_search` | Searches schemas, tables, columns, views, and related objects |
 | `database_neighbors` | Finds nearby connected graph nodes |
 | `database_explain_object` | Explains a selected table, column, view, or constraint |
+| `database_explain_query` | Plans read-only SQL without executing it and applies safety thresholds |
 | `database_readonly_query` | Runs guarded read-only SQL queries |
 
-`database_readonly_query` accepts only guarded `SELECT` or `WITH` statements, applies a row limit, runs inside a read-only transaction, and uses the configured statement timeout.
+`database_explain_query` uses `EXPLAIN` without `ANALYZE`, so it does not fetch result rows. `database_readonly_query` accepts only guarded `SELECT` or `WITH` statements, blocks known state-changing functions and row locks, applies a row limit, and runs inside a read-only transaction with statement and lock timeouts.
+
+Sensitive-column detection is deliberately conservative and name-based. It is defense in depth, not a replacement for a least-privilege PostgreSQL role, database classification, or column-level grants.
 
 ---
 
@@ -326,6 +343,7 @@ Repeat the schema grants for every schema you want TableFox to map.
 | `GET` | `/graph` | Full graph response |
 | `GET` | `/graph/search?q=customers` | Search graph objects |
 | `GET` | `/graph/node/{node_id}` | Inspect one graph node |
+| `POST` | `/query/explain` | Assess a read-only query plan without executing it |
 | `WS` | `/graph/live` | Live graph/status stream |
 
 ---
@@ -356,17 +374,17 @@ Run a safe read-only query to count employees department-wise.
 python -m pytest services/dbmap/tests
 ```
 
+Use [FUNCTIONAL_CHECKLIST.md](./FUNCTIONAL_CHECKLIST.md) for the complete purpose-driven release and acceptance check.
+
 ---
 
 ## Roadmap
 
-- [ ] Docker Compose setup
 - [ ] Graph export as JSON
 - [ ] Mermaid ER diagram export
 - [ ] Schema snapshot history
 - [ ] Schema comparison between two database snapshots
 - [ ] AI-generated table documentation
-- [ ] Query explanation mode
 - [ ] PostgreSQL performance hints for indexes and constraints
 - [ ] Role-based UI access
 

@@ -9,7 +9,8 @@ from typing import Any
 from .config import Settings
 from .graph import GraphEngine
 from .models import GraphSnapshot
-from .readonly import apply_limit
+from .query_policy import assess_query_plan, classify_sensitive_columns
+from .readonly import apply_limit, validate_readonly_sql
 
 
 RELATIONS_SQL = """
@@ -112,8 +113,7 @@ class PostgresIntrospector:
         import psycopg
 
         with psycopg.connect(**self.settings.connection_kwargs()) as conn:
-            conn.execute("set transaction read only")
-            conn.execute(f"set statement_timeout = {int(self.settings.statement_timeout_ms)}")
+            self._configure_readonly_transaction(conn)
             row = conn.execute(
                 "select current_database(), current_user, version(), pg_is_in_recovery(), "
                 "current_setting('default_transaction_read_only')::boolean"
@@ -144,8 +144,7 @@ class PostgresIntrospector:
         from psycopg.rows import dict_row
 
         with psycopg.connect(**self.settings.connection_kwargs(), row_factory=dict_row) as conn:
-            conn.execute("set transaction read only")
-            conn.execute(f"set statement_timeout = {int(self.settings.statement_timeout_ms)}")
+            self._configure_readonly_transaction(conn)
             return {
                 "relations": list(conn.execute(RELATIONS_SQL)),
                 "columns": list(conn.execute(COLUMNS_SQL)),
@@ -161,15 +160,59 @@ class PostgresIntrospector:
         row_limit = max(1, min(requested_limit, self.settings.max_query_rows))
         guarded_sql = apply_limit(sql, row_limit)
         with psycopg.connect(**self.settings.connection_kwargs(), row_factory=dict_row) as conn:
-            conn.execute("set transaction read only")
-            conn.execute(f"set statement_timeout = {int(self.settings.statement_timeout_ms)}")
-            rows = list(conn.execute(guarded_sql))
+            self._configure_readonly_transaction(conn)
+            cursor = conn.execute(guarded_sql)
+            columns = [column.name for column in cursor.description or []]
+            sensitive_columns = classify_sensitive_columns(columns)
+            if sensitive_columns and not self.settings.allow_sensitive_data:
+                cursor.close()
+                return {
+                    "sql": guarded_sql,
+                    "blocked": True,
+                    "reason": "Result columns matched the sensitive-data policy.",
+                    "sensitive_columns": sensitive_columns,
+                    "row_count": 0,
+                    "limit": row_limit,
+                    "rows": [],
+                }
+            rows = list(cursor)
             return {
                 "sql": guarded_sql,
+                "blocked": False,
+                "sensitive_columns": sensitive_columns,
                 "row_count": len(rows),
                 "limit": row_limit,
                 "rows": rows,
             }
+
+    def explain_query(self, sql: str, include_plan: bool = False) -> dict[str, Any]:
+        import psycopg
+
+        statement = validate_readonly_sql(sql)
+        explain_sql = (
+            "EXPLAIN (FORMAT JSON, ANALYZE FALSE, BUFFERS FALSE, VERBOSE FALSE) "
+            f"{statement}"
+        )
+        with psycopg.connect(**self.settings.connection_kwargs()) as conn:
+            self._configure_readonly_transaction(conn)
+            row = conn.execute(explain_sql).fetchone()
+        if not row:
+            raise RuntimeError("PostgreSQL returned no EXPLAIN plan.")
+        result = assess_query_plan(
+            row[0],
+            max_total_cost=self.settings.max_explain_cost,
+            max_plan_rows=self.settings.max_explain_rows,
+            include_plan=include_plan,
+        )
+        result["sql"] = statement
+        return result
+
+    def _configure_readonly_transaction(self, conn: Any) -> None:
+        timeout = max(1, int(self.settings.statement_timeout_ms))
+        lock_timeout = min(timeout, 1000)
+        conn.execute("set transaction read only")
+        conn.execute(f"set statement_timeout = {timeout}")
+        conn.execute(f"set lock_timeout = {lock_timeout}")
 
     def _cache_path(self) -> Path:
         identity = self.settings.cache_identity()

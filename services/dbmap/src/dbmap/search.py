@@ -18,8 +18,9 @@ def search_snapshot(snapshot: GraphSnapshot, query: str, limit: int = 25) -> lis
         "index": 5,
         "schema": 6,
     }
-    scored: list[tuple[int, GraphNode]] = []
+    scored: list[tuple[int, list[str], GraphNode]] = []
     for node in snapshot.nodes:
+        comment = str(node.metadata.get("comment") or "")
         haystack = " ".join(
             str(value or "")
             for value in [
@@ -28,7 +29,7 @@ def search_snapshot(snapshot: GraphSnapshot, query: str, limit: int = 25) -> lis
                 node.label,
                 node.schema,
                 node.name,
-                node.metadata.get("comment"),
+                comment,
                 node.metadata.get("data_type"),
                 node.metadata.get("table"),
             ]
@@ -37,25 +38,35 @@ def search_snapshot(snapshot: GraphSnapshot, query: str, limit: int = 25) -> lis
             continue
         name = (node.name or "").lower()
         label = node.label.lower()
+        reasons: list[str] = []
         if name == needle:
             score = 100
+            reasons.append("exact_name")
         elif label == needle:
             score = 95
+            reasons.append("exact_label")
         elif name.startswith(needle):
             score = 60
+            reasons.append("name_prefix")
         elif label.startswith(needle):
             score = 55
+            reasons.append("label_prefix")
         else:
             score = 10
+            reasons.append("metadata_match")
+        if needle in comment.lower():
+            score += 5
+            reasons.append("database_comment_match")
         if node.kind in {"table", "view", "materialized_view"}:
             score += 20
-        scored.append((score, node))
+            reasons.append("relation_kind_boost")
+        scored.append((score, reasons, node))
 
     scored.sort(
         key=lambda item: (
             -item[0],
-            kind_priority.get(item[1].kind, 99),
-            item[1].label,
+            kind_priority.get(item[2].kind, 99),
+            item[2].label,
         )
     )
     return [
@@ -67,6 +78,14 @@ def search_snapshot(snapshot: GraphSnapshot, query: str, limit: int = 25) -> lis
             "parent_id": node.parent_id,
             "metadata": node.metadata,
             "score": score,
+            "ranking": {
+                "score": score,
+                "reasons": reasons,
+                "usage_telemetry": {
+                    "status": "unavailable",
+                    "reason": "No approved aggregate usage source is configured.",
+                },
+            },
         }
-        for score, node in scored[:limit]
+        for score, reasons, node in scored[:limit]
     ]

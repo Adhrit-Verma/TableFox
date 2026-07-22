@@ -37,3 +37,6 @@ pnpm-debug.log*
 Thumbs.db
 .idea/
 .vscode/
+
+
+FUNCTIONAL_CHECKLIST.md

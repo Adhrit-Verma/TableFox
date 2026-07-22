@@ -54,6 +54,25 @@ class SettingsTests(unittest.TestCase):
         self.assertEqual(settings.cache_identity(), "db.example.com:5433/production|reader")
         self.assertNotIn("secret", settings.cache_identity())
 
+    def test_non_loopback_api_binding_is_rejected(self):
+        settings = Settings(
+            database_url=None,
+            host="localhost",
+            port=5432,
+            database="app",
+            user="reader",
+            password="secret",
+            sslmode="require",
+            cache_dir=Path(".dbmap-cache"),
+            statement_timeout_ms=5000,
+            max_query_rows=200,
+            api_host="0.0.0.0",
+            api_port=8000,
+        )
+
+        with self.assertRaises(ValueError):
+            settings.require_local_api()
+
 
 if __name__ == "__main__":
     unittest.main()

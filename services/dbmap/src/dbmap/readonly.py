@@ -8,6 +8,14 @@ _BLOCKED = re.compile(
     r"\b(insert|update|delete|drop|alter|create|truncate|grant|revoke|copy|call|do|vacuum|analyze|refresh|merge|into)\b",
     re.IGNORECASE,
 )
+_BLOCKED_FUNCTION = re.compile(
+    r"\b(pg_read_file|pg_read_binary_file|pg_ls_dir|pg_stat_file|"
+    r"pg_terminate_backend|pg_cancel_backend|pg_reload_conf|"
+    r"pg_advisory_lock|pg_try_advisory_lock|pg_advisory_xact_lock|"
+    r"pg_try_advisory_xact_lock|lo_import|lo_export|nextval|setval|set_config)\s*\(",
+    re.IGNORECASE,
+)
+_LOCKING_CLAUSE = re.compile(r"\bfor\s+(update|no\s+key\s+update|share|key\s+share)\b", re.IGNORECASE)
 
 
 def validate_readonly_sql(sql: str) -> str:
@@ -20,6 +28,10 @@ def validate_readonly_sql(sql: str) -> str:
         raise ValueError("Only SELECT or WITH queries are allowed.")
     if _BLOCKED.search(statement):
         raise ValueError("Query contains a blocked write or maintenance keyword.")
+    if _BLOCKED_FUNCTION.search(statement):
+        raise ValueError("Query contains a blocked privileged or state-changing function.")
+    if _LOCKING_CLAUSE.search(statement):
+        raise ValueError("Row-locking SELECT queries are not allowed.")
     return statement.rstrip(";")
 
 

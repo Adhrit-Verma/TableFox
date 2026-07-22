@@ -37,7 +37,8 @@ Restart the MCP client after changing `.env`, because a running stdio server kee
 3. Call `database_explain_object` on the best stable ID. This returns important columns and relationship direction in a compact response.
 4. Call `database_neighbors` when you need the local data model around that object. Start at depth 1 and increase only when necessary.
 5. Call `database_graph_snapshot` only when the task needs a broad schema inventory. Use schema filters and a bounded maximum node count.
-6. Call `database_readonly_query` only after the relevant objects and join paths are understood. Select explicit columns and use narrow predicates.
+6. Call `database_explain_query` on a proposed query. Review estimated rows, cost, sequential scans, and whether approval is required. This does not execute the query.
+7. Call `database_readonly_query` only after the relevant objects and join paths are understood and the plan is within policy. Select explicit columns and use narrow predicates.
 
 This sequence is faster and consumes much less model context than loading the full schema first.
 
@@ -50,6 +51,7 @@ This sequence is faster and consumes much less model context than loading the fu
 | `database_explain_object` | Understanding one table/view, its columns, and relationships | You need several hops of graph context |
 | `database_neighbors` | Discovering nearby tables and join paths | You need a database-wide inventory |
 | `database_graph_snapshot` | Audits, documentation, architecture summaries, and schema-wide analysis | A focused search can answer the question |
+| `database_explain_query` | Checking a proposed query plan without executing it | You need actual result rows |
 | `database_readonly_query` | Validating assumptions or retrieving a small result set | Schema discovery or any write operation |
 
 ## Stable IDs
@@ -78,9 +80,10 @@ IDs are the navigation contract. Human-readable labels may be duplicated across 
 - For data queries, select named columns instead of `SELECT *`.
 - Add restrictive predicates and request the smallest useful row limit.
 - Do not retrieve secrets, password hashes, tokens, personal data, or large text/blob columns unless the user explicitly needs them and is authorized.
+- Treat sensitive-column detection as a conservative name heuristic, not a substitute for database classification or column-level privileges.
 - Summarize query results; do not flood the model context with raw rows.
 
-The query tool independently enforces SELECT/CTE-only SQL, a statement timeout, a read-only transaction, and a maximum row count. These guards complement rather than replace careful agent behavior.
+The query tools enforce SELECT/CTE-only SQL, block known state-changing functions and row locks, use read-only transactions, apply statement and lock timeouts, and cap returned rows. Sensitive-looking result columns are blocked by default. These guards complement rather than replace an unprivileged PostgreSQL role.
 
 ## Efficient Agent Patterns
 
@@ -100,7 +103,8 @@ The query tool independently enforces SELECT/CTE-only SQL, a statement timeout, 
 2. Explain each table.
 3. Use neighbors to confirm the foreign-key path and direction.
 4. Draft SQL with explicit columns and aliases.
-5. Validate with a small read-only query limit.
+5. Check the draft with `database_explain_query`.
+6. Validate with a small read-only query limit only when the plan is acceptable.
 ```
 
 ### Document a schema
@@ -126,7 +130,7 @@ The query tool independently enforces SELECT/CTE-only SQL, a statement timeout, 
 An MCP client can include this compact instruction:
 
 ```text
-Use Database Agent incrementally. Check connectivity once, search before taking a full snapshot, preserve and reuse stable object IDs, explain candidate objects, and inspect depth-1 neighbors before writing joins. Use only bounded read-only queries with explicit columns. Treat the database as production and never request or expose credentials or sensitive row data.
+Use Database Agent incrementally. Check connectivity once, search before taking a full snapshot, preserve stable object IDs, explain candidates, and inspect depth-1 neighbors before writing joins. Run database_explain_query before database_readonly_query. Use explicit columns and bounded results. Treat the database as production and never request or expose credentials or sensitive row data.
 ```
 
 ## Troubleshooting
