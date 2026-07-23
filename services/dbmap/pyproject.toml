@@ -22,6 +22,10 @@ dev = [
 dbmap-api = "dbmap.cli:run_api"
 dbmap-mcp = "dbmap.mcp_server:main"
 dbmap-snapshot = "dbmap.cli:print_snapshot"
+dbmap-identity = "dbmap.cli:print_identity"
+dbmap-create-key = "dbmap.cli:create_api_key"
+dbmap-save-baseline = "dbmap.cli:save_baseline"
+dbmap-review = "dbmap.cli:review_schema"
 
 [build-system]
 requires = ["hatchling"]

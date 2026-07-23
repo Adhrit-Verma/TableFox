@@ -43,6 +43,7 @@ def explain_object(snapshot: GraphSnapshot, node_id: str) -> dict:
             key_roles.setdefault(column_name, []).append(role)
 
     comment = node.metadata.get("comment")
+    context = node.metadata.get("context", {})
     evidence = []
     if comment:
         evidence.append(
@@ -69,6 +70,18 @@ def explain_object(snapshot: GraphSnapshot, node_id: str) -> dict:
                 "inbound": [item.id for item in referenced_by],
             }
         )
+    if context:
+        evidence.append(
+            {
+                "kind": "approved_context",
+                "source": "configured context manifest",
+                "owner": context.get("owner"),
+                "updated_at": context.get("updated_at"),
+                "documents": context.get("documents", []),
+            }
+        )
+
+    source_of_truth_verified = context.get("source_of_truth") is True
 
     return {
         "found": True,
@@ -112,8 +125,12 @@ def explain_object(snapshot: GraphSnapshot, node_id: str) -> dict:
         "semantic_context": {
             "evidence": evidence,
             "source_of_truth_assessment": {
-                "status": "unverified",
-                "reason": "Catalog structure alone cannot establish business authority.",
+                "status": "verified" if source_of_truth_verified else "unverified",
+                "reason": (
+                    "The approved context manifest marks this object as authoritative."
+                    if source_of_truth_verified
+                    else "Catalog structure alone cannot establish business authority."
+                ),
                 "signals": {
                     "has_primary_key": any(
                         item.metadata.get("constraint_type") == "PRIMARY KEY"
@@ -125,10 +142,16 @@ def explain_object(snapshot: GraphSnapshot, node_id: str) -> dict:
                 },
             },
             "uncertainty": (
-                "No approved business documentation is linked to this object."
-                if not comment
-                else "A database comment is available, but business ownership is not verified."
+                None
+                if source_of_truth_verified
+                else "No approved source-of-truth assertion is linked to this object."
             ),
+            "description": context.get("description"),
+            "owner": context.get("owner"),
+            "documents": context.get("documents", []),
+            "code_links": context.get("code_links", []),
+            "code_links_status": context.get("code_links_status", "not_configured"),
+            "classification": context.get("classification", "unclassified"),
         },
     }
 

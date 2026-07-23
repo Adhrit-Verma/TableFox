@@ -54,6 +54,15 @@ class QueryPolicyTests(unittest.TestCase):
             },
         )
 
+    def test_approved_context_classification_takes_precedence(self):
+        findings = classify_sensitive_columns(
+            ["internal_reference"],
+            {"internal_reference": "restricted"},
+        )
+
+        self.assertEqual(findings[0]["detection"], "approved_context_policy")
+        self.assertEqual(findings[0]["category"], "restricted")
+
 
 if __name__ == "__main__":
     unittest.main()

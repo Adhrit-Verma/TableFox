@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import math
+
 from .models import GraphNode, GraphSnapshot
 
 
@@ -21,6 +23,14 @@ def search_snapshot(snapshot: GraphSnapshot, query: str, limit: int = 25) -> lis
     scored: list[tuple[int, list[str], GraphNode]] = []
     for node in snapshot.nodes:
         comment = str(node.metadata.get("comment") or "")
+        context = node.metadata.get("context", {})
+        context_text = " ".join(
+            [
+                str(context.get("description") or ""),
+                str(context.get("owner") or ""),
+                *(str(value) for item in context.get("documents", []) for value in item.values()),
+            ]
+        )
         haystack = " ".join(
             str(value or "")
             for value in [
@@ -32,6 +42,7 @@ def search_snapshot(snapshot: GraphSnapshot, query: str, limit: int = 25) -> lis
                 comment,
                 node.metadata.get("data_type"),
                 node.metadata.get("table"),
+                context_text,
             ]
         ).lower()
         if needle not in haystack:
@@ -57,9 +68,30 @@ def search_snapshot(snapshot: GraphSnapshot, query: str, limit: int = 25) -> lis
         if needle in comment.lower():
             score += 5
             reasons.append("database_comment_match")
+        if needle in context_text.lower():
+            score += 10
+            reasons.append("approved_context_match")
+        if needle in str(context.get("owner") or "").lower():
+            score += 5
+            reasons.append("approved_owner_match")
         if node.kind in {"table", "view", "materialized_view"}:
             score += 20
             reasons.append("relation_kind_boost")
+            row_estimate = int(node.metadata.get("row_estimate") or 0)
+            if row_estimate > 0:
+                score += min(5, int(math.log10(row_estimate + 1)))
+                reasons.append("catalog_size_signal")
+            usage = node.metadata.get("usage", {})
+            if usage.get("status") == "available":
+                scans = int(usage.get("sequential_scans") or 0) + int(
+                    usage.get("index_scans") or 0
+                )
+                if scans:
+                    score += min(10, int(math.log10(scans + 1) * 2))
+                    reasons.append("aggregate_scan_activity")
+                if usage.get("last_analyze"):
+                    score += 1
+                    reasons.append("analyze_freshness_signal")
         scored.append((score, reasons, node))
 
     scored.sort(
@@ -82,8 +114,10 @@ def search_snapshot(snapshot: GraphSnapshot, query: str, limit: int = 25) -> lis
                 "score": score,
                 "reasons": reasons,
                 "usage_telemetry": {
-                    "status": "unavailable",
-                    "reason": "No approved aggregate usage source is configured.",
+                    "status": node.metadata.get("usage", {}).get("status", "unavailable"),
+                    "source": "pg_stat_user_tables aggregates",
+                    "raw_query_text_exposed": False,
+                    "join_frequency": "unavailable",
                 },
             },
         }

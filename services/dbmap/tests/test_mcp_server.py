@@ -18,12 +18,16 @@ class McpServerTests(unittest.TestCase):
             names,
             {
                 "database_connectivity_check",
+                "database_context_identity",
                 "database_explain_object",
                 "database_explain_query",
+                "database_find_join_path",
                 "database_graph_snapshot",
                 "database_neighbors",
                 "database_readonly_query",
+                "database_schema_changes",
                 "database_search",
+                "database_source_of_truth",
             },
         )
 

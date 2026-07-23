@@ -28,6 +28,8 @@ pnpm-debug.log*
 # Local app state
 .dbmap-cache/
 .logs/
+.tablefox-context.json
+tablefox-auth.json
 *.sqlite
 *.db
 
@@ -37,6 +39,3 @@ pnpm-debug.log*
 Thumbs.db
 .idea/
 .vscode/
-
-
-FUNCTIONAL_CHECKLIST.md

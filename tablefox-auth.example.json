@@ -1,0 +1,14 @@
+{
+  "users": [
+    {
+      "name": "alice",
+      "role": "viewer",
+      "key_sha256": "replace-with-dbmap-create-key-output"
+    },
+    {
+      "name": "database-admin",
+      "role": "admin",
+      "key_sha256": "replace-with-a-different-key-hash"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "database": "db.example.com:5432/database_name",
+  "schema_fingerprint": "replace-with-dbmap-identity-output",
+  "objects": {
+    "table:public.customers": {
+      "description": "Approved business description.",
+      "owner": "team-name",
+      "updated_at": "2026-07-23",
+      "source_of_truth": true,
+      "classification": "internal",
+      "documents": [
+        {
+          "title": "Customer data contract",
+          "source": "internal-docs",
+          "url": "https://docs.example.com/customer-contract",
+          "updated_at": "2026-07-23"
+        }
+      ],
+      "code_links": [
+        {
+          "kind": "orm",
+          "path": "app/models/customer.py",
+          "revision": "git-commit-sha"
+        },
+        {
+          "kind": "migration",
+          "path": "migrations/20260723_customers.sql",
+          "revision": "git-commit-sha"
+        }
+      ],
+      "consumers": [
+        {
+          "name": "Customer API",
+          "source": "service-catalog",
+          "updated_at": "2026-07-23"
+        }
+      ],
+      "saved_queries": [
+        {
+          "name": "Monthly customer report",
+          "source": "report-catalog",
+          "updated_at": "2026-07-23"
+        }
+      ]
+    }
+  }
+}

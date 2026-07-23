@@ -7,10 +7,12 @@ from tempfile import NamedTemporaryFile
 from typing import Any
 
 from .config import Settings
+from .context import apply_context
 from .graph import GraphEngine
 from .models import GraphSnapshot
 from .query_policy import assess_query_plan, classify_sensitive_columns
 from .readonly import apply_limit, validate_readonly_sql
+from .security import filter_metadata_schemas, schema_allowed
 
 
 RELATIONS_SQL = """
@@ -104,6 +106,40 @@ group by schemaname, tablename, indexname, indexdef, ix.indisunique, ix.indispri
 order by schemaname, tablename, indexname
 """
 
+DEPENDENCIES_SQL = """
+select distinct
+  source_ns.nspname as schema,
+  source.relname as name,
+  target_ns.nspname as target_schema,
+  target.relname as target_name
+from pg_rewrite rewrite
+join pg_class source on source.oid = rewrite.ev_class
+join pg_namespace source_ns on source_ns.oid = source.relnamespace
+join pg_depend dependency on dependency.objid = rewrite.oid
+join pg_class target on target.oid = dependency.refobjid
+join pg_namespace target_ns on target_ns.oid = target.relnamespace
+where source.relkind in ('v', 'm')
+  and target.relkind in ('r', 'p', 'v', 'm')
+  and source.oid <> target.oid
+  and source_ns.nspname not in ('pg_catalog', 'information_schema')
+  and target_ns.nspname not in ('pg_catalog', 'information_schema')
+order by source_ns.nspname, source.relname, target_ns.nspname, target.relname
+"""
+
+USAGE_SQL = """
+select
+  stats.schemaname as schema,
+  stats.relname as name,
+  stats.seq_scan::bigint as sequential_scans,
+  stats.idx_scan::bigint as index_scans,
+  stats.n_live_tup::bigint as live_rows,
+  greatest(stats.last_analyze, stats.last_autoanalyze) as last_analyze,
+  database_stats.stats_reset
+from pg_stat_user_tables stats
+left join pg_stat_database database_stats on database_stats.datname = current_database()
+order by stats.schemaname, stats.relname
+"""
+
 
 class PostgresIntrospector:
     def __init__(self, settings: Settings | None = None) -> None:
@@ -139,31 +175,77 @@ class PostgresIntrospector:
             self._write_cache(cache_path, snapshot)
         return snapshot
 
-    def fetch_metadata(self) -> dict[str, list[dict]]:
+    def fetch_metadata(self) -> dict[str, Any]:
         import psycopg
         from psycopg.rows import dict_row
 
         with psycopg.connect(**self.settings.connection_kwargs(), row_factory=dict_row) as conn:
             self._configure_readonly_transaction(conn)
-            return {
+            metadata: dict[str, Any] = {
                 "relations": list(conn.execute(RELATIONS_SQL)),
                 "columns": list(conn.execute(COLUMNS_SQL)),
                 "constraints": list(conn.execute(CONSTRAINTS_SQL)),
                 "indexes": list(conn.execute(INDEXES_SQL)),
+                "dependencies": list(conn.execute(DEPENDENCIES_SQL)),
+                "usage": [],
+                "usage_status": "disabled",
             }
+            if self.settings.enable_usage_telemetry:
+                try:
+                    with conn.transaction():
+                        metadata["usage"] = list(conn.execute(USAGE_SQL))
+                    metadata["usage_status"] = "available"
+                except Exception:
+                    metadata["usage_status"] = "unavailable"
+            return filter_metadata_schemas(
+                metadata,
+                self.settings.allowed_schemas,
+                self.settings.restricted_schemas,
+            )
 
-    def readonly_query(self, sql: str, limit: int | None = None) -> dict[str, Any]:
+    def readonly_query(
+        self,
+        sql: str,
+        limit: int | None = None,
+        approved: bool = False,
+    ) -> dict[str, Any]:
         import psycopg
         from psycopg.rows import dict_row
 
         requested_limit = self.settings.max_query_rows if limit is None else limit
         row_limit = max(1, min(requested_limit, self.settings.max_query_rows))
         guarded_sql = apply_limit(sql, row_limit)
+        plan = self.explain_query(sql)
+        join_validation = self._validate_plan_relations(plan)
+        restricted = any(
+            reason.get("code") == "schema_not_allowed"
+            for reason in plan.get("blocking_reasons", [])
+        )
+        needs_approval = not plan["within_policy"] or not join_validation["verified"]
+        if restricted or (needs_approval and not approved):
+            return {
+                "sql": guarded_sql,
+                "blocked": True,
+                "reason": (
+                    "Query references a schema forbidden by policy."
+                    if restricted
+                    else "Query requires approval because it is outside the low-risk policy."
+                ),
+                "approval_required": not restricted,
+                "plan": plan,
+                "join_validation": join_validation,
+                "row_count": 0,
+                "limit": row_limit,
+                "rows": [],
+            }
         with psycopg.connect(**self.settings.connection_kwargs(), row_factory=dict_row) as conn:
             self._configure_readonly_transaction(conn)
             cursor = conn.execute(guarded_sql)
             columns = [column.name for column in cursor.description or []]
-            sensitive_columns = classify_sensitive_columns(columns)
+            sensitive_columns = classify_sensitive_columns(
+                columns,
+                self._context_classifications(),
+            )
             if sensitive_columns and not self.settings.allow_sensitive_data:
                 cursor.close()
                 return {
@@ -180,6 +262,8 @@ class PostgresIntrospector:
                 "sql": guarded_sql,
                 "blocked": False,
                 "sensitive_columns": sensitive_columns,
+                "plan": plan,
+                "join_validation": join_validation,
                 "row_count": len(rows),
                 "limit": row_limit,
                 "rows": rows,
@@ -190,7 +274,7 @@ class PostgresIntrospector:
 
         statement = validate_readonly_sql(sql)
         explain_sql = (
-            "EXPLAIN (FORMAT JSON, ANALYZE FALSE, BUFFERS FALSE, VERBOSE FALSE) "
+            "EXPLAIN (FORMAT JSON, ANALYZE FALSE, BUFFERS FALSE, VERBOSE TRUE) "
             f"{statement}"
         )
         with psycopg.connect(**self.settings.connection_kwargs()) as conn:
@@ -205,7 +289,58 @@ class PostgresIntrospector:
             include_plan=include_plan,
         )
         result["sql"] = statement
+        blocked_relations = []
+        for relation in result["summary"]["relations"]:
+            schema = relation.split(".", 1)[0] if "." in relation else None
+            if not schema_allowed(
+                schema,
+                self.settings.allowed_schemas,
+                self.settings.restricted_schemas,
+            ):
+                blocked_relations.append(relation)
+        if blocked_relations:
+            result["blocking_reasons"].append(
+                {"code": "schema_not_allowed", "relations": sorted(blocked_relations)}
+            )
+            result["within_policy"] = False
+            result["approval_required"] = True
         return result
+
+    def _validate_plan_relations(self, plan: dict[str, Any]) -> dict[str, Any]:
+        relations = set(plan.get("summary", {}).get("relations", []))
+        if len(relations) < 2:
+            return {"verified": True, "relations": sorted(relations), "edges": []}
+        snapshot = self.snapshot()
+        ids_by_label = {
+            node.label: node.id
+            for node in snapshot.nodes
+            if node.kind in {"table", "view", "materialized_view"}
+        }
+        missing = sorted(relations - ids_by_label.keys())
+        if missing:
+            return {
+                "verified": False,
+                "relations": sorted(relations),
+                "missing_from_graph": missing,
+                "edges": [],
+            }
+        return GraphEngine.validate_relation_set(
+            snapshot,
+            {ids_by_label[relation] for relation in relations},
+        )
+
+    def _context_classifications(self) -> dict[str, str]:
+        if not self.settings.context_file:
+            return {}
+        snapshot = apply_context(self.snapshot(), self.settings.context_file)
+        return {
+            str(node.name).lower(): str(node.metadata["context"]["classification"])
+            for node in snapshot.nodes
+            if node.kind == "column"
+            and node.name
+            and node.metadata.get("context", {}).get("classification")
+            not in {None, "", "unclassified"}
+        }
 
     def _configure_readonly_transaction(self, conn: Any) -> None:
         timeout = max(1, int(self.settings.statement_timeout_ms))

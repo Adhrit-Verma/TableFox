@@ -37,12 +37,16 @@ class GraphEngine:
             )
             add_node(schema_node)
 
+        usage_by_relation = {
+            (row["schema"], row["name"]): row for row in metadata.get("usage", [])
+        }
         for relation in metadata.get("relations", []):
             schema = relation["schema"]
             name = relation["name"]
             kind = relation.get("kind", "table")
             rel_id = node_id(kind, schema, name)
             schema_id = node_id("schema", schema)
+            usage = usage_by_relation.get((schema, name))
             add_node(
                 GraphNode(
                     id=rel_id,
@@ -54,6 +58,11 @@ class GraphEngine:
                     metadata={
                         "comment": relation.get("comment"),
                         "row_estimate": relation.get("row_estimate"),
+                        "usage": _usage_metadata(
+                            usage,
+                            kind,
+                            str(metadata.get("usage_status", "unavailable")),
+                        ),
                     },
                 )
             )
@@ -207,6 +216,26 @@ class GraphEngine:
                 )
             )
 
+        for dependency in metadata.get("dependencies", []):
+            source_key = (dependency["schema"], dependency["name"])
+            target_key = (dependency["target_schema"], dependency["target_name"])
+            source_kind = relation_kind_by_key.get(source_key)
+            target_kind = relation_kind_by_key.get(target_key)
+            if not source_kind or not target_kind:
+                continue
+            source_id = node_id(source_kind, *source_key)
+            target_id = node_id(target_kind, *target_key)
+            add_edge(
+                GraphEdge(
+                    id=edge_id("depends_on", source_id, target_id),
+                    kind="depends_on",
+                    source=source_id,
+                    target=target_id,
+                    label="depends on",
+                    metadata={"evidence": "pg_depend"},
+                )
+            )
+
         return GraphSnapshot.create(
             database=self.database_label,
             nodes=sorted(nodes_by_id.values(), key=lambda node: node.id),
@@ -280,3 +309,89 @@ class GraphEngine:
             if edge.source in seen and edge.target in seen
         ]
         return GraphSnapshot.create(snapshot.database, nodes, edges)
+
+    @staticmethod
+    def join_path(snapshot: GraphSnapshot, source: str, target: str, max_hops: int = 6) -> dict:
+        relation_ids = {
+            node.id
+            for node in snapshot.nodes
+            if node.kind in {"table", "view", "materialized_view"}
+        }
+        if source not in relation_ids or target not in relation_ids:
+            return {"found": False, "reason": "Both IDs must identify visible relations."}
+
+        edges = [
+            edge
+            for edge in snapshot.edges
+            if edge.kind in {"foreign_key", "depends_on"}
+            and edge.source in relation_ids
+            and edge.target in relation_ids
+        ]
+        adjacency: dict[str, list[tuple[str, GraphEdge]]] = {}
+        for edge in edges:
+            adjacency.setdefault(edge.source, []).append((edge.target, edge))
+            adjacency.setdefault(edge.target, []).append((edge.source, edge))
+
+        queue: deque[tuple[str, list[str], list[GraphEdge]]] = deque([(source, [source], [])])
+        seen = {source}
+        while queue:
+            current, node_path, edge_path = queue.popleft()
+            if current == target:
+                return {
+                    "found": True,
+                    "verified": True,
+                    "nodes": node_path,
+                    "edges": [edge.to_dict() for edge in edge_path],
+                    "evidence": "declared_foreign_keys_and_catalog_dependencies",
+                }
+            if len(edge_path) >= max(1, min(max_hops, 12)):
+                continue
+            for neighbor, edge in sorted(adjacency.get(current, []), key=lambda item: item[0]):
+                if neighbor not in seen:
+                    seen.add(neighbor)
+                    queue.append((neighbor, [*node_path, neighbor], [*edge_path, edge]))
+        return {"found": False, "reason": "No declared relationship path was found."}
+
+    @staticmethod
+    def validate_relation_set(snapshot: GraphSnapshot, relation_ids: set[str]) -> dict:
+        if len(relation_ids) < 2:
+            return {"verified": True, "relations": sorted(relation_ids), "edges": []}
+        relevant = [
+            edge
+            for edge in snapshot.edges
+            if edge.kind in {"foreign_key", "depends_on"}
+            and edge.source in relation_ids
+            and edge.target in relation_ids
+        ]
+        adjacency: dict[str, set[str]] = {}
+        for edge in relevant:
+            adjacency.setdefault(edge.source, set()).add(edge.target)
+            adjacency.setdefault(edge.target, set()).add(edge.source)
+        seen = {min(relation_ids)}
+        queue = deque(seen)
+        while queue:
+            current = queue.popleft()
+            for neighbor in adjacency.get(current, set()) - seen:
+                seen.add(neighbor)
+                queue.append(neighbor)
+        return {
+            "verified": seen == relation_ids,
+            "relations": sorted(relation_ids),
+            "edges": [edge.to_dict() for edge in relevant],
+            "unconnected": sorted(relation_ids - seen),
+        }
+
+
+def _usage_metadata(usage: dict | None, kind: str, status: str) -> dict:
+    if usage:
+        return {
+            "status": "available",
+            "sequential_scans": usage.get("sequential_scans"),
+            "index_scans": usage.get("index_scans"),
+            "live_rows": usage.get("live_rows"),
+            "last_analyze": usage.get("last_analyze"),
+            "stats_reset": usage.get("stats_reset"),
+        }
+    if kind in {"view", "materialized_view"}:
+        return {"status": "not_applicable"}
+    return {"status": "unavailable" if status == "available" else status}

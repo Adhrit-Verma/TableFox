@@ -1,0 +1,43 @@
+name: Schema impact
+
+on:
+  workflow_dispatch:
+    inputs:
+      baseline_path:
+        description: Committed baseline snapshot path
+        required: true
+      migration_path:
+        description: Migration file or pull-request path being reviewed
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.TABLEFOX_DATABASE_URL }}
+      DBMAP_CONTEXT_FILE: ${{ vars.TABLEFOX_CONTEXT_FILE }}
+      DBMAP_ALLOWED_SCHEMAS: ${{ vars.TABLEFOX_ALLOWED_SCHEMAS }}
+      DBMAP_RESTRICTED_SCHEMAS: ${{ vars.TABLEFOX_RESTRICTED_SCHEMAS }}
+      BASELINE_PATH: ${{ inputs.baseline_path }}
+      MIGRATION_PATH: ${{ inputs.migration_path }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install -e services/dbmap
+      - name: Build impact report
+        run: dbmap-review --baseline "$BASELINE_PATH" --output schema-impact.json
+      - name: Link migration and report
+        run: |
+          echo "## TableFox schema impact" >> "$GITHUB_STEP_SUMMARY"
+          echo "Migration: \`$MIGRATION_PATH\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "Report artifact: \`schema-impact\`" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: schema-impact
+          path: schema-impact.json

@@ -9,7 +9,9 @@ import {
   Eye,
   Filter,
   GitBranch,
+  KeyRound,
   Loader2,
+  LogOut,
   Maximize2,
   RefreshCw,
   Search,
@@ -20,7 +22,7 @@ import {
   ZoomIn,
   ZoomOut
 } from "lucide-react";
-import type { ReactNode } from "react";
+import type { FormEvent, ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type GraphNode = {
@@ -106,6 +108,19 @@ export default function Home() {
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [live, setLive] = useState<"connecting" | "connected" | "offline">("connecting");
   const [error, setError] = useState<string | null>(null);
+  const [apiKey, setApiKey] = useState("");
+  const [apiKeyInput, setApiKeyInput] = useState("");
+  const [authReady, setAuthReady] = useState(false);
+  const [authRequired, setAuthRequired] = useState(false);
+
+  const authHeaders = useMemo<Record<string, string>>(
+    () => {
+      const headers: Record<string, string> = {};
+      if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
+      return headers;
+    },
+    [apiKey]
+  );
 
   const schemas = useMemo(() => {
     if (!graph) return [];
@@ -160,16 +175,23 @@ export default function Home() {
     setStatus("loading");
     setError(null);
     try {
-      const response = await fetch(`${API_URL}/graph${refresh ? "?refresh=true" : ""}`);
+      const response = await fetch(`${API_URL}/graph${refresh ? "?refresh=true" : ""}`, {
+        headers: authHeaders
+      });
+      if (response.status === 401) {
+        setAuthRequired(true);
+        throw new Error("Authentication required.");
+      }
       if (!response.ok) throw new Error(`Graph request failed with ${response.status}`);
       const payload = (await response.json()) as GraphSnapshot;
       applyGraph(payload, refresh);
       setStatus("ready");
+      setAuthRequired(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to load graph.");
       setStatus("error");
     }
-  }, [applyGraph]);
+  }, [applyGraph, authHeaders]);
 
   const loadNode = useCallback(async (id: string, focus = false) => {
     nodeAbortRef.current?.abort();
@@ -179,8 +201,10 @@ export default function Home() {
     setSelectedId(id);
     try {
       const response = await fetch(`${API_URL}/graph/node/${encodeURIComponent(id)}`, {
+        headers: authHeaders,
         signal: controller.signal
       });
+      if (response.status === 401) setAuthRequired(true);
       if (!response.ok) throw new Error(`Node request failed with ${response.status}`);
       setSelected((await response.json()) as NodeExplanation);
     } catch (err) {
@@ -191,7 +215,7 @@ export default function Home() {
         summary: err instanceof Error ? err.message : "Unable to load node."
       });
     }
-  }, []);
+  }, [authHeaders]);
 
   const clearSelection = useCallback(() => {
     nodeAbortRef.current?.abort();
@@ -202,8 +226,13 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    loadGraph();
-  }, [loadGraph]);
+    setApiKey(window.sessionStorage.getItem("tablefox-api-key") ?? "");
+    setAuthReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (authReady) loadGraph();
+  }, [authReady, loadGraph]);
 
   useEffect(() => {
     if (!searchQuery.trim()) {
@@ -219,8 +248,10 @@ export default function Home() {
     const timer = window.setTimeout(async () => {
       try {
         const response = await fetch(`${API_URL}/graph/search?q=${encodeURIComponent(searchQuery)}&limit=12`, {
+          headers: authHeaders,
           signal: controller.signal
         });
+        if (response.status === 401) setAuthRequired(true);
         if (response.ok) {
           const payload = (await response.json()) as { results: SearchResult[] };
           setSearchResults(payload.results);
@@ -235,7 +266,7 @@ export default function Home() {
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, [searchQuery]);
+  }, [authHeaders, searchQuery]);
 
   useEffect(() => {
     const closeSearch = (event: PointerEvent) => {
@@ -246,6 +277,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    if (!authReady) return;
     const wsUrl = API_URL.replace(/^http/, "ws");
     let active = true;
     let socket: WebSocket | null = null;
@@ -254,11 +286,23 @@ export default function Home() {
     const connect = () => {
       if (!active) return;
       setLive("connecting");
-      socket = new WebSocket(`${wsUrl}/graph/live`);
+      try {
+        socket = apiKey
+          ? new WebSocket(`${wsUrl}/graph/live`, ["tablefox", apiKey])
+          : new WebSocket(`${wsUrl}/graph/live`);
+      } catch {
+        setAuthRequired(true);
+        setLive("offline");
+        return;
+      }
       socket.onopen = () => setLive("connected");
       socket.onerror = () => socket?.close();
-      socket.onclose = () => {
+      socket.onclose = (event) => {
         setLive("offline");
+        if (event.code === 1008) {
+          setAuthRequired(true);
+          return;
+        }
         if (active) reconnectTimer = window.setTimeout(connect, 2000);
       };
       socket.onmessage = (event) => {
@@ -287,7 +331,7 @@ export default function Home() {
       if (reconnectTimer !== null) window.clearTimeout(reconnectTimer);
       socket?.close();
     };
-  }, [applyGraph]);
+  }, [apiKey, applyGraph, authReady]);
 
   useEffect(() => () => {
     searchAbortRef.current?.abort();
@@ -531,6 +575,23 @@ export default function Home() {
     loadNode(result.id, true);
   };
 
+  const submitApiKey = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const value = apiKeyInput.trim();
+    if (!value) return;
+    window.sessionStorage.setItem("tablefox-api-key", value);
+    setApiKey(value);
+    setApiKeyInput("");
+    setAuthRequired(false);
+  };
+
+  const clearApiKey = () => {
+    window.sessionStorage.removeItem("tablefox-api-key");
+    setApiKey("");
+    setGraph(null);
+    setAuthRequired(true);
+  };
+
   return (
     <main className="shell">
       <header className="topbar">
@@ -609,8 +670,32 @@ export default function Home() {
           <button className="iconButton" onClick={() => loadGraph(true)} aria-label="Refresh graph">
             <RefreshCw size={16} />
           </button>
+          {apiKey && (
+            <button className="iconButton" onClick={clearApiKey} aria-label="Sign out" title="Sign out">
+              <LogOut size={16} />
+            </button>
+          )}
         </div>
       </header>
+
+      {authRequired && (
+        <div className="authOverlay" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+          <form className="authDialog" onSubmit={submitApiKey}>
+            <KeyRound size={24} />
+            <h1 id="auth-title">TableFox access</h1>
+            <label htmlFor="api-key">API key</label>
+            <input
+              id="api-key"
+              type="password"
+              autoComplete="current-password"
+              value={apiKeyInput}
+              onChange={(event) => setApiKeyInput(event.target.value)}
+              autoFocus
+            />
+            <button type="submit" disabled={!apiKeyInput.trim()}>Connect</button>
+          </form>
+        </div>
+      )}
 
       <aside className="rail" aria-label="Graph filters">
         <section>

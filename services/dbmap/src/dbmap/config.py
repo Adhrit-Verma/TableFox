@@ -31,6 +31,15 @@ def _env_bool(name: str, default: bool) -> bool:
     raise ValueError(f"{name} must be true or false.")
 
 
+def _env_list(name: str) -> tuple[str, ...]:
+    return tuple(item.strip() for item in os.getenv(name, "").split(",") if item.strip())
+
+
+def _env_path(name: str) -> Path | None:
+    value = os.getenv(name)
+    return Path(value).expanduser().resolve() if value else None
+
+
 @dataclass(frozen=True)
 class Settings:
     database_url: str | None
@@ -48,6 +57,16 @@ class Settings:
     max_explain_cost: float = 100000.0
     max_explain_rows: int = 100000
     allow_sensitive_data: bool = False
+    allowed_schemas: tuple[str, ...] = ()
+    restricted_schemas: tuple[str, ...] = ()
+    enable_usage_telemetry: bool = False
+    context_file: Path | None = None
+    baseline_file: Path | None = None
+    audit_dir: Path = Path(".logs/audit")
+    audit_retention_days: int = 30
+    auth_required: bool = False
+    auth_file: Path | None = None
+    mcp_actor: str = "local-mcp"
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -76,6 +95,16 @@ class Settings:
             max_explain_cost=float(os.getenv("DBMAP_MAX_EXPLAIN_COST", "100000")),
             max_explain_rows=int(os.getenv("DBMAP_MAX_EXPLAIN_ROWS", "100000")),
             allow_sensitive_data=_env_bool("DBMAP_ALLOW_SENSITIVE_DATA", False),
+            allowed_schemas=_env_list("DBMAP_ALLOWED_SCHEMAS"),
+            restricted_schemas=_env_list("DBMAP_RESTRICTED_SCHEMAS"),
+            enable_usage_telemetry=_env_bool("DBMAP_ENABLE_USAGE_TELEMETRY", False),
+            context_file=_env_path("DBMAP_CONTEXT_FILE"),
+            baseline_file=_env_path("DBMAP_BASELINE_FILE"),
+            audit_dir=Path(os.getenv("DBMAP_AUDIT_DIR", ".logs/audit")),
+            audit_retention_days=max(1, int(os.getenv("DBMAP_AUDIT_RETENTION_DAYS", "30"))),
+            auth_required=_env_bool("DBMAP_AUTH_REQUIRED", False),
+            auth_file=_env_path("DBMAP_AUTH_FILE"),
+            mcp_actor=os.getenv("DBMAP_MCP_ACTOR", "local-mcp").strip() or "local-mcp",
         )
 
     def connection_kwargs(self) -> dict[str, object]:

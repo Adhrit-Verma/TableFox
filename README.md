@@ -141,6 +141,10 @@ This is useful for:
 | **Guarded SQL execution** | Allows only protected `SELECT` / `WITH` statements with row limits and timeout controls |
 | **Non-executing query plans** | Uses `EXPLAIN` without `ANALYZE` and reports cost, row, and scan policy signals |
 | **Sensitive-column guard** | Blocks common credential and PII-like result column names unless an operator opts in |
+| **Verified workflows** | Finds declared join paths and distinguishes approved source-of-truth evidence from heuristics |
+| **Approved context** | Links business documents, owners, classifications, ORM models, migrations, consumers, and saved queries |
+| **Schema impact** | Compares a baseline with PostgreSQL and reports structural changes and confirmed dependencies |
+| **Governance** | Supports schema allow/deny rules, aggregate-only usage telemetry, per-user API roles, and JSONL audit logs |
 | **One-command launcher** | Starts API and web UI together on Windows |
 | **WebSocket updates** | Streams local graph refresh/status updates to the UI |
 
@@ -251,7 +255,31 @@ DBMAP_MAX_EXPLAIN_ROWS=100000
 DBMAP_ALLOW_SENSITIVE_DATA=false
 ```
 
-Keep `DBMAP_API_HOST` on `127.0.0.1`, `localhost`, or `::1`. TableFox rejects non-loopback API bindings because the local-only API has no authentication.
+Additional production controls are shown in `.env.example`. Keep `DBMAP_API_HOST` on `127.0.0.1`, `localhost`, or `::1`; TableFox remains local-only even when API authentication is enabled.
+
+### Approved context
+
+Run `dbmap-identity`, copy `tablefox-context.example.json` to `.tablefox-context.json`, and replace its database identity and schema fingerprint. Business links require a source and update date. ORM and migration links are omitted automatically unless both the database identity and schema fingerprint match.
+
+### API users
+
+Run `dbmap-create-key` once per user. Store only the printed SHA-256 value in a local `tablefox-auth.json` based on `tablefox-auth.example.json`, then set:
+
+```env
+DBMAP_AUTH_REQUIRED=true
+DBMAP_AUTH_FILE=tablefox-auth.json
+```
+
+Roles are `viewer`, `analyst`, `data_reader`, and `admin`. Only administrators can approve a query outside the low-risk cost or relationship policy. Restricted schemas cannot be overridden.
+
+### Schema baselines
+
+```powershell
+dbmap-save-baseline
+dbmap-review --baseline .dbmap-cache/baseline.snapshot.json --output schema-impact.json
+```
+
+The repository includes quality and manually triggered schema-impact GitHub Actions workflows. The impact workflow requires the `TABLEFOX_DATABASE_URL` repository secret.
 
 ---
 
@@ -312,10 +340,14 @@ The MCP process loads the repository-root `.env`, so database credentials do not
 | `database_explain_object` | Explains a selected table, column, view, or constraint |
 | `database_explain_query` | Plans read-only SQL without executing it and applies safety thresholds |
 | `database_readonly_query` | Runs guarded read-only SQL queries |
+| `database_find_join_path` | Finds a bounded path backed by foreign keys or catalog dependencies |
+| `database_source_of_truth` | Returns verified or unresolved authoritative-table candidates with evidence |
+| `database_schema_changes` | Compares the configured baseline with the current database |
+| `database_context_identity` | Returns the safe database identity and schema fingerprint for context files |
 
 `database_explain_query` uses `EXPLAIN` without `ANALYZE`, so it does not fetch result rows. `database_readonly_query` accepts only guarded `SELECT` or `WITH` statements, blocks known state-changing functions and row locks, applies a row limit, and runs inside a read-only transaction with statement and lock timeouts.
 
-Sensitive-column detection is deliberately conservative and name-based. It is defense in depth, not a replacement for a least-privilege PostgreSQL role, database classification, or column-level grants.
+Sensitive-column detection uses both conservative name checks and approved context classifications. It is defense in depth, not a replacement for a least-privilege PostgreSQL role or column-level grants. Multi-relation data queries must also match a declared relationship path.
 
 ---
 
@@ -343,7 +375,12 @@ Repeat the schema grants for every schema you want TableFox to map.
 | `GET` | `/graph` | Full graph response |
 | `GET` | `/graph/search?q=customers` | Search graph objects |
 | `GET` | `/graph/node/{node_id}` | Inspect one graph node |
+| `GET` | `/graph/identity` | Get context identity and schema fingerprint |
+| `GET` | `/graph/changes` | Compare the configured baseline |
 | `POST` | `/query/explain` | Assess a read-only query plan without executing it |
+| `POST` | `/query/readonly` | Run a role-authorized guarded query |
+| `POST` | `/workflow/join-path` | Find a verified relationship path |
+| `GET` | `/workflow/source-of-truth?q=customers` | Rank authoritative candidates with evidence |
 | `WS` | `/graph/live` | Live graph/status stream |
 
 ---
@@ -382,11 +419,9 @@ Use [FUNCTIONAL_CHECKLIST.md](./FUNCTIONAL_CHECKLIST.md) for the complete purpos
 
 - [ ] Graph export as JSON
 - [ ] Mermaid ER diagram export
-- [ ] Schema snapshot history
-- [ ] Schema comparison between two database snapshots
 - [ ] AI-generated table documentation
 - [ ] PostgreSQL performance hints for indexes and constraints
-- [ ] Role-based UI access
+- [ ] External identity-provider integration for hosted deployments
 
 ---
 

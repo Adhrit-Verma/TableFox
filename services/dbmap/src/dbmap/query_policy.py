@@ -36,11 +36,24 @@ _SENSITIVE_MARKERS = {
 }
 
 
-def classify_sensitive_columns(column_names: list[str]) -> list[dict[str, str]]:
+def classify_sensitive_columns(
+    column_names: list[str],
+    policy_classifications: dict[str, str] | None = None,
+) -> list[dict[str, str]]:
     """Return conservative, name-based classifications before rows leave the service."""
     findings: list[dict[str, str]] = []
+    configured = {key.lower(): value for key, value in (policy_classifications or {}).items()}
     for column_name in column_names:
         normalized = re.sub(r"[^a-z0-9]+", "_", column_name.lower()).strip("_")
+        if normalized in configured:
+            findings.append(
+                {
+                    "column": column_name,
+                    "category": configured[normalized],
+                    "detection": "approved_context_policy",
+                }
+            )
+            continue
         for category, markers in _SENSITIVE_MARKERS.items():
             if any(_contains_marker(normalized, marker) for marker in markers):
                 findings.append(

@@ -51,6 +51,9 @@ def sample_metadata():
                 "columns": ["email"],
             }
         ],
+        "dependencies": [],
+        "usage": [],
+        "usage_status": "disabled",
     }
 
 
@@ -141,3 +144,52 @@ class GraphEngineTests(unittest.TestCase):
         self.assertTrue(explanation["found"])
         self.assertTrue(explanation["columns"])
         self.assertEqual(explanation["foreign_keys_to"][0]["id"], "table:public.customers")
+
+    def test_join_path_uses_declared_foreign_keys(self):
+        snapshot = GraphEngine("testdb").build(sample_metadata())
+
+        path = GraphEngine.join_path(
+            snapshot,
+            "table:public.orders",
+            "table:public.customers",
+        )
+
+        self.assertTrue(path["found"])
+        self.assertTrue(path["verified"])
+        self.assertEqual(path["edges"][0]["kind"], "foreign_key")
+
+    def test_usage_and_view_dependencies_are_added_to_graph(self):
+        metadata = sample_metadata()
+        metadata["relations"].append(
+            {"schema": "public", "name": "customer_orders", "kind": "view"}
+        )
+        metadata["usage"] = [
+            {
+                "schema": "public",
+                "name": "orders",
+                "sequential_scans": 3,
+                "index_scans": 8,
+                "live_rows": 20,
+                "last_analyze": None,
+                "stats_reset": None,
+            }
+        ]
+        metadata["usage_status"] = "available"
+        metadata["dependencies"] = [
+            {
+                "schema": "public",
+                "name": "customer_orders",
+                "target_schema": "public",
+                "target_name": "orders",
+            }
+        ]
+
+        snapshot = GraphEngine("testdb").build(metadata)
+        order = next(node for node in snapshot.nodes if node.id == "table:public.orders")
+
+        self.assertEqual(order.metadata["usage"]["index_scans"], 8)
+        view = next(
+            node for node in snapshot.nodes if node.id == "view:public.customer_orders"
+        )
+        self.assertEqual(view.metadata["usage"]["status"], "not_applicable")
+        self.assertIn("depends_on", {edge.kind for edge in snapshot.edges})
