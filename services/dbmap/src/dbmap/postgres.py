@@ -2,8 +2,11 @@ from __future__ import annotations
 
 import json
 import hashlib
+import atexit
 from pathlib import Path
+import re
 from tempfile import NamedTemporaryFile
+from threading import Lock
 from typing import Any
 
 from .config import Settings
@@ -144,11 +147,36 @@ order by stats.schemaname, stats.relname
 class PostgresIntrospector:
     def __init__(self, settings: Settings | None = None) -> None:
         self.settings = settings or Settings.from_env()
+        self._pool: Any | None = None
+        self._pool_lock = Lock()
+
+    def _connection(self):
+        if self._pool is None:
+            with self._pool_lock:
+                if self._pool is None:
+                    from psycopg_pool import ConnectionPool
+
+                    minimum = min(
+                        self.settings.pool_min_size,
+                        self.settings.pool_max_size,
+                    )
+                    self._pool = ConnectionPool(
+                        kwargs=self.settings.connection_kwargs(),
+                        min_size=minimum,
+                        max_size=self.settings.pool_max_size,
+                        open=False,
+                        timeout=max(10.0, self.settings.statement_timeout_ms / 1000),
+                    )
+                    self._pool.open(wait=True)
+                    atexit.register(self.close)
+        return self._pool.connection()
+
+    def close(self) -> None:
+        if self._pool is not None:
+            self._pool.close()
 
     def connectivity_check(self) -> dict[str, Any]:
-        import psycopg
-
-        with psycopg.connect(**self.settings.connection_kwargs()) as conn:
+        with self._connection() as conn:
             self._configure_readonly_transaction(conn)
             row = conn.execute(
                 "select current_database(), current_user, version(), pg_is_in_recovery(), "
@@ -176,27 +204,27 @@ class PostgresIntrospector:
         return snapshot
 
     def fetch_metadata(self) -> dict[str, Any]:
-        import psycopg
         from psycopg.rows import dict_row
 
-        with psycopg.connect(**self.settings.connection_kwargs(), row_factory=dict_row) as conn:
+        with self._connection() as conn:
             self._configure_readonly_transaction(conn)
-            metadata: dict[str, Any] = {
-                "relations": list(conn.execute(RELATIONS_SQL)),
-                "columns": list(conn.execute(COLUMNS_SQL)),
-                "constraints": list(conn.execute(CONSTRAINTS_SQL)),
-                "indexes": list(conn.execute(INDEXES_SQL)),
-                "dependencies": list(conn.execute(DEPENDENCIES_SQL)),
-                "usage": [],
-                "usage_status": "disabled",
-            }
-            if self.settings.enable_usage_telemetry:
-                try:
-                    with conn.transaction():
-                        metadata["usage"] = list(conn.execute(USAGE_SQL))
-                    metadata["usage_status"] = "available"
-                except Exception:
-                    metadata["usage_status"] = "unavailable"
+            with conn.cursor(row_factory=dict_row) as cursor:
+                metadata: dict[str, Any] = {
+                    "relations": list(cursor.execute(RELATIONS_SQL)),
+                    "columns": list(cursor.execute(COLUMNS_SQL)),
+                    "constraints": list(cursor.execute(CONSTRAINTS_SQL)),
+                    "indexes": list(cursor.execute(INDEXES_SQL)),
+                    "dependencies": list(cursor.execute(DEPENDENCIES_SQL)),
+                    "usage": [],
+                    "usage_status": "disabled",
+                }
+                if self.settings.enable_usage_telemetry:
+                    try:
+                        with conn.transaction():
+                            metadata["usage"] = list(cursor.execute(USAGE_SQL))
+                        metadata["usage_status"] = "available"
+                    except Exception:
+                        metadata["usage_status"] = "unavailable"
             return filter_metadata_schemas(
                 metadata,
                 self.settings.allowed_schemas,
@@ -209,77 +237,85 @@ class PostgresIntrospector:
         limit: int | None = None,
         approved: bool = False,
     ) -> dict[str, Any]:
-        import psycopg
-        from psycopg.rows import dict_row
-
-        requested_limit = self.settings.max_query_rows if limit is None else limit
-        row_limit = max(1, min(requested_limit, self.settings.max_query_rows))
-        guarded_sql = apply_limit(sql, row_limit)
-        plan = self.explain_query(sql)
-        join_validation = self._validate_plan_relations(plan)
-        restricted = any(
-            reason.get("code") == "schema_not_allowed"
-            for reason in plan.get("blocking_reasons", [])
-        )
-        needs_approval = not plan["within_policy"] or not join_validation["verified"]
-        if restricted or (needs_approval and not approved):
-            return {
-                "sql": guarded_sql,
-                "blocked": True,
-                "reason": (
-                    "Query references a schema forbidden by policy."
-                    if restricted
-                    else "Query requires approval because it is outside the low-risk policy."
-                ),
-                "approval_required": not restricted,
-                "plan": plan,
-                "join_validation": join_validation,
-                "row_count": 0,
-                "limit": row_limit,
-                "rows": [],
-            }
-        with psycopg.connect(**self.settings.connection_kwargs(), row_factory=dict_row) as conn:
+        with self._connection() as conn:
             self._configure_readonly_transaction(conn)
-            cursor = conn.execute(guarded_sql)
-            columns = [column.name for column in cursor.description or []]
-            sensitive_columns = classify_sensitive_columns(
-                columns,
-                self._context_classifications(),
-            )
-            if sensitive_columns and not self.settings.allow_sensitive_data:
-                cursor.close()
-                return {
-                    "sql": guarded_sql,
-                    "blocked": True,
-                    "reason": "Result columns matched the sensitive-data policy.",
-                    "sensitive_columns": sensitive_columns,
-                    "row_count": 0,
-                    "limit": row_limit,
-                    "rows": [],
+            return self._readonly_query_on_connection(conn, sql, limit, approved)
+
+    def readonly_batch(
+        self,
+        queries: list[dict[str, Any]],
+        max_rows_each: int | None = None,
+        max_bytes: int = 32_768,
+        approved: bool = False,
+    ) -> dict[str, Any]:
+        if not 1 <= len(queries) <= 5:
+            raise ValueError("A read-only batch requires between one and five queries.")
+        prepared = []
+        names: set[str] = set()
+        for item in queries:
+            if not isinstance(item, dict):
+                raise ValueError("Each batch query must be an object.")
+            name = str(item.get("name", "")).strip()
+            sql = str(item.get("sql", "")).strip()
+            if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_-]{0,63}", name):
+                raise ValueError("Each query name must be a short identifier.")
+            if name in names:
+                raise ValueError("Query names must be unique within a batch.")
+            names.add(name)
+            validate_readonly_sql(sql)
+            requested_limit = item.get("limit") or max_rows_each
+            prepared.append((name, sql, requested_limit))
+
+        classifications = self._context_classifications()
+        results = []
+        with self._connection() as conn:
+            self._configure_readonly_transaction(conn)
+            for name, sql, limit in prepared:
+                full = self._readonly_query_on_connection(
+                    conn,
+                    sql,
+                    limit,
+                    approved,
+                    classifications,
+                )
+                columns = full.get("columns", [])
+                result = {
+                    "name": name,
+                    "columns": columns,
+                    "rows": [[row.get(column) for column in columns] for row in full["rows"]],
+                    "row_count": full["row_count"],
                 }
-            rows = list(cursor)
-            return {
-                "sql": guarded_sql,
-                "blocked": False,
-                "sensitive_columns": sensitive_columns,
-                "plan": plan,
-                "join_validation": join_validation,
-                "row_count": len(rows),
-                "limit": row_limit,
-                "rows": rows,
-            }
+                if full["blocked"]:
+                    result.update({"blocked": True, "reason": full.get("reason")})
+                review = []
+                if not full.get("plan", {}).get("within_policy", False):
+                    review.append("cost")
+                if not full.get("join_validation", {}).get("verified", False):
+                    review.append("join")
+                if full.get("sensitive_columns"):
+                    review.append("sensitive")
+                if review:
+                    result["review"] = review
+                results.append(result)
+        return self._bound_batch(results, max(2_048, min(max_bytes, 1_000_000)))
 
     def explain_query(self, sql: str, include_plan: bool = False) -> dict[str, Any]:
-        import psycopg
+        with self._connection() as conn:
+            self._configure_readonly_transaction(conn)
+            return self._explain_query_on_connection(conn, sql, include_plan)
 
+    def _explain_query_on_connection(
+        self,
+        conn: Any,
+        sql: str,
+        include_plan: bool = False,
+    ) -> dict[str, Any]:
         statement = validate_readonly_sql(sql)
         explain_sql = (
             "EXPLAIN (FORMAT JSON, ANALYZE FALSE, BUFFERS FALSE, VERBOSE TRUE) "
             f"{statement}"
         )
-        with psycopg.connect(**self.settings.connection_kwargs()) as conn:
-            self._configure_readonly_transaction(conn)
-            row = conn.execute(explain_sql).fetchone()
+        row = conn.execute(explain_sql).fetchone()
         if not row:
             raise RuntimeError("PostgreSQL returned no EXPLAIN plan.")
         result = assess_query_plan(
@@ -305,6 +341,95 @@ class PostgresIntrospector:
             result["within_policy"] = False
             result["approval_required"] = True
         return result
+
+    def _readonly_query_on_connection(
+        self,
+        conn: Any,
+        sql: str,
+        limit: int | None,
+        approved: bool,
+        classifications: dict[str, str] | None = None,
+    ) -> dict[str, Any]:
+        from psycopg.rows import dict_row
+
+        requested_limit = self.settings.max_query_rows if limit is None else int(limit)
+        row_limit = max(1, min(requested_limit, self.settings.max_query_rows))
+        guarded_sql = apply_limit(sql, row_limit)
+        plan = self._explain_query_on_connection(conn, sql)
+        join_validation = self._validate_plan_relations(plan)
+        restricted = any(
+            reason.get("code") == "schema_not_allowed"
+            for reason in plan.get("blocking_reasons", [])
+        )
+        needs_approval = not plan["within_policy"] or not join_validation["verified"]
+        if restricted or (needs_approval and not approved):
+            return {
+                "sql": guarded_sql,
+                "blocked": True,
+                "reason": (
+                    "Query references a schema forbidden by policy."
+                    if restricted
+                    else "Query requires approval because it is outside the low-risk policy."
+                ),
+                "approval_required": not restricted,
+                "plan": plan,
+                "join_validation": join_validation,
+                "row_count": 0,
+                "limit": row_limit,
+                "columns": [],
+                "rows": [],
+            }
+        with conn.cursor(row_factory=dict_row) as cursor:
+            cursor.execute(guarded_sql)
+            columns = [column.name for column in cursor.description or []]
+            sensitive_columns = classify_sensitive_columns(
+                columns,
+                classifications if classifications is not None else self._context_classifications(),
+            )
+            if sensitive_columns and not self.settings.allow_sensitive_data:
+                return {
+                    "sql": guarded_sql,
+                    "blocked": True,
+                    "reason": "Result columns matched the sensitive-data policy.",
+                    "sensitive_columns": sensitive_columns,
+                    "plan": plan,
+                    "join_validation": join_validation,
+                    "row_count": 0,
+                    "limit": row_limit,
+                    "columns": columns,
+                    "rows": [],
+                }
+            rows = list(cursor)
+        return {
+            "sql": guarded_sql,
+            "blocked": False,
+            "sensitive_columns": sensitive_columns,
+            "plan": plan,
+            "join_validation": join_validation,
+            "row_count": len(rows),
+            "limit": row_limit,
+            "columns": columns,
+            "rows": rows,
+        }
+
+    @staticmethod
+    def _bound_batch(results: list[dict[str, Any]], max_bytes: int) -> dict[str, Any]:
+        response = {"results": results}
+        while len(json.dumps(response, default=str, separators=(",", ":")).encode()) > max_bytes - 32:
+            result = next((item for item in reversed(results) if item["rows"]), None)
+            if result is None:
+                raise ValueError("The batch metadata exceeds the response byte limit.")
+            result["rows"].pop()
+            result["truncated"] = True
+            result["returned_rows"] = len(result["rows"])
+            response["truncated"] = True
+        response["bytes"] = len(
+            json.dumps(response, default=str, separators=(",", ":")).encode()
+        )
+        response["bytes"] = len(
+            json.dumps(response, default=str, separators=(",", ":")).encode()
+        )
+        return response
 
     def _validate_plan_relations(self, plan: dict[str, Any]) -> dict[str, Any]:
         relations = set(plan.get("summary", {}).get("relations", []))

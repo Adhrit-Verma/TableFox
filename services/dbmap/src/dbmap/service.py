@@ -11,6 +11,7 @@ from .diff import compare_snapshots, load_snapshot, schema_fingerprint
 from .explain import explain_object
 from .graph import GraphEngine
 from .models import GraphSnapshot
+from .retrieval import RetrievalIndex
 from .search import search_snapshot
 
 
@@ -23,6 +24,14 @@ class DatabaseSource(Protocol):
         self,
         sql: str,
         limit: int,
+        approved: bool = False,
+    ) -> dict[str, Any]: ...
+
+    def readonly_batch(
+        self,
+        queries: list[dict[str, Any]],
+        max_rows_each: int | None = None,
+        max_bytes: int = 32_768,
         approved: bool = False,
     ) -> dict[str, Any]: ...
 
@@ -41,11 +50,28 @@ class DatabaseMapService:
         self.introspector = introspector
         self.settings = settings or getattr(introspector, "settings", None)
         self.audit = audit
+        self._cached_snapshot: GraphSnapshot | None = None
+        self._context_stamp: int | None = None
+        self._retrieval_index: RetrievalIndex | None = None
 
     def _snapshot(self, refresh: bool = False) -> GraphSnapshot:
-        snapshot = self.introspector.snapshot(refresh=refresh)
         context_file = self.settings.context_file if self.settings else None
-        return apply_context(snapshot, context_file)
+        context_stamp = (
+            context_file.stat().st_mtime_ns
+            if context_file and context_file.is_file()
+            else None
+        )
+        if (
+            not refresh
+            and self._cached_snapshot is not None
+            and context_stamp == self._context_stamp
+        ):
+            return self._cached_snapshot
+        snapshot = self.introspector.snapshot(refresh=refresh)
+        self._cached_snapshot = apply_context(snapshot, context_file)
+        self._context_stamp = context_stamp
+        self._retrieval_index = None
+        return self._cached_snapshot
 
     def _record(
         self,
@@ -123,6 +149,64 @@ class DatabaseMapService:
                 "blocked": result.get("blocked", False),
                 "row_count": result.get("row_count", 0),
                 "approved": approved,
+            },
+        )
+        return result
+
+    def readonly_batch(
+        self,
+        queries: list[dict[str, Any]],
+        max_rows_each: int = 100,
+        max_bytes: int = 32_768,
+        approved: bool = False,
+        actor: str = "local",
+    ) -> dict[str, Any]:
+        result = self.introspector.readonly_batch(
+            queries,
+            max_rows_each=max(1, max_rows_each),
+            max_bytes=max_bytes,
+            approved=approved,
+        )
+        self._record(
+            actor,
+            "readonly_batch",
+            details={
+                "queries": [
+                    {
+                        "name": str(query.get("name", "")),
+                        "sql_sha256": hashlib.sha256(
+                            str(query.get("sql", "")).encode("utf-8")
+                        ).hexdigest(),
+                    }
+                    for query in queries
+                ],
+                "blocked": sum(
+                    1 for item in result["results"] if item.get("blocked")
+                ),
+                "bytes": result["bytes"],
+                "approved": approved,
+            },
+        )
+        return result
+
+    def task_context(
+        self,
+        question: str,
+        max_relations: int = 6,
+        max_bytes: int = 6_144,
+        actor: str = "local",
+    ) -> dict[str, Any]:
+        snapshot = self._snapshot()
+        if self._retrieval_index is None:
+            self._retrieval_index = RetrievalIndex(snapshot)
+        result = self._retrieval_index.context(question, max_relations, max_bytes)
+        self._record(
+            actor,
+            "task_context",
+            details={
+                "relations": len(result["relations"]),
+                "bytes": result["bytes"],
+                "connected": result["connected"],
             },
         )
         return result

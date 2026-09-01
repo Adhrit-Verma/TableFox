@@ -39,9 +39,9 @@ Search only what is needed
 → return a focused answer
 ```
 
-That means agents can work with **smaller context**, **fewer retries**, and **less prompt bloat**.
+The initial 2026-07-23 remote benchmark did not beat direct PostgreSQL. After the two-call optimization, the same single task used 2,343 estimated MCP payload tokens and 3.90 seconds of tool-call time. Production savings remain unproven until the reviewed 20-task median, p95, recall, and correctness gates pass.
 
-> TableFox is designed to reduce token usage for AI agents by replacing repeated full-schema prompts with targeted MCP tool calls such as search, neighbors, object explanation, and guarded read-only queries.
+> TableFox provides bounded, evidence-backed PostgreSQL context and guarded query execution for AI agents. Performance and token savings are measured goals, not current guarantees. See [PERFORMANCE_ARCHITECTURE_PLAN.md](./PERFORMANCE_ARCHITECTURE_PLAN.md).
 
 ---
 
@@ -96,7 +96,7 @@ Agent: database_readonly_query("SELECT ... LIMIT 50")
 
 ---
 
-## Token-saving workflow for AI agents
+## Bounded-context workflow for AI agents
 
 Without a schema map, agents often need this:
 
@@ -112,20 +112,24 @@ With TableFox, the agent can request only the relevant slice:
 
 | Agent need | TableFox tool |
 |---|---|
+| Get ranked task context, columns, and declared joins | `database_task_context` |
+| Run up to five guarded reads in one transaction | `database_readonly_batch` |
 | Find matching tables or columns | `database_search` |
 | Inspect relationships | `database_neighbors` |
 | Understand one object | `database_explain_object` |
 | Get graph summary | `database_graph_snapshot` |
 | Validate data through SQL | `database_readonly_query` |
 
-This is useful for:
+This is intended to provide:
 
 - smaller prompts
-- lower token usage
+- measurable payload limits
 - fewer hallucinated table names
 - safer SQL generation
 - faster debugging
 - better agent reliability on large databases
+
+These are release targets rather than proven performance claims. The performance plan defines the benchmark gates.
 
 ---
 
@@ -250,12 +254,22 @@ Query safety policy can be tuned without changing code:
 ```env
 DBMAP_STATEMENT_TIMEOUT_MS=5000
 DBMAP_MAX_QUERY_ROWS=200
+DBMAP_POOL_MIN_SIZE=1
+DBMAP_POOL_MAX_SIZE=4
 DBMAP_MAX_EXPLAIN_COST=100000
 DBMAP_MAX_EXPLAIN_ROWS=100000
 DBMAP_ALLOW_SENSITIVE_DATA=false
 ```
 
 Additional production controls are shown in `.env.example`. Keep `DBMAP_API_HOST` on `127.0.0.1`, `localhost`, or `::1`; TableFox remains local-only even when API authentication is enabled.
+
+To rerun the checked-in schema-discovery comparison against the configured database:
+
+```powershell
+python scripts\benchmark_tablefox.py
+```
+
+The report is written under the ignored `.dbmap-cache` directory. It measures discovery only; use the reviewed corpus from the performance plan before making end-to-end product claims.
 
 ### Approved context
 
@@ -340,12 +354,16 @@ The MCP process loads the repository-root `.env`, so database credentials do not
 | `database_explain_object` | Explains a selected table, column, view, or constraint |
 | `database_explain_query` | Plans read-only SQL without executing it and applies safety thresholds |
 | `database_readonly_query` | Runs guarded read-only SQL queries |
+| `database_task_context` | Returns a byte-bounded, relation-centric context for one natural-language task |
+| `database_readonly_batch` | Runs up to five named guarded reads with one pooled connection and compact columnar rows |
 | `database_find_join_path` | Finds a bounded path backed by foreign keys or catalog dependencies |
 | `database_source_of_truth` | Returns verified or unresolved authoritative-table candidates with evidence |
 | `database_schema_changes` | Compares the configured baseline with the current database |
 | `database_context_identity` | Returns the safe database identity and schema fingerprint for context files |
 
 `database_explain_query` uses `EXPLAIN` without `ANALYZE`, so it does not fetch result rows. `database_readonly_query` accepts only guarded `SELECT` or `WITH` statements, blocks known state-changing functions and row locks, applies a row limit, and runs inside a read-only transaction with statement and lock timeouts.
+
+For normal agent work, call `database_task_context` once, draft explicit bounded SQL from its stable IDs and joins, then call `database_readonly_batch` once. Use search, explain, neighbors, and join-path tools only to resolve ambiguity. A result is authoritative only when approved context marks it as the source of truth.
 
 Sensitive-column detection uses both conservative name checks and approved context classifications. It is defense in depth, not a replacement for a least-privilege PostgreSQL role or column-level grants. Multi-relation data queries must also match a declared relationship path.
 
@@ -379,6 +397,8 @@ Repeat the schema grants for every schema you want TableFox to map.
 | `GET` | `/graph/changes` | Compare the configured baseline |
 | `POST` | `/query/explain` | Assess a read-only query plan without executing it |
 | `POST` | `/query/readonly` | Run a role-authorized guarded query |
+| `POST` | `/query/readonly-batch` | Run up to five guarded reads in one transaction |
+| `POST` | `/workflow/task-context` | Get compact ranked context for one task |
 | `POST` | `/workflow/join-path` | Find a verified relationship path |
 | `GET` | `/workflow/source-of-truth?q=customers` | Rank authoritative candidates with evidence |
 | `WS` | `/graph/live` | Live graph/status stream |
@@ -417,6 +437,7 @@ Use [FUNCTIONAL_CHECKLIST.md](./FUNCTIONAL_CHECKLIST.md) for the complete purpos
 
 ## Roadmap
 
+- [ ] Complete the measured two-call performance architecture in [PERFORMANCE_ARCHITECTURE_PLAN.md](./PERFORMANCE_ARCHITECTURE_PLAN.md)
 - [ ] Graph export as JSON
 - [ ] Mermaid ER diagram export
 - [ ] AI-generated table documentation
@@ -427,7 +448,7 @@ Use [FUNCTIONAL_CHECKLIST.md](./FUNCTIONAL_CHECKLIST.md) for the complete purpos
 
 ## Resume line
 
-> Built **TableFox**, a local-first PostgreSQL schema intelligence tool using Python, FastAPI, Next.js, Cytoscape, and MCP to help AI agents search, traverse, explain, and safely query relational database structures while reducing full-schema prompt overhead.
+> Built **TableFox**, a local-first PostgreSQL schema intelligence tool using Python, FastAPI, Next.js, Cytoscape, and MCP to give AI agents bounded schema context, verified relationship evidence, and guarded read-only query execution.
 
 ---
 

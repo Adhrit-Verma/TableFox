@@ -63,6 +63,20 @@ def create_mcp(application_service: DatabaseMapService | None = None):
         return tool_service.readonly_query(sql, limit=limit, actor=actor)
 
     @mcp.tool()
+    def database_readonly_batch(
+        queries: list[dict[str, Any]],
+        max_rows_each: int = 100,
+        max_bytes: int = 32768,
+    ) -> dict[str, Any]:
+        """Run up to five guarded reads in one transaction and return compact columnar rows."""
+        return tool_service.readonly_batch(
+            queries,
+            max_rows_each=max_rows_each,
+            max_bytes=max_bytes,
+            actor=actor,
+        )
+
+    @mcp.tool()
     def database_explain_query(
         sql: str,
         include_plan: bool = False,
@@ -88,6 +102,20 @@ def create_mcp(application_service: DatabaseMapService | None = None):
     def database_source_of_truth(query: str, limit: int = 5) -> dict[str, Any]:
         """Rank authoritative candidates and distinguish verified context from heuristics."""
         return tool_service.source_of_truth(query, limit=limit, actor=actor)
+
+    @mcp.tool()
+    def database_task_context(
+        question: str,
+        max_relations: int = 6,
+        max_bytes: int = 6144,
+    ) -> dict[str, Any]:
+        """Return a compact ranked schema and declared-join context for one task."""
+        return tool_service.task_context(
+            question,
+            max_relations=max_relations,
+            max_bytes=max_bytes,
+            actor=actor,
+        )
 
     @mcp.tool()
     def database_schema_changes() -> dict[str, Any]:

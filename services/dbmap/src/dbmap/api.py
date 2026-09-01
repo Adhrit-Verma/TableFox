@@ -36,6 +36,25 @@ class ReadonlyQueryRequest(BaseModel):
     approved: bool = False
 
 
+class BatchQuery(BaseModel):
+    name: str = Field(pattern=r"^[A-Za-z][A-Za-z0-9_-]{0,63}$")
+    sql: str = Field(min_length=1, max_length=100_000)
+    limit: int | None = Field(default=None, ge=1, le=10_000)
+
+
+class ReadonlyBatchRequest(BaseModel):
+    queries: list[BatchQuery] = Field(min_length=1, max_length=5)
+    max_rows_each: int = Field(default=100, ge=1, le=10_000)
+    max_bytes: int = Field(default=32_768, ge=2_048, le=1_000_000)
+    approved: bool = False
+
+
+class TaskContextRequest(BaseModel):
+    question: str = Field(min_length=1, max_length=10_000)
+    max_relations: int = Field(default=6, ge=1, le=12)
+    max_bytes: int = Field(default=6_144, ge=2_048, le=32_768)
+
+
 class JoinPathRequest(BaseModel):
     source_id: str = Field(min_length=1, max_length=1000)
     target_id: str = Field(min_length=1, max_length=1000)
@@ -173,12 +192,38 @@ def query_readonly(request: ReadonlyQueryRequest, principal: QueryPrincipal) -> 
         raise HTTPException(status_code=400, detail=str(error)) from error
 
 
+@app.post("/query/readonly-batch")
+def query_readonly_batch(request: ReadonlyBatchRequest, principal: QueryPrincipal) -> dict:
+    if request.approved and not principal.can("approve"):
+        raise HTTPException(status_code=403, detail="Only an admin can approve high-risk queries.")
+    try:
+        return service.readonly_batch(
+            [query.model_dump(exclude_none=True) for query in request.queries],
+            max_rows_each=request.max_rows_each,
+            max_bytes=request.max_bytes,
+            approved=request.approved,
+            actor=principal.name,
+        )
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+
+
 @app.post("/workflow/join-path")
 def workflow_join_path(request: JoinPathRequest, principal: WorkflowPrincipal) -> dict:
     return service.join_path(
         request.source_id,
         request.target_id,
         max_hops=request.max_hops,
+        actor=principal.name,
+    )
+
+
+@app.post("/workflow/task-context")
+def workflow_task_context(request: TaskContextRequest, principal: WorkflowPrincipal) -> dict:
+    return service.task_context(
+        request.question,
+        max_relations=request.max_relations,
+        max_bytes=request.max_bytes,
         actor=principal.name,
     )
 

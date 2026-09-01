@@ -2,6 +2,7 @@ from pathlib import Path
 import sys
 from tempfile import TemporaryDirectory
 import unittest
+from contextlib import contextmanager
 
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
@@ -51,6 +52,128 @@ class PostgresIntrospectorTests(unittest.TestCase):
 
             self.assertEqual(loaded.database, "testdb")
             self.assertEqual(list(Path(directory).glob("*.tmp")), [])
+
+    def test_guarded_query_uses_one_connection_for_explain_and_execution(self):
+        class Result:
+            def fetchone(self):
+                return ([{"Plan": {"Node Type": "Result", "Total Cost": 0, "Plan Rows": 1}}],)
+
+        class Column:
+            name = "value"
+
+        class Cursor:
+            description = [Column()]
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_):
+                return None
+
+            def execute(self, _sql):
+                return self
+
+            def __iter__(self):
+                return iter([{"value": 1}])
+
+        class Connection:
+            def execute(self, sql):
+                self.explains += sql.startswith("EXPLAIN")
+                return Result()
+
+            def cursor(self, **_kwargs):
+                return Cursor()
+
+            explains = 0
+
+        introspector = PostgresIntrospector(settings("postgresql://reader@db/app", Path(".")))
+        connection = Connection()
+        checkouts = 0
+
+        @contextmanager
+        def checkout():
+            nonlocal checkouts
+            checkouts += 1
+            yield connection
+
+        introspector._connection = checkout
+        introspector._configure_readonly_transaction = lambda _conn: None
+
+        result = introspector.readonly_query("select 1 as value", limit=10)
+
+        self.assertEqual(checkouts, 1)
+        self.assertEqual(connection.explains, 1)
+        self.assertEqual(result["rows"], [{"value": 1}])
+
+    def test_batch_validation_and_response_budget(self):
+        rows = [
+            {
+                "name": "values",
+                "blocked": False,
+                "columns": ["value"],
+                "rows": [["x" * 500] for _ in range(10)],
+                "row_count": 10,
+            }
+        ]
+
+        result = PostgresIntrospector._bound_batch(rows, 2048)
+
+        self.assertTrue(result["truncated"])
+        self.assertLessEqual(result["bytes"], 2048)
+
+    def test_batch_uses_one_checkout_and_compact_columnar_results(self):
+        introspector = PostgresIntrospector(settings("postgresql://reader@db/app", Path(".")))
+        checkouts = 0
+        calls = []
+
+        @contextmanager
+        def checkout():
+            nonlocal checkouts
+            checkouts += 1
+            yield object()
+
+        def run(_connection, sql, limit, approved, _classifications):
+            calls.append((sql, limit, approved))
+            return {
+                "blocked": False,
+                "columns": ["value"],
+                "rows": [{"value": len(calls)}],
+                "row_count": 1,
+                "plan": {"within_policy": True},
+                "join_validation": {"verified": True},
+                "sensitive_columns": [],
+            }
+
+        introspector._connection = checkout
+        introspector._configure_readonly_transaction = lambda _connection: None
+        introspector._context_classifications = lambda: {}
+        introspector._readonly_query_on_connection = run
+
+        result = introspector.readonly_batch(
+            [
+                {"name": "first", "sql": "select 1"},
+                {"name": "second", "sql": "select 2"},
+            ],
+            max_rows_each=5,
+        )
+
+        self.assertEqual(checkouts, 1)
+        self.assertEqual(len(calls), 2)
+        self.assertEqual(result["results"][0]["rows"], [[1]])
+        self.assertNotIn("policy", result["results"][0])
+
+    def test_batch_rejects_writes_and_duplicate_names_before_connecting(self):
+        introspector = PostgresIntrospector(settings("postgresql://reader@db/app", Path(".")))
+
+        with self.assertRaises(ValueError):
+            introspector.readonly_batch([{"name": "bad", "sql": "delete from users"}])
+        with self.assertRaises(ValueError):
+            introspector.readonly_batch(
+                [
+                    {"name": "same", "sql": "select 1"},
+                    {"name": "same", "sql": "select 2"},
+                ]
+            )
 
 
 if __name__ == "__main__":

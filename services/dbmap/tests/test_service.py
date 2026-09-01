@@ -32,11 +32,13 @@ class FakeIntrospector:
         )
         self.query_limit = None
         self.include_plan = None
+        self.snapshot_calls = 0
 
     def connectivity_check(self):
         return {"ok": True}
 
     def snapshot(self, refresh: bool = False):
+        self.snapshot_calls += 1
         return self.snapshot_value
 
     def readonly_query(self, sql: str, limit: int, approved: bool = False):
@@ -52,6 +54,13 @@ class FakeIntrospector:
             "summary": {"relations": []},
         }
 
+    def readonly_batch(self, queries, max_rows_each=100, max_bytes=32768, approved=False):
+        return {
+            "results": [{"name": queries[0]["name"], "blocked": False}],
+            "bytes": 100,
+            "truncated": False,
+        }
+
 
 class DatabaseMapServiceTests(unittest.TestCase):
     def test_shared_use_cases_apply_bounds_and_delegate(self):
@@ -65,6 +74,18 @@ class DatabaseMapServiceTests(unittest.TestCase):
         self.assertEqual(introspector.query_limit, 1)
         self.assertFalse(service.explain_query("select 1")["executed"])
         self.assertFalse(introspector.include_plan)
+
+    def test_task_context_reuses_snapshot_and_batch_delegates(self):
+        introspector = FakeIntrospector()
+        service = DatabaseMapService(introspector)
+
+        context = service.task_context("customers")
+        service.task_context("customers")
+        batch = service.readonly_batch([{"name": "count", "sql": "select 1"}])
+
+        self.assertEqual(context["relations"][0]["id"], "table:public.customers")
+        self.assertEqual(introspector.snapshot_calls, 1)
+        self.assertEqual(batch["results"][0]["name"], "count")
 
     def test_context_resolves_source_of_truth_and_baseline_comparison(self):
         introspector = FakeIntrospector()

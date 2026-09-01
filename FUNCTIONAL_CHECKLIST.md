@@ -10,12 +10,32 @@ TableFox exists to help AI agents and humans understand an unfamiliar PostgreSQL
 
 Stop running development services before the production web build.
 
-- [ ] `python -m pytest -q` passes.
-- [ ] `python -m ruff check services scripts` passes.
-- [ ] `python -m pip check` reports no broken requirements.
-- [ ] `npm run web:build` completes without type, lint, or build errors.
-- [ ] `git diff --check` reports no whitespace errors.
-- [ ] `git status --short` does not list `.env`, credentials, cache files, or build output.
+- [x] `python -m pytest -q` passes.
+- [x] `python -m ruff check services scripts` passes.
+- [x] `python -m pip check` reports no broken requirements.
+- [x] `npm.cmd run web:build` completes without type, lint, or build errors.
+- [x] `git diff --check` reports no whitespace errors.
+- [x] `git status --short` does not list `.env`, credentials, cache files, or build output.
+
+## Performance Gate
+
+Use the corpus and procedure in `PERFORMANCE_ARCHITECTURE_PLAN.md`. Do not claim time or token savings while any required gate is open.
+
+- [ ] Warm end-to-end median is below 3.0 seconds and beats reviewed direct SQL.
+- [ ] Cold end-to-end median is below 5.0 seconds and at least 20% faster than the 6.72-second baseline.
+- [ ] End-to-end p95 is below 6.0 seconds across at least 20 reviewed tasks.
+- [ ] Schema context is no larger than 6 KiB of serialized JSON.
+- [ ] Full task payload is below 2,500 estimated tokens and smaller than the direct path.
+- [ ] Normal tasks require no more than two MCP calls and one PostgreSQL connection checkout.
+- [ ] Relevant relations appear in the top five for at least 90% of corpus tasks.
+- [ ] Answers match reviewed direct SQL and all existing security checks still pass.
+
+Single-task evidence from 2026-07-23, not a release claim:
+
+- [x] Optimized path uses two MCP calls and one pooled checkout for the query bundle.
+- [x] Sample context was 2,019 bytes and the conservative MCP payload was 2,343 estimated tokens.
+- [x] Sample tool-call time was 3.90 seconds and material rows matched the reviewed direct query.
+- [ ] Repeat these checks across the reviewed 20-task corpus with end-to-end median and p95 timing.
 
 ## PostgreSQL Connection And Safety
 
@@ -43,6 +63,8 @@ Stop running development services before the production web build.
 Run this sequence through a real MCP client.
 
 - [ ] `database_connectivity_check` identifies the expected database safely.
+- [x] `database_task_context` returns relevant relation IDs, useful columns, declared joins, and a byte count in one call.
+- [x] `database_readonly_batch` executes at most five named reads with one checkout and compact columnar rows.
 - [ ] `database_search` finds a known business table from its name, column, or comment.
 - [ ] The first exact table-name match ranks ahead of partial column matches.
 - [ ] `database_explain_object` returns columns and inbound/outbound relationships for the selected stable ID.
@@ -158,3 +180,11 @@ These checks apply when the corresponding capability is implemented. Do not mark
 - Security: hashed API-key authentication and roles are covered end to end; restricted schemas cannot be administrator-overridden; temporary test keys were removed.
 - Remaining limitation: approved join-frequency telemetry is not configured and raw production query logs remain intentionally unsupported.
 - Blocking risk: the configured `appuser` role is still not read-only by default. Production publication remains blocked until a dedicated reader is used.
+
+### Performance Record: 2026-07-23
+
+- Task: named captain documents, rest, flight time, and duty period for one year.
+- TableFox MCP: 22.65 seconds and 10,517 estimated response tokens.
+- Conventional catalog search and direct SQL: 6.72 seconds and 3,698 estimated response tokens.
+- Result: TableFox was 3.37 times slower and returned 2.84 times more estimated payload.
+- Decision: time/token-saving claims are withdrawn until `PERFORMANCE_ARCHITECTURE_PLAN.md` release gates pass.

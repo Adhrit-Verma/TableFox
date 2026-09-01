@@ -67,6 +67,8 @@ class Settings:
     auth_required: bool = False
     auth_file: Path | None = None
     mcp_actor: str = "local-mcp"
+    pool_min_size: int = 1
+    pool_max_size: int = 4
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -105,6 +107,8 @@ class Settings:
             auth_required=_env_bool("DBMAP_AUTH_REQUIRED", False),
             auth_file=_env_path("DBMAP_AUTH_FILE"),
             mcp_actor=os.getenv("DBMAP_MCP_ACTOR", "local-mcp").strip() or "local-mcp",
+            pool_min_size=max(0, int(os.getenv("DBMAP_POOL_MIN_SIZE", "1"))),
+            pool_max_size=max(1, int(os.getenv("DBMAP_POOL_MAX_SIZE", "4"))),
         )
 
     def connection_kwargs(self) -> dict[str, object]:

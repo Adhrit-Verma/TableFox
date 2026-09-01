@@ -353,6 +353,57 @@ class GraphEngine:
         return {"found": False, "reason": "No declared relationship path was found."}
 
     @staticmethod
+    def join_subgraph(
+        snapshot: GraphSnapshot,
+        terminals: list[str],
+        max_hops: int = 6,
+    ) -> dict:
+        terminals = list(dict.fromkeys(terminals))
+        if len(terminals) < 2:
+            return {"connected": True, "nodes": terminals, "edges": []}
+
+        paths = []
+        for index, source in enumerate(terminals):
+            for target in terminals[index + 1 :]:
+                path = GraphEngine.join_path(snapshot, source, target, max_hops)
+                if path.get("found"):
+                    paths.append((len(path["edges"]), source, target, path))
+
+        parent = {terminal: terminal for terminal in terminals}
+
+        def find(item: str) -> str:
+            while parent[item] != item:
+                parent[item] = parent[parent[item]]
+                item = parent[item]
+            return item
+
+        selected = []
+        for _, source, target, path in sorted(paths, key=lambda item: item[:3]):
+            left, right = find(source), find(target)
+            if left == right:
+                continue
+            parent[left] = right
+            selected.append(path)
+            if len(selected) == len(terminals) - 1:
+                break
+
+        edges = {
+            edge["id"]: edge
+            for path in selected
+            for edge in path["edges"]
+        }
+        nodes = {
+            node
+            for path in selected
+            for node in path["nodes"]
+        } | set(terminals)
+        return {
+            "connected": len({find(terminal) for terminal in terminals}) == 1,
+            "nodes": sorted(nodes),
+            "edges": [edges[key] for key in sorted(edges)],
+        }
+
+    @staticmethod
     def validate_relation_set(snapshot: GraphSnapshot, relation_ids: set[str]) -> dict:
         if len(relation_ids) < 2:
             return {"verified": True, "relations": sorted(relation_ids), "edges": []}

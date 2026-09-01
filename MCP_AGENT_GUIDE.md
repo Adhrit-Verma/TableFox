@@ -33,14 +33,12 @@ Restart the MCP client after changing `.env`, because a running stdio server kee
 ## Recommended Navigation Workflow
 
 1. Call `database_connectivity_check` once. Confirm the expected database and read-only user before doing other work.
-2. Call `database_search` with a business term, table fragment, column name, constraint, or comment. Start with a small result limit.
-3. Call `database_explain_object` on the best stable ID. This returns important columns and relationship direction in a compact response.
-4. Call `database_source_of_truth` when the task needs an authoritative object. Treat only `verified` context as authoritative.
-5. Call `database_find_join_path` before drafting a multi-table query.
-6. Call `database_neighbors` when you need broader local context. Start at depth 1 and increase only when necessary.
-7. Call `database_graph_snapshot` only when the task needs a broad schema inventory. Use schema filters and a bounded maximum node count.
-8. Call `database_explain_query` on a proposed query. Review estimated rows, cost, sequential scans, and whether approval is required. This does not execute the query.
-9. Call `database_readonly_query` only after the plan is within policy. Select explicit columns and use narrow predicates.
+2. Call `database_task_context` with the complete task. It returns ranked relation IDs, matched/key columns, declared joins, interpretations, and a connectivity flag.
+3. Treat the ranked relations as candidates. Call `database_source_of_truth` only when the answer requires an authoritative business source; only approved context is verified.
+4. Draft at most five named, explicit, bounded `SELECT`/`WITH` statements. Use only declared joins from the context.
+5. Call `database_readonly_batch` once. It runs every statement through the same EXPLAIN, schema, join, sensitive-column, timeout, and read-only controls as the single-query tool.
+6. Use `database_search`, `database_explain_object`, `database_neighbors`, or `database_find_join_path` only when the compact context is ambiguous or disconnected.
+7. Call `database_graph_snapshot` only for broad inventories, not routine data questions.
 
 This sequence is faster and consumes much less model context than loading the full schema first.
 
@@ -49,6 +47,8 @@ This sequence is faster and consumes much less model context than loading the fu
 | Tool | Use it for | Avoid it when |
 | --- | --- | --- |
 | `database_connectivity_check` | Confirming credentials, server identity, and reachability | Repeating it before every tool call |
+| `database_task_context` | Normal task discovery in one compact call | You need a schema-wide inventory |
+| `database_readonly_batch` | Executing up to five independent guarded reads in one transaction | Any write, unbounded read, or unresolved join |
 | `database_search` | Finding objects from names, comments, data types, or business language | You already have the exact stable ID |
 | `database_explain_object` | Understanding one table/view, its columns, and relationships | You need several hops of graph context |
 | `database_neighbors` | Discovering nearby tables and join paths | You need a database-wide inventory |
@@ -96,10 +96,10 @@ The query tools enforce SELECT/CTE-only SQL, block known state-changing function
 ### Understand a business concept
 
 ```text
-1. Search for "customer lifecycle".
-2. Explain the most relevant table and view IDs.
-3. Inspect depth-1 neighbors for each candidate.
-4. Report the likely source of truth, important keys, and unresolved ambiguity.
+1. Request task context for "customer lifecycle".
+2. Review ranked stable IDs, columns, joins, and connectivity.
+3. Check source-of-truth evidence when authority matters.
+4. Report important keys and unresolved ambiguity.
 ```
 
 ### Build a join safely
@@ -136,7 +136,7 @@ The query tools enforce SELECT/CTE-only SQL, block known state-changing function
 An MCP client can include this compact instruction:
 
 ```text
-Use Database Agent incrementally. Check connectivity once, search before taking a full snapshot, preserve stable IDs, use database_source_of_truth for authority claims, and call database_find_join_path before writing joins. Run database_explain_query before database_readonly_query. Use explicit columns and bounded results. Treat the database as production and never request or expose credentials or sensitive row data.
+Use Database Agent's two-call path: database_task_context for the complete task, then one database_readonly_batch containing explicit bounded reads. Preserve stable IDs and declared joins. Use database_source_of_truth for authority claims and diagnostic tools only when context is ambiguous or disconnected. Treat the database as production and never request or expose credentials or sensitive row data.
 ```
 
 ## Troubleshooting

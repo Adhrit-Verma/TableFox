@@ -7,6 +7,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from dbmap.explain import explain_object
 from dbmap.graph import GraphEngine
+from dbmap.retrieval import RetrievalIndex
 from dbmap.search import search_snapshot
 
 
@@ -157,6 +158,96 @@ class GraphEngineTests(unittest.TestCase):
         self.assertTrue(path["found"])
         self.assertTrue(path["verified"])
         self.assertEqual(path["edges"][0]["kind"], "foreign_key")
+
+    def test_task_context_groups_columns_and_connects_relations(self):
+        snapshot = GraphEngine("testdb").build(sample_metadata())
+
+        context = RetrievalIndex(snapshot).context(
+            "customer orders email",
+            max_relations=6,
+            max_bytes=2048,
+        )
+
+        self.assertLessEqual(context["bytes"], 2048)
+        self.assertEqual(
+            {item["id"] for item in context["relations"]},
+            {"table:public.customers", "table:public.orders"},
+        )
+        self.assertTrue(context["connected"])
+        self.assertEqual(context["joins"][0][1], ["customer_id"])
+
+    def test_task_context_uses_trigrams_for_misspelled_schema_name(self):
+        metadata = sample_metadata()
+        metadata["relations"].append(
+            {"schema": "public", "name": "doccuments", "kind": "table"}
+        )
+        snapshot = GraphEngine("testdb").build(metadata)
+
+        context = RetrievalIndex(snapshot).context("documents", max_relations=3)
+
+        self.assertEqual(context["relations"][0]["id"], "table:public.doccuments")
+        self.assertIn("documents~doccuments", context["interpreted"])
+
+    def test_task_context_expands_schema_derived_acronyms(self):
+        metadata = sample_metadata()
+        metadata["columns"].extend(
+            [
+                {
+                    "schema": "public",
+                    "table": "orders",
+                    "name": "flight_time",
+                    "data_type": "real",
+                },
+                {
+                    "schema": "public",
+                    "table": "orders",
+                    "name": "duty_period",
+                    "data_type": "real",
+                },
+            ]
+        )
+        snapshot = GraphEngine("testdb").build(metadata)
+
+        context = RetrievalIndex(snapshot).context("FT and DP")
+
+        self.assertEqual(
+            context["interpreted"],
+            ["ft=flight time", "dp=duty period"],
+        )
+        self.assertEqual(context["relations"][0]["id"], "table:public.orders")
+
+    def test_task_context_prefers_metrics_and_omits_timezone_companions(self):
+        metadata = sample_metadata()
+        metadata["columns"].extend(
+            [
+                {
+                    "schema": "public",
+                    "table": "orders",
+                    "name": "flight_duty_time",
+                    "data_type": "real",
+                },
+                {
+                    "schema": "public",
+                    "table": "orders",
+                    "name": "flight_duty_time_time_zone",
+                    "data_type": "text",
+                },
+                {
+                    "schema": "public",
+                    "table": "orders",
+                    "name": "hours_flight_block",
+                    "data_type": "real",
+                },
+            ]
+        )
+        snapshot = GraphEngine("testdb").build(metadata)
+
+        context = RetrievalIndex(snapshot).context("flight duty time")
+        columns = context["relations"][0]["columns"]
+
+        self.assertIn("flight_duty_time", columns)
+        self.assertIn("hours_flight_block", columns)
+        self.assertNotIn("flight_duty_time_time_zone", columns)
 
     def test_usage_and_view_dependencies_are_added_to_graph(self):
         metadata = sample_metadata()

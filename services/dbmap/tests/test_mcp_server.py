@@ -25,9 +25,11 @@ class McpServerTests(unittest.TestCase):
                 "database_graph_snapshot",
                 "database_neighbors",
                 "database_readonly_query",
+                "database_readonly_batch",
                 "database_schema_changes",
                 "database_search",
                 "database_source_of_truth",
+                "database_task_context",
             },
         )
 

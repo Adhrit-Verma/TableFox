@@ -8,7 +8,7 @@ product
 Database engineers, backend developers, data platform owners, and AI agents that need to understand a PostgreSQL database quickly without manual schema spelunking. Humans use it locally while exploring unfamiliar databases; agents use the MCP tools to navigate schema structure and relationships incrementally.
 
 ## Product Purpose
-Database Agent turns PostgreSQL metadata into a stable graph map that both people and LLMs can search, traverse, and explain. Success means users can identify important tables, relationship paths, columns, and constraints quickly while using read-only credentials by default.
+Database Agent turns PostgreSQL metadata into a stable graph map that both people and LLMs can search, traverse, and explain. Success means users can identify important tables, relationship paths, columns, and constraints quickly while using read-only credentials by default. Performance claims require the reviewed TableFox path to beat direct PostgreSQL on both end-to-end time and response payload without weakening safety.
 
 ## Brand Personality
 Precise, calm, technical. The interface should feel like an expert instrument: information-dense, legible, restrained, and fast.

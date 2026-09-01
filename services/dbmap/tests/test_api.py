@@ -36,6 +36,14 @@ class ReadonlyService:
     ):
         return {"sql": sql, "approved": approved, "actor": actor}
 
+    def readonly_batch(self, queries, **kwargs):
+        return {"queries": queries, **kwargs}
+
+
+class TaskContextService:
+    def task_context(self, question, **kwargs):
+        return {"question": question, **kwargs}
+
 
 class GraphService:
     audit = None
@@ -75,6 +83,25 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(denied.exception.status_code, 403)
         self.assertTrue(allowed["approved"])
         self.assertEqual(allowed["actor"], "dba")
+
+    def test_batch_approval_and_task_context_delegate(self):
+        batch_request = api.ReadonlyBatchRequest(
+            queries=[api.BatchQuery(name="count", sql="select 1")],
+            approved=True,
+        )
+        context_request = api.TaskContextRequest(question="customer orders")
+        with patch.object(api, "service", ReadonlyService()):
+            with self.assertRaises(HTTPException):
+                api.query_readonly_batch(batch_request, Principal("reader", "data_reader"))
+            batch = api.query_readonly_batch(batch_request, Principal("dba", "admin"))
+        with patch.object(api, "service", TaskContextService()):
+            context = api.workflow_task_context(
+                context_request,
+                Principal("analyst", "analyst"),
+            )
+
+        self.assertEqual(batch["queries"][0]["name"], "count")
+        self.assertEqual(context["question"], "customer orders")
 
     def test_graph_endpoint_requires_valid_key_when_auth_is_enabled(self):
         token = "browser-test-key"
