@@ -142,6 +142,75 @@ class GovernanceTests(unittest.TestCase):
         self.assertEqual([row["name"] for row in filtered["relations"]], ["orders"])
         self.assertEqual(len(filtered["constraints"]), 1)
 
+    def test_missing_context_file_is_tolerated_but_a_wrong_one_is_not(self):
+        snapshot = GraphSnapshot.create(
+            "db.example/app",
+            [GraphNode("table:public.customers", "table", "public.customers", "public")],
+            [],
+        )
+        with TemporaryDirectory() as directory:
+            missing = Path(directory) / "not-created-yet.json"
+
+            unchanged = apply_context(snapshot, missing)
+
+            wrong_database = Path(directory) / "wrong.json"
+            wrong_database.write_text(
+                json.dumps({"database": "someone-elses-db", "objects": {}}),
+                encoding="utf-8",
+            )
+            with self.assertRaises(ValueError):
+                apply_context(snapshot, wrong_database)
+
+        self.assertEqual(unchanged.nodes[0].metadata.get("context"), None)
+
+    def test_restricted_schema_is_enforced_before_metadata_is_cached(self):
+        from dbmap.security import schema_allowed
+
+        metadata = {
+            "relations": [
+                {"schema": "public", "name": "orders"},
+                {"schema": "vault", "name": "secrets"},
+            ],
+            "columns": [
+                {"schema": "vault", "table": "secrets", "name": "token"},
+                {"schema": "public", "table": "orders", "name": "id"},
+            ],
+        }
+
+        filtered = filter_metadata_schemas(metadata, (), ("vault",))
+
+        self.assertEqual([row["name"] for row in filtered["relations"]], ["orders"])
+        self.assertEqual([row["name"] for row in filtered["columns"]], ["id"])
+        # A restricted schema stays blocked even when it is also explicitly allowed.
+        self.assertFalse(schema_allowed("vault", ("vault",), ("vault",)))
+
+    def test_unsafe_sql_is_rejected_for_every_statement_shape(self):
+        from dbmap.readonly import validate_readonly_sql
+
+        unsafe = [
+            "insert into public.orders values (1)",
+            "update public.orders set id = 2",
+            "delete from public.orders",
+            "drop table public.orders",
+            "alter table public.orders add column x int",
+            "truncate public.orders",
+            "grant select on public.orders to someone",
+            "select 1; select 2",
+            "select * into copied from public.orders",
+            "select pg_read_file('/etc/passwd')",
+            "select id from public.orders for update",
+            "select pg_terminate_backend(1)",
+        ]
+        for statement in unsafe:
+            with self.subTest(statement=statement):
+                with self.assertRaises(ValueError):
+                    validate_readonly_sql(statement)
+
+        self.assertEqual(
+            validate_readonly_sql("with recent as (select 1) select * from recent"),
+            "with recent as (select 1) select * from recent",
+        )
+
     def test_audit_log_records_hashes_without_sql_text(self):
         with TemporaryDirectory() as directory:
             audit = AuditLog(Path(directory))

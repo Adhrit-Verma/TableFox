@@ -53,6 +53,11 @@ class TaskContextRequest(BaseModel):
     question: str = Field(min_length=1, max_length=10_000)
     max_relations: int = Field(default=6, ge=1, le=12)
     max_bytes: int = Field(default=6_144, ge=2_048, le=32_768)
+    refresh_context: bool = False
+
+
+class ContextWindowRequest(BaseModel):
+    size: int = Field(ge=0, le=128)
 
 
 class JoinPathRequest(BaseModel):
@@ -224,8 +229,28 @@ def workflow_task_context(request: TaskContextRequest, principal: WorkflowPrinci
         request.question,
         max_relations=request.max_relations,
         max_bytes=request.max_bytes,
+        refresh_context=request.refresh_context,
         actor=principal.name,
     )
+
+
+@app.get("/settings/context-window")
+def get_context_window(principal: MetadataPrincipal) -> dict:
+    return service.context_window_report()
+
+
+@app.post("/settings/context-window")
+def set_context_window(request: ContextWindowRequest, principal: MetadataPrincipal) -> dict:
+    # Changes behaviour for every consumer of the runtime file, including MCP agents.
+    if not principal.can("approve"):
+        raise HTTPException(
+            status_code=403,
+            detail="Only an admin can change the shared context window.",
+        )
+    try:
+        return service.set_context_window(request.size, actor=principal.name)
+    except (ValueError, OSError) as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
 
 
 @app.get("/workflow/source-of-truth")
@@ -276,12 +301,21 @@ async def graph_live(websocket: WebSocket) -> None:
         return
     await websocket.accept(subprotocol="tablefox" if protocols and protocols[0] == "tablefox" else None)
     last_signature: str | None = None
+    # Start the interval now, so a reconnect loop cannot trigger repeated refreshes.
+    # The UI's Refresh button still forces an immediate rebuild via GET /graph?refresh=true.
+    last_refresh = asyncio.get_running_loop().time()
     try:
         while True:
             try:
+                # Heartbeats read the cached snapshot; a full catalog introspection is
+                # expensive, so it runs only once per DBMAP_LIVE_REFRESH_SECONDS.
+                now = asyncio.get_running_loop().time()
+                refresh = now - last_refresh >= settings.live_refresh_seconds
+                if refresh:
+                    last_refresh = now
                 snapshot = await asyncio.to_thread(
                     service.graph_snapshot,
-                    refresh=True,
+                    refresh=refresh,
                     actor=principal.name,
                 )
                 signature = _structure_signature(snapshot)

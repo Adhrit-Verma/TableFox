@@ -19,6 +19,7 @@ class McpServerTests(unittest.TestCase):
             {
                 "database_connectivity_check",
                 "database_context_identity",
+                "database_context_window",
                 "database_explain_object",
                 "database_explain_query",
                 "database_find_join_path",

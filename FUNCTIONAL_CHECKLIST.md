@@ -21,14 +21,17 @@ Stop running development services before the production web build.
 
 Use the corpus and procedure in `PERFORMANCE_ARCHITECTURE_PLAN.md`. Do not claim time or token savings while any required gate is open.
 
-- [ ] Warm end-to-end median is below 3.0 seconds and beats reviewed direct SQL.
-- [ ] Cold end-to-end median is below 5.0 seconds and at least 20% faster than the 6.72-second baseline.
-- [ ] End-to-end p95 is below 6.0 seconds across at least 20 reviewed tasks.
-- [ ] Schema context is no larger than 6 KiB of serialized JSON.
-- [ ] Full task payload is below 2,500 estimated tokens and smaller than the direct path.
-- [ ] Normal tasks require no more than two MCP calls and one PostgreSQL connection checkout.
-- [ ] Relevant relations appear in the top five for at least 90% of corpus tasks.
-- [ ] Answers match reviewed direct SQL and all existing security checks still pass.
+Measured on the 14-task corpus (2026-09-01). Every gate below that requires 20 tasks stays
+open on corpus size alone, even where the measured value already clears the threshold.
+
+- [x] Warm end-to-end median is below 3.0 seconds and beats reviewed direct SQL. (1,200 ms vs 2,396 ms)
+- [x] Cold end-to-end median is below 5.0 seconds and at least 20% faster than the 6.72-second baseline. (2,683 ms)
+- [ ] End-to-end p95 is below 6.0 seconds across at least 20 reviewed tasks. (1,519 ms, but only 14 tasks)
+- [x] Schema context is no larger than 6 KiB of serialized JSON.
+- [x] Full task payload is below 2,500 estimated tokens and smaller than the direct path. (976 vs 1,240)
+- [x] Normal tasks require no more than two MCP calls and one PostgreSQL connection checkout.
+- [ ] Relevant relations appear in the top five for at least 90% of corpus tasks. (93% on 14 tasks; needs the 20-task corpus)
+- [x] Answers match reviewed direct SQL and all existing security checks still pass. (14/14, 67 tests)
 
 Single-task evidence from 2026-07-23, not a release claim:
 
@@ -180,6 +183,18 @@ These checks apply when the corresponding capability is implemented. Do not mark
 - Security: hashed API-key authentication and roles are covered end to end; restricted schemas cannot be administrator-overridden; temporary test keys were removed.
 - Remaining limitation: approved join-frequency telemetry is not configured and raw production query logs remain intentionally unsupported.
 - Blocking risk: the configured `appuser` role is still not read-only by default. Production publication remains blocked until a dedicated reader is used.
+
+### Performance Record: 2026-09-01
+
+- Corpus: 14 reviewed tasks in `scripts/corpus_tasks.json`, 3 repeats (42 executions), live remote database with 38 tables and few rows per table.
+- Command: `python scripts/benchmark_corpus.py --repeat 3`.
+- TableFox warm median 1,200 ms, warm p95 1,519 ms, cold median 2,683 ms, mean 976 estimated tokens per task.
+- Conventional catalog search and direct SQL: median 2,396 ms, p95 2,562 ms, mean 1,240 estimated tokens.
+- Answer agreement 14/14. Retrieval recall 13/14; the miss is `audit_logs`, whose only link to the question wording is a row value, and it reaches 14/14 once an approved description exists.
+- Context window at 16 lowers mean tokens per task to 879 without changing recall or answer agreement.
+- Fixed this cycle: the live graph socket re-introspected the whole catalog every 30 s (6.3 s of query work per tab); payload byte counts were serialized twice; `RetrievalIndex.context` used a method-level `lru_cache` that pinned every discarded index and snapshot; term expansion produced false readings such as `is=investment submissions` and `all~allow`, and reported ordinary plurals as typos; a configured but not-yet-created `DBMAP_CONTEXT_FILE` made task context and every guarded query fail outright, which `.env.example` invited by shipping that line uncommented.
+- Note for future benchmarking: `Settings.from_env()` loads `.env` with `override=True`, so a `DBMAP_*` variable exported by a parent process does not win over the file. `scripts/benchmark_corpus.py` therefore sets the context window through `database_context_window` and restores the previous value afterwards.
+- Open: the corpus is 14 tasks, below the 20 the gates require. Cold median (2,683 ms) clears the absolute 5.0 s gate but is slower than the conventional path (2,396 ms), so single-question sessions gain nothing.
 
 ### Performance Record: 2026-07-23
 

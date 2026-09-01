@@ -29,6 +29,7 @@ pnpm-debug.log*
 .dbmap-cache/
 .logs/
 .tablefox-context.json
+.tablefox-runtime.json
 tablefox-auth.json
 *.sqlite
 *.db

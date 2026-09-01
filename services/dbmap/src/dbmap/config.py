@@ -69,6 +69,9 @@ class Settings:
     mcp_actor: str = "local-mcp"
     pool_min_size: int = 1
     pool_max_size: int = 4
+    live_refresh_seconds: int = 600
+    context_window: int = 0
+    runtime_file: Path = Path(".tablefox-runtime.json")
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -109,6 +112,11 @@ class Settings:
             mcp_actor=os.getenv("DBMAP_MCP_ACTOR", "local-mcp").strip() or "local-mcp",
             pool_min_size=max(0, int(os.getenv("DBMAP_POOL_MIN_SIZE", "1"))),
             pool_max_size=max(1, int(os.getenv("DBMAP_POOL_MAX_SIZE", "4"))),
+            live_refresh_seconds=max(30, int(os.getenv("DBMAP_LIVE_REFRESH_SECONDS", "600"))),
+            context_window=max(0, min(int(os.getenv("DBMAP_CONTEXT_WINDOW", "0")), 128)),
+            runtime_file=Path(
+                os.getenv("DBMAP_RUNTIME_FILE", ".tablefox-runtime.json")
+            ).expanduser(),
         )
 
     def connection_kwargs(self) -> dict[str, object]:

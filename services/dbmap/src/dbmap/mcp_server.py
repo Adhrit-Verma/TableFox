@@ -108,14 +108,31 @@ def create_mcp(application_service: DatabaseMapService | None = None):
         question: str,
         max_relations: int = 6,
         max_bytes: int = 6144,
+        refresh_context: bool = False,
     ) -> dict[str, Any]:
-        """Return a compact ranked schema and declared-join context for one task."""
+        """Return a compact ranked schema and declared-join context for one task.
+
+        When the context window is enabled, relations already sent this session come back
+        in "known" instead of being repeated. Pass refresh_context=true to force full detail.
+        """
         return tool_service.task_context(
             question,
             max_relations=max_relations,
             max_bytes=max_bytes,
+            refresh_context=refresh_context,
             actor=actor,
         )
+
+    @mcp.tool()
+    def database_context_window(size: int | None = None) -> dict[str, Any]:
+        """Read or set how many relations are remembered as already-sent.
+
+        Call with no size to see the current setting, the measured token savings, and the
+        cost, then ask the user which value they want before setting it. Size 0 disables it.
+        """
+        if size is None:
+            return tool_service.context_window_report()
+        return tool_service.set_context_window(size, actor=actor)
 
     @mcp.tool()
     def database_schema_changes() -> dict[str, Any]:

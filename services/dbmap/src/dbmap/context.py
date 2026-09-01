@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import replace
 from datetime import datetime
 import json
+import logging
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
@@ -11,12 +12,20 @@ from .diff import schema_fingerprint
 from .models import GraphSnapshot
 
 
+logger = logging.getLogger(__name__)
 MAX_CONTEXT_BYTES = 1_000_000
 MAX_CONTEXT_OBJECTS = 10_000
 
 
 def apply_context(snapshot: GraphSnapshot, path: Path | None) -> GraphSnapshot:
     if not path:
+        return snapshot
+    if not path.is_file():
+        # A configured path that has not been created yet simply means nothing is
+        # approved: dbmap-context-scaffold writes this file. Failing here would take
+        # down task context and every guarded query on a fresh install. A file that
+        # does exist but is malformed or names another database still fails loudly.
+        logger.warning("No approved context file at %s; continuing without it.", path)
         return snapshot
     manifest = _load_manifest(path)
     expected_database = manifest.get("database")

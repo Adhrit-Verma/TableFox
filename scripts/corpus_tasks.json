@@ -1,0 +1,187 @@
+{
+  "description": "Reviewed benchmark corpus. Each task pairs a natural-language question with the bounded SQL a correct answer requires, the relations that answer genuinely needs, and the single-word terms a developer would type into a catalog search when working without TableFox.",
+  "tasks": [
+    {
+      "name": "recent_joiners",
+      "category": "single_table",
+      "question": "Find me employees who joined recently",
+      "needed_relations": ["team_members"],
+      "catalog_terms": ["employee", "joined", "hire"],
+      "queries": [
+        {
+          "name": "recent_joiners",
+          "sql": "select id, full_name, employee_code, department, designation, status, created_at from public.team_members order by created_at desc limit 20"
+        }
+      ]
+    },
+    {
+      "name": "leave_setting_changes",
+      "category": "audit_trail",
+      "question": "Find me employees have done most change in leave settings",
+      "needed_relations": ["audit_logs", "team_members"],
+      "catalog_terms": ["leave", "audit", "policy"],
+      "queries": [
+        {
+          "name": "leave_setting_changes",
+          "sql": "select al.actor_team_member_id, tm.full_name, count(*) as change_count from public.audit_logs al join public.team_members tm on tm.id = al.actor_team_member_id where al.entity_type = 'leave_policy' and al.action_type in ('create_leave_policy', 'update_leave_policy') group by al.actor_team_member_id, tm.full_name order by change_count desc limit 20"
+        }
+      ]
+    },
+    {
+      "name": "exact_holidays",
+      "category": "exact_name",
+      "question": "List all public holidays",
+      "needed_relations": ["public_holidays"],
+      "catalog_terms": ["holiday"],
+      "queries": [
+        {
+          "name": "exact_holidays",
+          "sql": "select title, start_date, end_date, is_optional from public.public_holidays order by start_date"
+        }
+      ]
+    },
+    {
+      "name": "exact_trainings",
+      "category": "exact_name",
+      "question": "Show me all training programs",
+      "needed_relations": ["trainings"],
+      "catalog_terms": ["training"],
+      "queries": [
+        {
+          "name": "exact_trainings",
+          "sql": "select title, training_type, status, start_at, end_at from public.trainings order by start_at"
+        }
+      ]
+    },
+    {
+      "name": "acronym_ctc",
+      "category": "acronym",
+      "question": "What is the average CTC of employees",
+      "needed_relations": ["employee_finance_profiles", "team_members"],
+      "catalog_terms": ["ctc"],
+      "queries": [
+        {
+          "name": "acronym_ctc",
+          "sql": "select tm.full_name, efp.current_ctc_amount, efp.currency_code from public.employee_finance_profiles efp join public.team_members tm on tm.id = efp.team_member_id order by efp.current_ctc_amount desc"
+        }
+      ]
+    },
+    {
+      "name": "acronym_hr_portal_users",
+      "category": "acronym",
+      "question": "Show me all HR portal users",
+      "needed_relations": ["hr_portal_users", "team_members"],
+      "catalog_terms": ["hr", "portal"],
+      "queries": [
+        {
+          "name": "acronym_hr_portal_users",
+          "sql": "select tm.full_name, hpu.authority_level, hpu.status from public.hr_portal_users hpu join public.team_members tm on tm.id = hpu.team_member_id"
+        }
+      ]
+    },
+    {
+      "name": "misspelling_announcements",
+      "category": "misspelling",
+      "question": "Show me all anouncements",
+      "needed_relations": ["announcements"],
+      "catalog_terms": ["anouncement", "announcement"],
+      "queries": [
+        {
+          "name": "misspelling_announcements",
+          "sql": "select title, category, announcement_status, publish_at from public.announcements order by publish_at desc nulls last"
+        }
+      ]
+    },
+    {
+      "name": "misspelling_salary_slips",
+      "category": "misspelling",
+      "question": "List employe salary slips",
+      "needed_relations": ["employee_salary_slips", "team_members"],
+      "catalog_terms": ["employe", "salary", "employee"],
+      "queries": [
+        {
+          "name": "misspelling_salary_slips",
+          "sql": "select tm.full_name, ess.slip_month, ess.gross_pay, ess.net_pay from public.employee_salary_slips ess join public.team_members tm on tm.id = ess.team_member_id order by ess.slip_month desc"
+        }
+      ]
+    },
+    {
+      "name": "two_join_approved_leave",
+      "category": "two_table_join",
+      "question": "Which employees have approved leave requests",
+      "needed_relations": ["leave_requests", "team_members"],
+      "catalog_terms": ["leave", "approved"],
+      "queries": [
+        {
+          "name": "two_join_approved_leave",
+          "sql": "select tm.full_name, lr.leave_type, lr.start_date, lr.end_date, lr.total_days from public.leave_requests lr join public.team_members tm on tm.id = lr.team_member_id where lr.status = 'approved' order by lr.start_date"
+        }
+      ]
+    },
+    {
+      "name": "two_join_reporting_manager",
+      "category": "self_join",
+      "question": "List employees along with their reporting manager",
+      "needed_relations": ["team_members"],
+      "catalog_terms": ["manager", "report"],
+      "queries": [
+        {
+          "name": "two_join_reporting_manager",
+          "sql": "select e.full_name as employee, m.full_name as manager from public.team_members e left join public.team_members m on m.id = e.reporting_manager_team_member_id order by e.full_name"
+        }
+      ]
+    },
+    {
+      "name": "three_join_leave_policy_employee",
+      "category": "three_table_join",
+      "question": "Show leave requests with policy names and employee names",
+      "needed_relations": ["leave_requests", "leave_policies", "team_members"],
+      "catalog_terms": ["leave", "policy", "employee"],
+      "queries": [
+        {
+          "name": "three_join_leave_policy_employee",
+          "sql": "select tm.full_name, lp.leave_type as policy_type, lr.status, lr.start_date, lr.end_date from public.leave_requests lr join public.leave_policies lp on lp.id = lr.leave_policy_id join public.team_members tm on tm.id = lr.team_member_id order by lr.start_date"
+        }
+      ]
+    },
+    {
+      "name": "three_join_investment_files",
+      "category": "three_table_join",
+      "question": "Show investment submissions with their uploaded files and employee names",
+      "needed_relations": ["employee_investment_submissions", "employee_investment_files", "team_members"],
+      "catalog_terms": ["investment", "file"],
+      "queries": [
+        {
+          "name": "three_join_investment_files",
+          "sql": "select tm.full_name, eis.financial_year, eis.submission_status, eif.file_kind, eif.original_name from public.employee_investment_submissions eis join public.employee_investment_files eif on eif.submission_id = eis.id join public.team_members tm on tm.id = eis.team_member_id order by eis.financial_year"
+        }
+      ]
+    },
+    {
+      "name": "missing_data_department",
+      "category": "no_results",
+      "question": "Find employees in the Legal department",
+      "needed_relations": ["team_members"],
+      "catalog_terms": ["department", "legal"],
+      "queries": [
+        {
+          "name": "missing_data_department",
+          "sql": "select full_name, department, designation from public.team_members where department = 'Legal'"
+        }
+      ]
+    },
+    {
+      "name": "missing_data_pending_leave",
+      "category": "no_results",
+      "question": "Show me pending leave requests awaiting approval",
+      "needed_relations": ["leave_requests", "team_members"],
+      "catalog_terms": ["leave", "pending"],
+      "queries": [
+        {
+          "name": "missing_data_pending_leave",
+          "sql": "select tm.full_name, lr.leave_type, lr.status from public.leave_requests lr join public.team_members tm on tm.id = lr.team_member_id where lr.status = 'pending'"
+        }
+      ]
+    }
+  ]
+}

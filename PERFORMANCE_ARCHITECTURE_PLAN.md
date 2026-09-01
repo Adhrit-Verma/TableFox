@@ -145,7 +145,17 @@ Cache only immutable derived schema artifacts:
 - adjacency lists;
 - repeated task-context packs.
 
-Keys include database identity, schema fingerprint, context-file fingerprint, normalized question, and output budget. Use Python's thread-safe `functools.lru_cache`; do not cache application query rows. Source: [Python `functools.lru_cache`](https://docs.python.org/3/library/functools.html#functools.lru_cache).
+Keys include database identity, schema fingerprint, context-file fingerprint, normalized question, and output budget. Do not cache application query rows.
+
+Keep this cache on the index instance, not on the method. `functools.lru_cache` applied to a method makes `self` part of the key, so every superseded index and the entire snapshot behind it stay reachable for the life of the process — which the 30-second live refresh turned into steady growth. A bounded `OrderedDict` on the instance dies with the index. Source: [Python `functools.lru_cache`](https://docs.python.org/3/library/functools.html#functools.lru_cache).
+
+### 6. Fixed-Length Delivery Window
+
+Caching computation does not reduce tokens: an identical pack still serializes into the model's context. Tokens only fall when TableFox stops repeating what the agent already received.
+
+The delivery window is therefore a fixed-length record of relations already sent, evicted in sliding order rather than by time. A repeat relation returns as a bare id; a relation needing extra columns returns only those columns as a delta, so nothing the agent has not seen is ever suppressed. It clears on schema-fingerprint change and on `refresh_context=true`.
+
+Measured at window 16 on the 14-task corpus: mean task tokens fall from 976 to 879. It ships disabled, because the saving assumes the agent still holds the earlier pack — an assumption a compacted conversation breaks. That cost is stated wherever the setting is offered.
 
 ## Connection And Query Architecture
 
@@ -230,7 +240,16 @@ Performance work must not remove:
 
 ### Phase 0: Correct The Benchmark
 
-Implementation: partial. Cold/warm and dual MCP payload accounting exist; the reviewed 20-task corpus is still required.
+Implementation: mostly complete. `scripts/benchmark_corpus.py` with `scripts/corpus_tasks.json` runs a reviewed corpus with repeats, separates cold from warm, reports median and p95, counts both MCP payload representations, and checks retrieval recall and answer agreement automatically. The corpus holds 14 tasks; 20 are still required.
+
+Measured on 2026-09-01 with `--repeat 3`: TableFox warm median 1,200 ms and p95 1,519 ms against a conventional median of 2,396 ms; mean 976 estimated tokens per task against 1,240; answers agreed 14/14; recall 13/14.
+
+Four defects were fixed in the same cycle, all of which had been inflating cost:
+
+- the live graph socket re-introspected the entire catalog every 30 seconds per browser tab, roughly 6.3 seconds of query work each time, and discarded the retrieval index with it;
+- batch and context responses serialized their own byte count twice;
+- `RetrievalIndex.context` carried a method-level `lru_cache`, so every discarded index and its whole snapshot stayed reachable for the life of the process;
+- term expansion ran the acronym and trigram paths over ordinary words, producing false readings (`is=investment submissions`, `all~allow`) and reporting plain plurals as typo corrections. Correcting this also sharpened ranking enough to cut mean task tokens by roughly a sixth.
 
 - Record cold and warm runs separately.
 - Measure MCP startup, pool wait, graph retrieval, database time, serialization bytes, and tool count.

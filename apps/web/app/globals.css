@@ -396,6 +396,40 @@ button:disabled {
   color: var(--ink);
 }
 
+.windowChoices {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+}
+
+.windowChoice {
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.windowChoice:hover {
+  background: var(--surface-strong);
+}
+
+.windowChoice.active {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: white;
+  font-weight: 700;
+}
+
+.windowError {
+  margin: 0;
+  color: var(--danger);
+  font-size: 0.78rem;
+}
+
 .metrics {
   padding-top: 4px;
 }

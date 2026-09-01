@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+from collections import OrderedDict
 import hashlib
+import json
 from pathlib import Path
 from typing import Any, Protocol
 
@@ -53,6 +55,12 @@ class DatabaseMapService:
         self._cached_snapshot: GraphSnapshot | None = None
         self._context_stamp: int | None = None
         self._retrieval_index: RetrievalIndex | None = None
+        self._fingerprint: str | None = None
+        # Fixed-length delivery window: relation id -> columns already sent this session.
+        self._window: OrderedDict[str, set[str]] = OrderedDict()
+        self._window_fingerprint: str | None = None
+        self._runtime_stamp: int | None = None
+        self._runtime_window: int | None = None
 
     def _snapshot(self, refresh: bool = False) -> GraphSnapshot:
         context_file = self.settings.context_file if self.settings else None
@@ -71,6 +79,8 @@ class DatabaseMapService:
         self._cached_snapshot = apply_context(snapshot, context_file)
         self._context_stamp = context_stamp
         self._retrieval_index = None
+        # Computed once per rebuild so the delivery window can check it per call cheaply.
+        self._fingerprint = schema_fingerprint(self._cached_snapshot)
         return self._cached_snapshot
 
     def _record(
@@ -189,24 +199,129 @@ class DatabaseMapService:
         )
         return result
 
+    def context_window_size(self) -> int:
+        """Effective window length: the runtime override file, else the env default."""
+        settings = self.settings
+        if settings is None:
+            return 0
+        path = settings.runtime_file
+        stamp = path.stat().st_mtime_ns if path.is_file() else None
+        if stamp != self._runtime_stamp:
+            self._runtime_stamp = stamp
+            self._runtime_window = None
+            if stamp is not None:
+                try:
+                    payload = json.loads(path.read_text(encoding="utf-8"))
+                    value = payload.get("context_window")
+                    if isinstance(value, int):
+                        self._runtime_window = max(0, min(value, 128))
+                except (OSError, ValueError):
+                    self._runtime_window = None
+        if self._runtime_window is not None:
+            return self._runtime_window
+        return settings.context_window
+
+    def set_context_window(self, size: int, actor: str = "local") -> dict[str, Any]:
+        if self.settings is None:
+            raise ValueError("No settings are configured.")
+        size = max(0, min(int(size), 128))
+        path = self.settings.runtime_file
+        path.parent.mkdir(parents=True, exist_ok=True)
+        temporary = path.with_suffix(f"{path.suffix}.tmp")
+        temporary.write_text(
+            json.dumps({"context_window": size}, indent=2) + "\n", encoding="utf-8"
+        )
+        temporary.replace(path)
+        self._runtime_stamp = None
+        if size == 0:
+            self._window.clear()
+        self._record(actor, "set_context_window", details={"size": size})
+        return self.context_window_report()
+
+    def context_window_report(self) -> dict[str, Any]:
+        """Current setting plus the measured trade-off, so an agent can ask the user."""
+        return {
+            "size": self.context_window_size(),
+            "enabled": self.context_window_size() > 0,
+            "tracked_relations": len(self._window),
+            "measured_savings": {
+                "0": "no reduction (default)",
+                "8": "about 15% fewer task-context tokens",
+                "16": "about 23% fewer task-context tokens",
+                "32": "about 25% fewer task-context tokens (diminishing)",
+            },
+            "measurement_basis": (
+                "14-task corpus against a 38-table database; savings vary by how much "
+                "consecutive questions overlap."
+            ),
+            "cost": (
+                "Relations already sent are returned as ids only. If this conversation is "
+                "compacted or truncated, those column lists may no longer be in context. "
+                "Call database_task_context with refresh_context=true to get full detail again."
+            ),
+        }
+
+    def _apply_window(self, response: dict[str, Any], size: int) -> dict[str, Any]:
+        if self._window_fingerprint != self._fingerprint:
+            self._window.clear()
+            self._window_fingerprint = self._fingerprint
+        kept: list[dict[str, Any]] = []
+        known: list[str] = []
+        for relation in response["relations"]:
+            relation_id = relation["id"]
+            columns = list(relation.get("columns", []))
+            delivered = self._window.get(relation_id)
+            if delivered is None:
+                kept.append(relation)
+            else:
+                fresh = [column for column in columns if column not in delivered]
+                if fresh:
+                    kept.append({**relation, "columns": fresh, "partial": True})
+                else:
+                    known.append(relation_id)
+            self._window[relation_id] = (delivered or set()) | set(columns)
+            self._window.move_to_end(relation_id)
+        while len(self._window) > size:
+            self._window.popitem(last=False)
+        response["relations"] = kept
+        if known:
+            response["known"] = known
+        response["window"] = {"size": size, "hint": "refresh_context=true returns full detail."}
+        response["bytes"] = len(
+            json.dumps(response, separators=(",", ":"), default=str).encode()
+        )
+        return response
+
     def task_context(
         self,
         question: str,
         max_relations: int = 6,
         max_bytes: int = 6_144,
+        refresh_context: bool = False,
         actor: str = "local",
     ) -> dict[str, Any]:
         snapshot = self._snapshot()
+        # A guarded read almost always follows, so open the pool while the agent drafts SQL.
+        prewarm = getattr(self.introspector, "prewarm", None)
+        if prewarm is not None:
+            prewarm()
         if self._retrieval_index is None:
             self._retrieval_index = RetrievalIndex(snapshot)
         result = self._retrieval_index.context(question, max_relations, max_bytes)
+        window = self.context_window_size()
+        if refresh_context:
+            self._window.clear()
+        if window:
+            result = self._apply_window(result, window)
         self._record(
             actor,
             "task_context",
             details={
                 "relations": len(result["relations"]),
+                "known": len(result.get("known", [])),
                 "bytes": result["bytes"],
                 "connected": result["connected"],
+                "window": window,
             },
         )
         return result
@@ -303,7 +418,7 @@ class DatabaseMapService:
         snapshot = self._snapshot()
         result = {
             "database": snapshot.database,
-            "schema_fingerprint": schema_fingerprint(snapshot),
+            "schema_fingerprint": self._fingerprint or schema_fingerprint(snapshot),
         }
         self._record(actor, "context_identity")
         return result

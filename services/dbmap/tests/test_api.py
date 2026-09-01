@@ -103,6 +103,27 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(batch["queries"][0]["name"], "count")
         self.assertEqual(context["question"], "customer orders")
 
+    def test_only_admin_can_change_the_shared_context_window(self):
+        class WindowService:
+            audit = None
+
+            def context_window_report(self):
+                return {"size": 0, "enabled": False}
+
+            def set_context_window(self, size, actor="local"):
+                return {"size": size, "enabled": size > 0, "actor": actor}
+
+        request = api.ContextWindowRequest(size=16)
+        with patch.object(api, "service", WindowService()):
+            with self.assertRaises(HTTPException) as denied:
+                api.set_context_window(request, Principal("analyst", "analyst"))
+            allowed = api.set_context_window(request, Principal("dba", "admin"))
+            report = api.get_context_window(Principal("viewer", "viewer"))
+
+        self.assertEqual(denied.exception.status_code, 403)
+        self.assertEqual(allowed["size"], 16)
+        self.assertFalse(report["enabled"])
+
     def test_graph_endpoint_requires_valid_key_when_auth_is_enabled(self):
         token = "browser-test-key"
         with TemporaryDirectory() as directory:

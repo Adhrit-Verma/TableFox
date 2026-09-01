@@ -26,6 +26,7 @@ dbmap-identity = "dbmap.cli:print_identity"
 dbmap-create-key = "dbmap.cli:create_api_key"
 dbmap-save-baseline = "dbmap.cli:save_baseline"
 dbmap-review = "dbmap.cli:review_schema"
+dbmap-context-scaffold = "dbmap.cli:scaffold_context"
 
 [build-system]
 requires = ["hatchling"]

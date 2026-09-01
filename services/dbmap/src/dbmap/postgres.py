@@ -6,7 +6,7 @@ import atexit
 from pathlib import Path
 import re
 from tempfile import NamedTemporaryFile
-from threading import Lock
+from threading import Lock, Thread
 from typing import Any
 
 from .config import Settings
@@ -149,6 +149,7 @@ class PostgresIntrospector:
         self.settings = settings or Settings.from_env()
         self._pool: Any | None = None
         self._pool_lock = Lock()
+        self._prewarming = False
 
     def _connection(self):
         if self._pool is None:
@@ -170,6 +171,26 @@ class PostgresIntrospector:
                     self._pool.open(wait=True)
                     atexit.register(self.close)
         return self._pool.connection()
+
+    def prewarm(self) -> None:
+        """Open the pool in the background so the first query skips the handshake.
+
+        Called when a task context is requested, because a guarded read almost always
+        follows. Failures are ignored here; the real request reports them.
+        """
+        with self._pool_lock:
+            if self._pool is not None or self._prewarming:
+                return
+            self._prewarming = True
+
+        def open_pool() -> None:
+            try:
+                with self._connection():
+                    pass
+            except Exception:  # pragma: no cover - depends on external database
+                pass
+
+        Thread(target=open_pool, name="dbmap-prewarm", daemon=True).start()
 
     def close(self) -> None:
         if self._pool is not None:
@@ -423,9 +444,6 @@ class PostgresIntrospector:
             result["truncated"] = True
             result["returned_rows"] = len(result["rows"])
             response["truncated"] = True
-        response["bytes"] = len(
-            json.dumps(response, default=str, separators=(",", ":")).encode()
-        )
         response["bytes"] = len(
             json.dumps(response, default=str, separators=(",", ":")).encode()
         )

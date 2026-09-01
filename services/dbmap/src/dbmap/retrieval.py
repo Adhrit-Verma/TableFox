@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from collections import Counter
-from functools import lru_cache
+from collections import Counter, OrderedDict
+from copy import deepcopy
 import heapq
 from itertools import combinations
 import json
@@ -13,10 +13,14 @@ from .graph import GraphEngine
 from .models import GraphNode, GraphSnapshot
 
 
+CONTEXT_CACHE_SIZE = 256
 RELATION_KINDS = {"table", "view", "materialized_view"}
 STOP_WORDS = {
-    "a", "an", "and", "for", "from", "get", "his", "her", "in", "last",
-    "me", "of", "show", "the", "their", "to", "with", "year",
+    "a", "all", "along", "an", "and", "are", "average", "been", "change", "changes",
+    "done", "find", "for", "from", "get", "had", "has", "have", "her", "his", "in",
+    "is", "last", "list", "made", "make", "me", "most", "my", "of", "recently",
+    "show", "the", "their", "they", "to", "was", "were", "what", "which", "who",
+    "with", "year",
 }
 
 
@@ -54,6 +58,8 @@ class RetrievalIndex:
 
     def __init__(self, snapshot: GraphSnapshot) -> None:
         self.snapshot = snapshot
+        # Per-instance so a discarded index (and its snapshot) can be collected.
+        self._cache: OrderedDict[tuple[str, int, int], dict[str, Any]] = OrderedDict()
         self.nodes = {node.id: node for node in snapshot.nodes}
         self.relations = {
             node.id: node for node in snapshot.nodes if node.kind in RELATION_KINDS
@@ -116,9 +122,12 @@ class RetrievalIndex:
         fuzzy: dict[str, str] = {}
         acronyms: dict[str, str] = {}
         for term in original:
-            if term in self.vocabulary:
+            in_vocabulary = term in self.vocabulary
+            if in_vocabulary:
                 expanded.append(term)
-            phrases = self.acronym_phrases.get(term)
+            # Only treat a term as an acronym when the schema does not already use it as
+            # a word, otherwise ordinary words expand into unrelated column phrases.
+            phrases = None if in_vocabulary else self.acronym_phrases.get(term)
             if phrases:
                 phrase, _ = max(
                     phrases.items(),
@@ -132,14 +141,17 @@ class RetrievalIndex:
                 expanded.extend(phrase)
                 acronyms[term] = " ".join(phrase)
                 continue
-            prefixes = sorted(
+            # Singular/plural are the same word in both directions, never a typo.
+            variants = sorted(
                 token
                 for token in self.vocabulary
                 if token in {f"{term}s", f"{term}es"}
+                or (term.endswith("s") and token == term[:-1])
+                or (term.endswith("es") and token == term[:-2])
             )
-            if prefixes:
-                expanded.extend(prefixes[:3])
-            if term in self.vocabulary or prefixes:
+            if variants:
+                expanded.extend(variants[:3])
+            if in_vocabulary or variants:
                 continue
             abbreviations = sorted(
                 token
@@ -149,6 +161,10 @@ class RetrievalIndex:
             if abbreviations:
                 expanded.extend(abbreviations[:3])
                 fuzzy[term] = abbreviations[0]
+            if len(term) < 4:
+                # Short tokens produce noise ("all" scoring against "allow"), and the scan
+                # below costs a full vocabulary pass, so skip them.
+                continue
             # ponytail: vocabulary scan is fine for schema-sized indexes; add trigram postings
             # only if a benchmark shows more than 10k relations.
             matches = heapq.nlargest(
@@ -160,6 +176,22 @@ class RetrievalIndex:
                     expanded.append(token)
                     fuzzy[term] = token
         return list(dict.fromkeys(expanded)), fuzzy, acronyms
+
+    def _foreign_key_neighbours(self, relation_id: str, limit: int) -> list[str]:
+        """Relations reachable by one declared foreign key, targets before sources."""
+        if limit <= 0:
+            return []
+        targets: list[str] = []
+        sources: list[str] = []
+        for edge in self.snapshot.edges:
+            if edge.kind != "foreign_key":
+                continue
+            if edge.source == relation_id and edge.target in self.relations:
+                targets.append(edge.target)
+            elif edge.target == relation_id and edge.source in self.relations:
+                sources.append(edge.source)
+        ordered = list(dict.fromkeys(targets + sources))
+        return [item for item in ordered if item != relation_id][:limit]
 
     def _rank(
         self,
@@ -224,13 +256,17 @@ class RetrievalIndex:
                 ranked.append((score, relation_id))
         return heapq.nlargest(limit, ranked), terms, fuzzy, acronyms
 
-    @lru_cache(maxsize=256)
     def context(
         self,
         question: str,
         max_relations: int = 6,
         max_bytes: int = 6_144,
     ) -> dict[str, Any]:
+        cache_key = (question, max_relations, max_bytes)
+        cached = self._cache.get(cache_key)
+        if cached is not None:
+            self._cache.move_to_end(cache_key)
+            return deepcopy(cached)
         max_relations = max(1, min(max_relations, 12))
         max_bytes = max(2_048, min(max_bytes, 32_768))
         ranked, terms, fuzzy, acronyms = self._rank(question, max_relations * 4)
@@ -264,6 +300,12 @@ class RetrievalIndex:
         relation_ids = terminal_ids + [
             node for node in subgraph["nodes"] if node not in terminal_ids
         ]
+        if len(terminal_ids) == 1:
+            # A single confident match still needs its lookup tables, and join_subgraph
+            # returns early for one terminal, so add direct foreign-key neighbours.
+            relation_ids += self._foreign_key_neighbours(
+                terminal_ids[0], max(0, max_relations - 1)
+            )
         relations = []
         for relation_id in relation_ids:
             relation = self.relations.get(relation_id)
@@ -353,6 +395,10 @@ class RetrievalIndex:
             "connected": subgraph["connected"],
         }
         self._fit(response, max_bytes)
+        # Store a copy: callers (the delivery window) mutate the response they receive.
+        self._cache[cache_key] = deepcopy(response)
+        while len(self._cache) > CONTEXT_CACHE_SIZE:
+            self._cache.popitem(last=False)
         return response
 
     @staticmethod
@@ -378,5 +424,4 @@ class RetrievalIndex:
             ]
             response["omitted_relations"] = response.get("omitted_relations", 0) + 1
             response["truncated"] = True
-        response["bytes"] = size()
         response["bytes"] = size()

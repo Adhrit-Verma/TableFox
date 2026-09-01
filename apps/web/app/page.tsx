@@ -8,6 +8,7 @@ import {
   Database,
   Eye,
   Filter,
+  Gauge,
   GitBranch,
   KeyRound,
   Loader2,
@@ -50,6 +51,13 @@ type GraphSnapshot = {
   summary: Record<string, number>;
   nodes: GraphNode[];
   edges: GraphEdge[];
+};
+
+type ContextWindowReport = {
+  size: number;
+  enabled: boolean;
+  tracked_relations: number;
+  cost: string;
 };
 
 type SearchResult = {
@@ -112,6 +120,8 @@ export default function Home() {
   const [apiKeyInput, setApiKeyInput] = useState("");
   const [authReady, setAuthReady] = useState(false);
   const [authRequired, setAuthRequired] = useState(false);
+  const [contextWindow, setContextWindow] = useState<ContextWindowReport | null>(null);
+  const [windowError, setWindowError] = useState<string | null>(null);
 
   const authHeaders = useMemo<Record<string, string>>(
     () => {
@@ -230,9 +240,41 @@ export default function Home() {
     setAuthReady(true);
   }, []);
 
+  const loadContextWindow = useCallback(async () => {
+    try {
+      const response = await fetch(`${API_URL}/settings/context-window`, { headers: authHeaders });
+      if (response.ok) setContextWindow((await response.json()) as ContextWindowReport);
+    } catch {
+      setContextWindow(null);
+    }
+  }, [authHeaders]);
+
+  const applyContextWindow = useCallback(async (size: number) => {
+    setWindowError(null);
+    try {
+      const response = await fetch(`${API_URL}/settings/context-window`, {
+        method: "POST",
+        headers: { ...authHeaders, "Content-Type": "application/json" },
+        body: JSON.stringify({ size })
+      });
+      if (response.status === 403) {
+        setWindowError("Only an admin key can change the shared context window.");
+        return;
+      }
+      if (!response.ok) throw new Error(`Request failed with ${response.status}`);
+      setContextWindow((await response.json()) as ContextWindowReport);
+    } catch (err) {
+      setWindowError(err instanceof Error ? err.message : "Unable to update the window.");
+    }
+  }, [authHeaders]);
+
   useEffect(() => {
     if (authReady) loadGraph();
   }, [authReady, loadGraph]);
+
+  useEffect(() => {
+    if (authReady) loadContextWindow();
+  }, [authReady, loadContextWindow]);
 
   useEffect(() => {
     if (!searchQuery.trim()) {
@@ -737,6 +779,32 @@ export default function Home() {
             <GitBranch size={15} />
             Focus selection
           </button>
+        </section>
+
+        <section>
+          <h2><Gauge size={15} /> Agent context window</h2>
+          <div className="windowChoices" role="group" aria-label="Context window length">
+            {[0, 8, 16, 32].map((size) => (
+              <button
+                key={size}
+                className={contextWindow?.size === size ? "windowChoice active" : "windowChoice"}
+                onClick={() => applyContextWindow(size)}
+                aria-pressed={contextWindow?.size === size}
+              >
+                {size === 0 ? "Off" : size}
+              </button>
+            ))}
+          </div>
+          <p className="emptyText">
+            {contextWindow?.enabled
+              ? `Remembering ${contextWindow.tracked_relations} relations. Repeats are sent as ids only — about ${contextWindow.size >= 32 ? 25 : contextWindow.size >= 16 ? 23 : 15}% fewer task-context tokens.`
+              : "Off: every task context is sent in full. Enabling it stops re-sending relations an agent already received."}
+          </p>
+          <p className="emptyText">
+            Cost: if the agent&apos;s conversation is compacted, skipped column lists may no
+            longer be in its context. It can call task context with refresh to get full detail.
+          </p>
+          {windowError && <p className="windowError">{windowError}</p>}
         </section>
 
         <section className="metrics">
