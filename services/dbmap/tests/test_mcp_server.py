@@ -34,6 +34,14 @@ class McpServerTests(unittest.TestCase):
             },
         )
 
+    def test_every_tool_has_explicit_annotations(self):
+        for tool in asyncio.run(create_mcp().list_tools()):
+            hints = tool.annotations
+            self.assertIsNotNone(hints, tool.name)
+            for value in (hints.readOnlyHint, hints.destructiveHint, hints.openWorldHint):
+                self.assertIsInstance(value, bool, tool.name)
+            self.assertFalse(hints.destructiveHint, tool.name)
+
 
 if __name__ == "__main__":
     unittest.main()
