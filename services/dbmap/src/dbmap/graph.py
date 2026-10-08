@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 from collections import deque
-from typing import Iterable
+from collections.abc import Iterable
 
 from .ids import edge_id, node_id
 from .models import GraphEdge, GraphNode, GraphSnapshot
-
 
 SYSTEM_SCHEMAS = {"pg_catalog", "information_schema"}
 

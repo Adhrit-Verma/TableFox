@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import re
 
-
 _SELECT_START = re.compile(r"^\s*(select|with)\b", re.IGNORECASE | re.DOTALL)
 _BLOCKED = re.compile(
     r"\b(insert|update|delete|drop|alter|create|truncate|grant|revoke|copy|call|do|vacuum|analyze|refresh|merge|into)\b",

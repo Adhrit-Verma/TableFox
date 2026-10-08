@@ -1,17 +1,16 @@
 from __future__ import annotations
 
-from collections import Counter, OrderedDict
-from copy import deepcopy
 import heapq
-from itertools import combinations
 import json
 import math
 import re
+from collections import Counter, OrderedDict
+from copy import deepcopy
+from itertools import combinations
 from typing import Any
 
 from .graph import GraphEngine
 from .models import GraphNode, GraphSnapshot
-
 
 CONTEXT_CACHE_SIZE = 256
 RELATION_KINDS = {"table", "view", "materialized_view"}

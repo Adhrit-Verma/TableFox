@@ -1,10 +1,9 @@
 import hashlib
 import json
-from pathlib import Path
 import sys
-from tempfile import TemporaryDirectory
 import unittest
-
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
@@ -202,9 +201,8 @@ class GovernanceTests(unittest.TestCase):
             "select pg_terminate_backend(1)",
         ]
         for statement in unsafe:
-            with self.subTest(statement=statement):
-                with self.assertRaises(ValueError):
-                    validate_readonly_sql(statement)
+            with self.subTest(statement=statement), self.assertRaises(ValueError):
+                validate_readonly_sql(statement)
 
         self.assertEqual(
             validate_readonly_sql("with recent as (select 1) select * from recent"),

@@ -1,9 +1,8 @@
-from pathlib import Path
 import sys
-from tempfile import TemporaryDirectory
 import unittest
 from contextlib import contextmanager
-
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
@@ -62,7 +61,7 @@ class PostgresIntrospectorTests(unittest.TestCase):
             name = "value"
 
         class Cursor:
-            description = [Column()]
+            description = (Column(),)
 
             def __enter__(self):
                 return self
@@ -146,7 +145,7 @@ class PostgresIntrospectorTests(unittest.TestCase):
 
         introspector._connection = checkout
         introspector._configure_readonly_transaction = lambda _connection: None
-        introspector._context_classifications = lambda: {}
+        introspector._context_classifications = dict
         introspector._readonly_query_on_connection = run
 
         result = introspector.readonly_batch(

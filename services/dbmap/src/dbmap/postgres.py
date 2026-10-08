@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-import json
-import hashlib
 import atexit
-from pathlib import Path
+import hashlib
+import json
 import re
+from pathlib import Path
 from tempfile import NamedTemporaryFile
 from threading import Lock, Thread
 from typing import Any
@@ -16,7 +16,6 @@ from .models import GraphSnapshot
 from .query_policy import assess_query_plan, classify_sensitive_columns
 from .readonly import apply_limit, validate_readonly_sql
 from .security import filter_metadata_schemas, schema_allowed
-
 
 RELATIONS_SQL = """
 select
@@ -187,7 +186,8 @@ class PostgresIntrospector:
             try:
                 with self._connection():
                     pass
-            except Exception:  # pragma: no cover - depends on external database
+            # Best-effort warm-up; the first real query reports connection errors.
+            except Exception:  # noqa: BLE001, S110  # pragma: no cover - depends on external database
                 pass
 
         Thread(target=open_pool, name="dbmap-prewarm", daemon=True).start()
@@ -244,7 +244,7 @@ class PostgresIntrospector:
                         with conn.transaction():
                             metadata["usage"] = list(cursor.execute(USAGE_SQL))
                         metadata["usage_status"] = "available"
-                    except Exception:
+                    except Exception:  # noqa: BLE001 - optional telemetry must not fail introspection
                         metadata["usage_status"] = "unavailable"
             return filter_metadata_schemas(
                 metadata,
@@ -275,7 +275,7 @@ class PostgresIntrospector:
         names: set[str] = set()
         for item in queries:
             if not isinstance(item, dict):
-                raise ValueError("Each batch query must be an object.")
+                raise ValueError("Each batch query must be an object.")  # noqa: TRY004 - surfaced as a client error
             name = str(item.get("name", "")).strip()
             sql = str(item.get("sql", "")).strip()
             if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_-]{0,63}", name):

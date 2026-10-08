@@ -1,16 +1,15 @@
 from __future__ import annotations
 
-from dataclasses import replace
-from datetime import datetime
 import json
 import logging
+from dataclasses import replace
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
 
 from .diff import schema_fingerprint
 from .models import GraphSnapshot
-
 
 logger = logging.getLogger(__name__)
 MAX_CONTEXT_BYTES = 1_000_000
@@ -54,7 +53,7 @@ def _load_manifest(path: Path) -> dict[str, Any]:
         raise ValueError("Context file exceeds the 1 MB safety limit.")
     payload = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
-        raise ValueError("Context file must contain a JSON object.")
+        raise ValueError("Context file must contain a JSON object.")  # noqa: TRY004 - callers handle ValueError
     return payload
 
 

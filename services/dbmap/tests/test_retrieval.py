@@ -1,11 +1,10 @@
 import gc
 import json
-from pathlib import Path
 import sys
-from tempfile import TemporaryDirectory
 import unittest
 import weakref
-
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 

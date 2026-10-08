@@ -2,23 +2,21 @@ from __future__ import annotations
 
 import argparse
 import asyncio
-from contextlib import redirect_stderr
 import io
 import json
 import math
 import os
-from pathlib import Path
 import sys
+from contextlib import redirect_stderr
+from pathlib import Path
 from time import perf_counter
 from typing import Any
-
 
 ROOT = Path(__file__).resolve().parents[1]
 SERVICE_SRC = ROOT / "services" / "dbmap" / "src"
 sys.path.insert(0, str(SERVICE_SRC))
 
-from dbmap.config import Settings  # noqa: E402
-
+from dbmap.config import Settings
 
 CATALOG_SEARCH_SQL = """
 select
@@ -52,7 +50,7 @@ def payload_tokens(payload: Any) -> int:
 
 def mcp_payload(result: Any) -> dict[str, Any]:
     texts = [item.text for item in result.content if hasattr(item, "text")]
-    return {"structuredContent": result.structuredContent, "content": texts}
+    return {"structuredContent": result.structured_content, "content": texts}
 
 
 async def tablefox_context(question: str) -> dict[str, Any]:
@@ -70,22 +68,24 @@ async def tablefox_context(question: str) -> dict[str, Any]:
     calls: list[dict[str, Any]] = []
     total_start = perf_counter()
     with redirect_stderr(io.StringIO()):
-        async with stdio_client(server) as (read_stream, write_stream):
-            async with ClientSession(read_stream, write_stream) as session:
-                await session.initialize()
-                started = perf_counter()
-                result = await session.call_tool(
-                    "database_task_context",
-                    {"question": question, "max_relations": 6, "max_bytes": 6144},
-                )
-                payload = mcp_payload(result)
-                calls.append(
-                    {
-                        "elapsed_ms": round((perf_counter() - started) * 1000, 2),
-                        "estimated_payload_tokens": payload_tokens(payload),
-                        "payload": payload,
-                    }
-                )
+        async with (
+            stdio_client(server) as (read_stream, write_stream),
+            ClientSession(read_stream, write_stream) as session,
+        ):
+            await session.initialize()
+            started = perf_counter()
+            result = await session.call_tool(
+                "database_task_context",
+                {"question": question, "max_relations": 6, "max_bytes": 6144},
+            )
+            payload = mcp_payload(result)
+            calls.append(
+                {
+                    "elapsed_ms": round((perf_counter() - started) * 1000, 2),
+                    "estimated_payload_tokens": payload_tokens(payload),
+                    "payload": payload,
+                }
+            )
     return {
         "method": "Tablefox MCP database_task_context",
         "elapsed_ms": round((perf_counter() - total_start) * 1000, 2),

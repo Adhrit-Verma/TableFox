@@ -1,8 +1,7 @@
 import asyncio
-from pathlib import Path
 import sys
 import unittest
-
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
@@ -38,9 +37,9 @@ class McpServerTests(unittest.TestCase):
         for tool in asyncio.run(create_mcp().list_tools()):
             hints = tool.annotations
             self.assertIsNotNone(hints, tool.name)
-            for value in (hints.readOnlyHint, hints.destructiveHint, hints.openWorldHint):
+            for value in (hints.read_only_hint, hints.destructive_hint, hints.open_world_hint):
                 self.assertIsInstance(value, bool, tool.name)
-            self.assertFalse(hints.destructiveHint, tool.name)
+            self.assertFalse(hints.destructive_hint, tool.name)
 
 
 if __name__ == "__main__":

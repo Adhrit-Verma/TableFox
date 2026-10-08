@@ -16,24 +16,22 @@ from __future__ import annotations
 
 import argparse
 import asyncio
-from contextlib import redirect_stderr
 import io
 import json
 import math
 import os
-from pathlib import Path
 import statistics
 import sys
+from contextlib import redirect_stderr
+from pathlib import Path
 from time import perf_counter
 from typing import Any
-
 
 ROOT = Path(__file__).resolve().parents[1]
 SERVICE_SRC = ROOT / "services" / "dbmap" / "src"
 sys.path.insert(0, str(SERVICE_SRC))
 
-from dbmap.config import Settings  # noqa: E402
-
+from dbmap.config import Settings
 
 CATALOG_SEARCH_SQL = """
 select
@@ -65,7 +63,7 @@ def payload_tokens(payload: Any) -> int:
 
 def mcp_payload(result: Any) -> dict[str, Any]:
     return {
-        "structuredContent": result.structuredContent,
+        "structuredContent": result.structured_content,
         "content": [item.text for item in result.content if hasattr(item, "text")],
     }
 
@@ -74,7 +72,7 @@ def percentile(values: list[float], fraction: float) -> float:
     if not values:
         return 0.0
     ordered = sorted(values)
-    index = min(len(ordered) - 1, int(round(fraction * (len(ordered) - 1))))
+    index = min(len(ordered) - 1, round(fraction * (len(ordered) - 1)))
     return ordered[index]
 
 
@@ -89,54 +87,56 @@ async def run_tablefox(tasks: list[dict[str, Any]], window: int) -> list[dict[st
     )
     results: list[dict[str, Any]] = []
     with redirect_stderr(io.StringIO()):
-        async with stdio_client(server) as (read_stream, write_stream):
-            async with ClientSession(read_stream, write_stream) as session:
-                await session.initialize()
-                # Set the window through the tool itself. A DBMAP_CONTEXT_WINDOW variable
-                # would not survive: Settings loads .env with override=True, so the file
-                # wins over anything this process exports.
-                previous = (
-                    await session.call_tool("database_context_window", {})
-                ).structuredContent["size"]
-                if window != previous:
-                    await session.call_tool("database_context_window", {"size": window})
-                for index, task in enumerate(tasks):
-                    started = perf_counter()
-                    context = await session.call_tool(
-                        "database_task_context",
-                        {"question": task["question"], "max_relations": 6, "max_bytes": 6144},
-                    )
-                    batch = await session.call_tool(
-                        "database_readonly_batch",
-                        {"queries": task["queries"], "max_rows_each": 50, "max_bytes": 32768},
-                    )
-                    elapsed_ms = round((perf_counter() - started) * 1000, 2)
-                    context_payload = mcp_payload(context)
-                    batch_payload = mcp_payload(batch)
-                    structured = context_payload["structuredContent"] or {}
-                    returned = {
-                        item["id"].split(".")[-1]
-                        for item in structured.get("relations", [])
-                    } | {
-                        item.split(".")[-1] for item in structured.get("known", [])
+        async with (
+            stdio_client(server) as (read_stream, write_stream),
+            ClientSession(read_stream, write_stream) as session,
+        ):
+            await session.initialize()
+            # Set the window through the tool itself. A DBMAP_CONTEXT_WINDOW variable
+            # would not survive: Settings loads .env with override=True, so the file
+            # wins over anything this process exports.
+            previous = (
+                await session.call_tool("database_context_window", {})
+            ).structured_content["size"]
+            if window != previous:
+                await session.call_tool("database_context_window", {"size": window})
+            for index, task in enumerate(tasks):
+                started = perf_counter()
+                context = await session.call_tool(
+                    "database_task_context",
+                    {"question": task["question"], "max_relations": 6, "max_bytes": 6144},
+                )
+                batch = await session.call_tool(
+                    "database_readonly_batch",
+                    {"queries": task["queries"], "max_rows_each": 50, "max_bytes": 32768},
+                )
+                elapsed_ms = round((perf_counter() - started) * 1000, 2)
+                context_payload = mcp_payload(context)
+                batch_payload = mcp_payload(batch)
+                structured = context_payload["structuredContent"] or {}
+                returned = {
+                    item["id"].split(".")[-1]
+                    for item in structured.get("relations", [])
+                } | {
+                    item.split(".")[-1] for item in structured.get("known", [])
+                }
+                answer = (batch_payload["structuredContent"] or {}).get("results", [])
+                results.append(
+                    {
+                        "task": task["name"],
+                        "category": task.get("category", "uncategorised"),
+                        "cold": index == 0,
+                        "elapsed_ms": elapsed_ms,
+                        "tokens": payload_tokens(context_payload)
+                        + payload_tokens(batch_payload),
+                        "context_tokens": payload_tokens(context_payload),
+                        "recall_ok": set(task["needed_relations"]) <= returned,
+                        "missing": sorted(set(task["needed_relations"]) - returned),
+                        "row_count": sum(item.get("row_count", 0) for item in answer),
                     }
-                    answer = (batch_payload["structuredContent"] or {}).get("results", [])
-                    results.append(
-                        {
-                            "task": task["name"],
-                            "category": task.get("category", "uncategorised"),
-                            "cold": index == 0,
-                            "elapsed_ms": elapsed_ms,
-                            "tokens": payload_tokens(context_payload)
-                            + payload_tokens(batch_payload),
-                            "context_tokens": payload_tokens(context_payload),
-                            "recall_ok": set(task["needed_relations"]) <= returned,
-                            "missing": sorted(set(task["needed_relations"]) - returned),
-                            "row_count": sum(item.get("row_count", 0) for item in answer),
-                        }
-                    )
-                if window != previous:
-                    await session.call_tool("database_context_window", {"size": previous})
+                )
+            if window != previous:
+                await session.call_tool("database_context_window", {"size": previous})
     return results
 
 

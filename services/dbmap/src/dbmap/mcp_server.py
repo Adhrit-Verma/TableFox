@@ -5,21 +5,20 @@ from typing import Any
 
 from .service import DatabaseMapService, build_service
 
-
 service = build_service()
 
 
 def create_mcp(application_service: DatabaseMapService | None = None):
-    from mcp.server.fastmcp import FastMCP
+    from mcp.server.mcpserver import MCPServer
     from mcp.types import ToolAnnotations
 
     tool_service = application_service or service
     actor = tool_service.settings.mcp_actor if tool_service.settings else "local-mcp"
-    mcp = FastMCP("dbmap-postgres")
+    mcp = MCPServer("dbmap-postgres")
     # ChatGPT plugin review requires explicit booleans on every tool. All tools are
     # confined to the one configured database, so openWorldHint is false.
-    read = ToolAnnotations(readOnlyHint=True, destructiveHint=False, openWorldHint=False)
-    setting = ToolAnnotations(readOnlyHint=False, destructiveHint=False, openWorldHint=False)
+    read = ToolAnnotations(read_only_hint=True, destructive_hint=False, open_world_hint=False)
+    setting = ToolAnnotations(read_only_hint=False, destructive_hint=False, open_world_hint=False)
 
     @mcp.tool(annotations=read)
     def database_connectivity_check() -> dict[str, Any]:
@@ -156,13 +155,26 @@ def create_mcp(application_service: DatabaseMapService | None = None):
 def main() -> None:
     mcp = create_mcp()
     transport = os.getenv("DBMAP_MCP_TRANSPORT", "stdio")
-    if transport == "streamable-http":
-        # Stays bound to loopback: expose it only through an authenticating HTTPS proxy.
-        mcp.settings.port = int(os.getenv("DBMAP_MCP_PORT", "8765"))
-        public_host = os.getenv("DBMAP_MCP_PUBLIC_HOST", "").strip()
-        if public_host:
-            mcp.settings.transport_security.allowed_hosts.append(public_host)
-    mcp.run(transport=transport)
+    if transport != "streamable-http":
+        mcp.run(transport=transport)
+        return
+    from mcp.server.transport_security import TransportSecuritySettings
+
+    # Stays bound to loopback: expose it only through an authenticating HTTPS proxy.
+    security = TransportSecuritySettings(
+        enable_dns_rebinding_protection=True,
+        allowed_hosts=["127.0.0.1:*", "localhost:*", "[::1]:*"],
+        allowed_origins=["http://127.0.0.1:*", "http://localhost:*", "http://[::1]:*"],
+    )
+    public_host = os.getenv("DBMAP_MCP_PUBLIC_HOST", "").strip()
+    if public_host:
+        security.allowed_hosts.append(public_host)
+    mcp.run(
+        transport="streamable-http",
+        host="127.0.0.1",
+        port=int(os.getenv("DBMAP_MCP_PORT", "8765")),
+        transport_security=security,
+    )
 
 
 if __name__ == "__main__":

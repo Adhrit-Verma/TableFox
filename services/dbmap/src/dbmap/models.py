@@ -46,7 +46,7 @@ class GraphSnapshot:
         database: str,
         nodes: list[GraphNode],
         edges: list[GraphEdge],
-    ) -> "GraphSnapshot":
+    ) -> GraphSnapshot:
         summary: dict[str, int] = {}
         for node in nodes:
             summary[node.kind] = summary.get(node.kind, 0) + 1

@@ -6,16 +6,23 @@ import json
 import logging
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Query, WebSocket, WebSocketDisconnect
+from fastapi import (
+    Depends,
+    FastAPI,
+    Header,
+    HTTPException,
+    Query,
+    WebSocket,
+    WebSocketDisconnect,
+)
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
-from .models import GraphSnapshot
 from .config import Settings
+from .models import GraphSnapshot
 from .security import ApiKeyAuth, Principal
 from .service import build_service
-
 
 logger = logging.getLogger(__name__)
 app = FastAPI(title="Database Graph Map", version="0.1.0")

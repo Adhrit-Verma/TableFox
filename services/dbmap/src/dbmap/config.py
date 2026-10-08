@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 import os
+from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
@@ -74,7 +74,7 @@ class Settings:
     runtime_file: Path = Path(".tablefox-runtime.json")
 
     @classmethod
-    def from_env(cls) -> "Settings":
+    def from_env(cls) -> Settings:
         try:
             from dotenv import load_dotenv
 

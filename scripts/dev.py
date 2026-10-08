@@ -3,17 +3,16 @@ from __future__ import annotations
 import argparse
 import json
 import os
-from pathlib import Path
 import shutil
 import socket
 import subprocess
 import sys
 import time
-from typing import Sequence
+import webbrowser
+from collections.abc import Sequence
+from pathlib import Path
 from urllib.error import URLError
 from urllib.request import urlopen
-import webbrowser
-
 
 REPO = Path(__file__).resolve().parents[1]
 WEB_DIR = REPO / "apps" / "web"
@@ -69,7 +68,7 @@ def validate_database(introspector) -> dict:
     try:
         connection = introspector.connectivity_check()
         snapshot = introspector.snapshot(refresh=True)
-    except Exception as error:
+    except Exception as error:  # noqa: BLE001 - any driver failure becomes one setup message
         raise RuntimeError(f"Database check failed: {error}") from None
     summary = snapshot.summary
     print(

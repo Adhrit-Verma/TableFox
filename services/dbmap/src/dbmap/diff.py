@@ -7,7 +7,6 @@ from typing import Any
 
 from .models import GraphEdge, GraphNode, GraphSnapshot
 
-
 MAX_SNAPSHOT_BYTES = 50_000_000
 VOLATILE_METADATA = {"context", "row_estimate", "usage"}
 

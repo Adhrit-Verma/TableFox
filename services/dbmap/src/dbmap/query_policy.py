@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from collections import Counter
 import json
 import re
+from collections import Counter
 from typing import Any
-
 
 MAX_PLAN_NODES = 1000
 MAX_PLAN_BYTES = 250_000
@@ -77,7 +76,7 @@ def assess_query_plan(
     document = _plan_document(payload)
     root = document.get("Plan")
     if not isinstance(root, dict):
-        raise ValueError("PostgreSQL returned an invalid EXPLAIN plan.")
+        raise ValueError("PostgreSQL returned an invalid EXPLAIN plan.")  # noqa: TRY004 - callers handle ValueError
 
     node_types: Counter[str] = Counter()
     relations: set[str] = set()
