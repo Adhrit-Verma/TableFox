@@ -36,18 +36,21 @@ ChatGPT ↔ `https://<host>/mcp` ↔ Cloudflare Access (OAuth) ↔ Cloudflare Tu
 
 The server only listens on loopback and has no login of its own; Cloudflare Access is the only gate. Never expose port 8765 any other way, and never use a quick tunnel (`cloudflared tunnel --url`).
 
-Before you start, point `.env` at the dedicated `dbmap_reader` role (see README "Safety model"). With ChatGPT in the loop, the PostgreSQL role is the second line of defense if anything above it fails.
+Each person runs their own TableFox with their own database, tunnel, and ChatGPT account. Credentials stay in a local file on that machine and are never typed into ChatGPT.
 
-1. **Run the server over HTTP.** In `.env`:
+1. **Run the server over HTTP with its own credentials.** Create a read-only role for your database (README "Safety model"); with ChatGPT in the loop it is the second line of defense if anything above it fails. Then create `.env.chatgpt` in the repo root (git-ignored) holding only what this server needs, so your everyday `.env` is never exposed:
 
    ```
+   DATABASE_URL=postgresql://dbmap_reader:<password>@<db-host>:5432/<database>
    DBMAP_MCP_TRANSPORT=streamable-http
    DBMAP_MCP_PORT=8765
    DBMAP_MCP_PUBLIC_HOST=<host>
    DBMAP_MCP_ACTOR=chatgpt
+   DBMAP_AUDIT_DIR=.logs/audit-chatgpt
+   DBMAP_RUNTIME_FILE=.tablefox-runtime-chatgpt.json
    ```
 
-   Then `.\scripts\run_mcp.ps1`. Requests whose `Host` is not loopback or `<host>` get `421`.
+   Then `$env:DBMAP_ENV_FILE = "$PWD\.env.chatgpt"; .\scripts\run_mcp.ps1`. Without `DBMAP_ENV_FILE` the server falls back to `.env`. Requests whose `Host` is not loopback or `<host>` get `421`.
 2. **Tunnel.** Cloudflare dashboard → Networking → Tunnels → Create a tunnel → Windows → run the generated install command in an admin terminal. Routes → Add route → Published application: your subdomain/domain, no path, Service URL `http://127.0.0.1:8765`.
 3. **Access app.** Zero Trust → Access controls → AI controls → MCP servers → Add an MCP server. HTTP URL `https://<host>/mcp`, policy Allow → Emails → your email only.
 4. **Managed OAuth.** Applications → that app → Edit → Advanced settings → turn on Managed OAuth. Allowed redirect URIs:

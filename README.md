@@ -146,10 +146,12 @@ These are defence in depth, not a substitute for a least-privilege PostgreSQL ro
 
 ```sql
 create role dbmap_reader login password 'replace-with-a-strong-password';
+alter role dbmap_reader set default_transaction_read_only = on;
 grant connect on database your_database to dbmap_reader;
 grant usage on schema public to dbmap_reader;
 grant select on all tables in schema public to dbmap_reader;
-alter default privileges in schema public grant select on tables to dbmap_reader;
+-- table_owner = the role that creates your tables; covers tables added later
+alter default privileges for role table_owner in schema public grant select on tables to dbmap_reader;
 ```
 
 ---
