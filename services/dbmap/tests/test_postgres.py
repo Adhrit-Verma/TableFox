@@ -29,6 +29,34 @@ def settings(database_url: str, cache_dir: Path) -> Settings:
 
 
 class PostgresIntrospectorTests(unittest.TestCase):
+    def test_database_url_reaches_the_pool_as_conninfo(self):
+        import psycopg_pool
+
+        created = {}
+
+        class Pool:
+            def __init__(self, conninfo="", **options):
+                created.update(conninfo=conninfo, kwargs=options["kwargs"])
+
+            def open(self, wait):
+                pass
+
+            def connection(self):
+                return None
+
+            def close(self):
+                pass
+
+        real_pool = psycopg_pool.ConnectionPool
+        psycopg_pool.ConnectionPool = Pool
+        try:
+            with TemporaryDirectory() as directory:
+                PostgresIntrospector(settings("postgresql://reader@db.example.com/app", Path(directory)))._connection()
+        finally:
+            psycopg_pool.ConnectionPool = real_pool
+        self.assertEqual(created["conninfo"], "postgresql://reader@db.example.com/app")
+        self.assertNotIn("conninfo", created["kwargs"])
+
     def test_cache_key_does_not_change_when_password_rotates(self):
         with TemporaryDirectory() as directory:
             cache_dir = Path(directory)

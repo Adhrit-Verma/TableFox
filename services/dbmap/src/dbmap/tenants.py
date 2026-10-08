@@ -174,8 +174,18 @@ def check_reader_role(pinned_url: str) -> None:
         with psycopg.connect(pinned_url, autocommit=True) as conn:
             row = conn.execute(WRITE_PRIVILEGE_SQL).fetchone()
     except psycopg.Error as error:
-        # Driver messages can echo connection details, so only the class is reported.
-        raise TenantError(f"Could not connect ({type(error).__name__}). Check host, user, password, and SSL.") from None
+        # Driver messages can echo connection details, so only known causes are named.
+        text = str(error).lower()
+        reasons = {
+            "does not support ssl": "The server does not accept SSL connections; TableFox requires SSL.",
+            "password authentication failed": "Wrong user or password.",
+            "does not exist": "That database or user does not exist.",
+            "timeout expired": "The server did not answer. Check the host, port, and firewall.",
+            "connection refused": "The server refused the connection. Check the host, port, and firewall.",
+            "no pg_hba.conf entry": "The server does not allow connections from TableFox's address.",
+        }
+        reason = next((message for marker, message in reasons.items() if marker in text), None)
+        raise TenantError(reason or "Could not connect. Check host, user, password, and SSL.") from None
     privileged, database_create, schema_create, table_write = row
     problems = [
         label

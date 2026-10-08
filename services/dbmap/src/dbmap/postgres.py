@@ -160,8 +160,12 @@ class PostgresIntrospector:
                         self.settings.pool_min_size,
                         self.settings.pool_max_size,
                     )
+                    kwargs = self.settings.connection_kwargs()
+                    # The pool passes conninfo positionally; leaving it in kwargs makes every
+                    # DATABASE_URL connection fail with "multiple values for 'conninfo'".
                     self._pool = ConnectionPool(
-                        kwargs=self.settings.connection_kwargs(),
+                        str(kwargs.pop("conninfo", "")),
+                        kwargs=kwargs,
                         min_size=minimum,
                         max_size=self.settings.pool_max_size,
                         open=False,
