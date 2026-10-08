@@ -97,41 +97,55 @@ def pin_database_url(url: str, allowed_ports: set[int], resolve=None) -> str:
 
 
 class CredentialStore:
-    """Encrypted per-user database URLs in a small SQLite file."""
+    """Encrypted per-user database URLs, in a SQLite file or an operator PostgreSQL database.
 
-    def __init__(self, path: Path, key: str) -> None:
+    Hosts without a persistent disk (e.g. Render's free tier) pass a postgresql:// URL.
+    """
+
+    def __init__(self, location: Path | str, key: str) -> None:
         from cryptography.fernet import Fernet
 
         self._fernet = Fernet(key.encode())
         self._link_key = hashlib.sha256(b"dbmap-connect-link" + key.encode()).digest()
-        path.parent.mkdir(parents=True, exist_ok=True)
-        self._db = sqlite3.connect(path, check_same_thread=False)
         self._lock = Lock()
+        self._postgres_url = str(location) if str(location).startswith(("postgres://", "postgresql://")) else None
+        self._db = None
+        if self._postgres_url is None:
+            path = Path(location)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            self._db = sqlite3.connect(path, check_same_thread=False)
+        blob = "bytea" if self._postgres_url else "blob"
+        self._run(f"create table if not exists credentials (user_id text primary key, secret {blob} not null)")
+        self._run("create table if not exists used_links (nonce text primary key, expires bigint)")
+
+    def _run(self, sql: str, params: tuple = ()) -> tuple | None:
+        """Execute one statement in its own transaction and return the first row, if any."""
+        if self._postgres_url:
+            import psycopg
+
+            # A short connection per call survives serverless databases closing idle sessions.
+            with psycopg.connect(self._postgres_url, autocommit=True, connect_timeout=10) as conn:
+                cursor = conn.execute(sql.replace("?", "%s"), params)
+                return cursor.fetchone() if cursor.description else None
         with self._lock, self._db:
-            self._db.execute(
-                "create table if not exists credentials (user_id text primary key, secret blob not null)"
-            )
-            self._db.execute("create table if not exists used_links (nonce text primary key, expires integer)")
+            return self._db.execute(sql, params).fetchone()
+
+    def close(self) -> None:
+        if self._db is not None:
+            self._db.close()
 
     def get(self, user_id: str) -> str | None:
-        with self._lock:
-            row = self._db.execute(
-                "select secret from credentials where user_id = ?", (user_id,)
-            ).fetchone()
-        return self._fernet.decrypt(row[0]).decode() if row else None
+        row = self._run("select secret from credentials where user_id = ?", (user_id,))
+        return self._fernet.decrypt(bytes(row[0])).decode() if row else None
 
     def put(self, user_id: str, database_url: str) -> None:
-        secret = self._fernet.encrypt(database_url.encode())
-        with self._lock, self._db:
-            self._db.execute(
-                "insert into credentials values (?, ?) "
-                "on conflict(user_id) do update set secret = excluded.secret",
-                (user_id, secret),
-            )
+        self._run(
+            "insert into credentials values (?, ?) on conflict (user_id) do update set secret = excluded.secret",
+            (user_id, self._fernet.encrypt(database_url.encode())),
+        )
 
     def delete(self, user_id: str) -> None:
-        with self._lock, self._db:
-            self._db.execute("delete from credentials where user_id = ?", (user_id,))
+        self._run("delete from credentials where user_id = ?", (user_id,))
 
     def make_link_token(self, user_id: str, now: float | None = None) -> str:
         payload = {
@@ -152,18 +166,13 @@ class CredentialStore:
         payload = json.loads(base64.urlsafe_b64decode(body))
         if payload["exp"] < (now or time.time()):
             raise TenantError("This connect link has expired. Ask ChatGPT for a new one.")
-        with self._lock:
-            used = self._db.execute(
-                "select 1 from used_links where nonce = ?", (payload["nonce"],)
-            ).fetchone()
-        if used:
+        if self._run("select 1 from used_links where nonce = ?", (payload["nonce"],)):
             raise TenantError("This connect link was already used. Ask ChatGPT for a new one.")
         return payload
 
     def consume_link(self, payload: dict) -> None:
-        with self._lock, self._db:
-            self._db.execute("delete from used_links where expires < ?", (int(time.time()),))
-            self._db.execute("insert or ignore into used_links values (?, ?)", (payload["nonce"], payload["exp"]))
+        self._run("delete from used_links where expires < ?", (int(time.time()),))
+        self._run("insert into used_links values (?, ?) on conflict do nothing", (payload["nonce"], payload["exp"]))
 
 
 def check_reader_role(pinned_url: str) -> None:

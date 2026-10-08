@@ -1,0 +1,22 @@
+# Render blueprint for hosted multi-user TableFox (see MULTI_TENANT_PLAN.md).
+services:
+  - type: web
+    name: tablefox
+    runtime: docker
+    plan: free
+    dockerfilePath: ./services/dbmap/Dockerfile
+    dockerContext: ./services/dbmap
+    healthCheckPath: /health
+    envVars:
+      # https://<service>.onrender.com, or your custom domain
+      - key: DBMAP_PUBLIC_URL
+        sync: false
+      # Auth0 issuer, e.g. https://<tenant>.us.auth0.com/
+      - key: DBMAP_OAUTH_ISSUER
+        sync: false
+      # Fernet key; losing it makes saved connections unreadable
+      - key: DBMAP_TENANT_KEY
+        sync: false
+      # postgresql:// URL of the operator database (e.g. Neon); the free disk is wiped on restart
+      - key: DBMAP_TENANT_DB
+        sync: false

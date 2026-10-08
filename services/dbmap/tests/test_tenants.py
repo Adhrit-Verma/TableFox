@@ -86,7 +86,7 @@ class CredentialStoreTests(unittest.TestCase):
         self.store = CredentialStore(self.path, Fernet.generate_key().decode())
 
     def tearDown(self):
-        self.store._db.close()
+        self.store.close()
         self.tmp.cleanup()
 
     def test_round_trip_is_encrypted_at_rest(self):
@@ -118,7 +118,7 @@ class CredentialStoreTests(unittest.TestCase):
             with self.assertRaises(TenantError):
                 other.read_link_token(self.store.make_link_token("auth0|alice"))
         finally:
-            other._db.close()
+            other.close()
 
 
 class FakeService:
@@ -150,7 +150,7 @@ class TenantRegistryTests(unittest.TestCase):
         from dbmap import tenants
 
         tenants.socket.getaddrinfo = self._real_resolve
-        self.store._db.close()
+        self.store.close()
         self.tmp.cleanup()
 
     def test_users_are_isolated(self):

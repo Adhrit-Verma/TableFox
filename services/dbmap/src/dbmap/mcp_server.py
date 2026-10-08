@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import html
 import os
-from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, urlsplit
 
@@ -333,7 +332,7 @@ def create_multi_tenant_mcp():
     issuer = required("DBMAP_OAUTH_ISSUER")
     audience = os.getenv("DBMAP_OAUTH_AUDIENCE", "").strip() or f"{public_url}/mcp"
     store = CredentialStore(
-        Path(os.getenv("DBMAP_TENANT_DB", str(base.cache_dir / "tenants.sqlite"))),
+        os.getenv("DBMAP_TENANT_DB", "").strip() or base.cache_dir / "tenants.sqlite",
         required("DBMAP_TENANT_KEY"),
     )
     ports = {int(port) for port in os.getenv("DBMAP_TENANT_PORTS", "5432").split(",") if port.strip()}
@@ -379,7 +378,8 @@ def main() -> None:
         # Loopback by default: expose it only through an HTTPS proxy. A container sets
         # DBMAP_MCP_BIND=0.0.0.0 and publishes the port to the host's loopback only.
         host=os.getenv("DBMAP_MCP_BIND", "127.0.0.1"),
-        port=int(os.getenv("DBMAP_MCP_PORT", "8765")),
+        # Render and similar hosts assign the port through PORT.
+        port=int(os.getenv("DBMAP_MCP_PORT") or os.getenv("PORT") or "8765"),
         transport_security=security,
     )
 

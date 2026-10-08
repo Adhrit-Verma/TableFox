@@ -26,6 +26,7 @@ How a user connects: the first tool call without a saved database returns a priv
 | `DBMAP_OAUTH_ISSUER` | Auth0 issuer, e.g. `https://<tenant>.us.auth0.com/` |
 | `DBMAP_OAUTH_AUDIENCE` | Auth0 API identifier; defaults to `https://<your-host>/mcp` |
 | `DBMAP_TENANT_KEY` | Fernet key: `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"`. Losing it makes saved connections unreadable. |
+| `DBMAP_TENANT_DB` | Where encrypted connections live: a file path (default `/data/tenants.sqlite`) or a `postgresql://` URL. Hosts without a persistent disk, such as Render's free tier, must use a URL (e.g. Neon). |
 | `DBMAP_TENANT_PORTS` | Allowed database ports, default `5432` |
 
 The image keeps state in `/data` (encrypted credentials, per-user cache and audit). Mount a volume there. `/health` answers `{"status": "ok"}`.
