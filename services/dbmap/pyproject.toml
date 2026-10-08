@@ -2,7 +2,6 @@
 name = "dbmap"
 version = "0.1.0"
 description = "Local PostgreSQL database graph mapper with FastAPI and MCP stdio entry points."
-readme = "../../README.md"
 requires-python = ">=3.11"
 dependencies = [
   "fastapi>=0.115.0",
