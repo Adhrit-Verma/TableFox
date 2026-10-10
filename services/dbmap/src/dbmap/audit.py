@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from threading import Lock
 from typing import Any
@@ -25,7 +25,7 @@ class AuditLog:
         target: str | None = None,
         details: dict[str, Any] | None = None,
     ) -> None:
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         event = {
             "timestamp": now.isoformat(),
             "actor": actor[:200],

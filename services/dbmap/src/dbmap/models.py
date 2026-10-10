@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 
@@ -53,7 +53,7 @@ class GraphSnapshot:
         summary["edges"] = len(edges)
         return cls(
             database=database,
-            generated_at=datetime.now(timezone.utc).isoformat(),
+            generated_at=datetime.now(UTC).isoformat(),
             nodes=nodes,
             edges=edges,
             summary=summary,

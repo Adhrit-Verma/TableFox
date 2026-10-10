@@ -119,7 +119,7 @@ def _bounded_records(
 
 def _valid_timestamp(value: str) -> bool:
     try:
-        datetime.fromisoformat(value.replace("Z", "+00:00"))
+        datetime.fromisoformat(value)
         return True
     except ValueError:
         return False
