@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import html
 import os
+from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, urlsplit
 
@@ -9,6 +10,19 @@ from .service import DatabaseMapService, build_service
 from .tenants import TenantError, TenantRegistry
 
 service = build_service()
+
+ICON_FILE = Path(__file__).with_name("static") / "icon.png"
+SERVER_DESCRIPTION = (
+    "Ask questions about your PostgreSQL database in plain language. TableFox finds the few "
+    "tables a question needs and runs guarded, read-only queries."
+)
+SERVER_INSTRUCTIONS = (
+    "Start with database_task_context for the user's question, then answer with at most five "
+    "bounded SELECT/WITH statements in one database_readonly_batch call. Use only the joins it "
+    "returns. TableFox is read-only: never attempt writes. Never ask the user to type database "
+    "credentials into the chat; if no database is connected, give them the link from "
+    "database_connection_link."
+)
 
 PAGE_HEADERS = {
     "Cache-Control": "no-store",
@@ -80,7 +94,25 @@ def create_mcp(
     from mcp.types import ToolAnnotations
 
     single_service = application_service or service
-    mcp = MCPServer("dbmap-postgres", **server_options)
+    from mcp.types import Icon
+
+    icons = [Icon(src=f"{public_url.rstrip('/')}/icon.png", mime_type="image/png", sizes=["512x512"])] if public_url else None
+    mcp = MCPServer(
+        "dbmap-postgres",
+        title="TableFox",
+        description=SERVER_DESCRIPTION,
+        instructions=SERVER_INSTRUCTIONS,
+        website_url="https://github.com/Adhrit-Verma/TableFox",
+        icons=icons,
+        **server_options,
+    )
+
+    @mcp.custom_route("/icon.png", methods=["GET"])
+    async def icon(_request):
+        from starlette.responses import FileResponse
+
+        return FileResponse(ICON_FILE, media_type="image/png", headers={"Cache-Control": "public, max-age=86400"})
+
     # ChatGPT plugin review requires explicit booleans on every tool. All tools are
     # confined to the caller's one configured database, so openWorldHint is false.
     read = ToolAnnotations(read_only_hint=True, destructive_hint=False, open_world_hint=False)
@@ -357,8 +389,8 @@ def main() -> None:
         mcp, public_host = create_multi_tenant_mcp()
         transport = "streamable-http"
     else:
-        mcp = create_mcp()
         public_host = os.getenv("DBMAP_MCP_PUBLIC_HOST", "").strip()
+        mcp = create_mcp(public_url=f"https://{public_host}" if public_host else "")
         transport = os.getenv("DBMAP_MCP_TRANSPORT", "stdio")
     if transport != "streamable-http":
         mcp.run(transport=transport)
