@@ -41,6 +41,27 @@ class McpServerTests(unittest.TestCase):
                 self.assertIsInstance(value, bool, tool.name)
             self.assertFalse(hints.destructive_hint, tool.name)
 
+    def test_validation_errors_reach_the_model_as_text(self):
+        from types import SimpleNamespace
+
+        from mcp.server.mcpserver.exceptions import ToolError
+
+        class Service:
+            settings = SimpleNamespace(mcp_actor="test")
+
+            def readonly_query(self, sql, limit, actor):
+                raise ValueError("Only SELECT or WITH queries are allowed.")
+
+        mcp = create_mcp(Service())
+        with self.assertRaisesRegex(ToolError, "Only SELECT or WITH queries are allowed"):
+            asyncio.run(mcp.call_tool("database_readonly_query", {"sql": "delete from t"}))
+
+    def test_batch_schema_tells_the_model_how_to_name_queries(self):
+        tools = {tool.name: tool for tool in asyncio.run(create_mcp().list_tools())}
+        schema = str(tools["database_readonly_batch"].input_schema)
+        self.assertIn("A-Za-z0-9_-", schema)
+        self.assertIn("sql", schema)
+
 
 if __name__ == "__main__":
     unittest.main()

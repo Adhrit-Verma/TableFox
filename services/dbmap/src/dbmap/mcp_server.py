@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import functools
 import os
 from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, quote, urlsplit
+
+from pydantic import BaseModel, Field
 
 from . import pages
 from .service import DatabaseMapService, build_service
@@ -16,6 +19,16 @@ SERVER_DESCRIPTION = (
     "Ask questions about your PostgreSQL database in plain language. TableFox finds the few "
     "tables a question needs and runs guarded, read-only queries."
 )
+class BatchQuery(BaseModel):
+    """One named statement inside database_readonly_batch."""
+
+    name: str = Field(
+        pattern=r"^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+        description="Short identifier for this result, letters/digits/_/- only, e.g. top_products.",
+    )
+    sql: str = Field(description="One SELECT or WITH statement.")
+
+
 def database_url_from_form(fields: dict[str, str]) -> str:
     """Build a postgresql:// URL from the connect form, escaping every part."""
     pasted = fields.get("database_url", "").strip()
@@ -123,6 +136,21 @@ def create_mcp(
     read = ToolAnnotations(read_only_hint=True, destructive_hint=False, open_world_hint=False)
     setting = ToolAnnotations(read_only_hint=False, destructive_hint=False, open_world_hint=False)
 
+    def tool(annotations):
+        """Register a tool whose ValueErrors (our own validation messages) reach the model as text."""
+
+        def register(fn):
+            @functools.wraps(fn)
+            def guarded(*args, **kwargs):
+                try:
+                    return fn(*args, **kwargs)
+                except ValueError as error:
+                    raise ToolError(str(error)) from None
+
+            return mcp.tool(annotations=annotations)(guarded)
+
+        return register
+
     def connect_link(user_id: str) -> str:
         return f"{public_url.rstrip('/')}/connect?t={registry.store.make_link_token(user_id)}"
 
@@ -160,13 +188,13 @@ def create_mcp(
             raise ToolError(f"{error} Reconnect '{name}': {connect_link(user_id)}") from None
         return user_service, user_service.settings.mcp_actor
 
-    @mcp.tool(annotations=read)
+    @tool(read)
     def database_connectivity_check(database: str | None = None) -> dict[str, Any]:
         """Validate PostgreSQL credentials and report safe connection metadata."""
         tool_service, actor = current(database)
         return tool_service.connectivity_check(actor=actor)
 
-    @mcp.tool(annotations=read)
+    @tool(read)
     def database_graph_snapshot(
         refresh: bool = False,
         schemas: list[str] | None = None,
@@ -182,7 +210,7 @@ def create_mcp(
             actor=actor,
         ).to_dict()
 
-    @mcp.tool(annotations=read)
+    @tool(read)
     def database_search(query: str, limit: int = 25, database: str | None = None) -> dict[str, Any]:
         """Search graph objects by table, column, constraint, index, comment, or data type."""
         tool_service, actor = current(database)
@@ -191,7 +219,7 @@ def create_mcp(
             "results": tool_service.search(query, limit=limit, actor=actor),
         }
 
-    @mcp.tool(annotations=read)
+    @tool(read)
     def database_neighbors(node_id: str, depth: int = 1, max_nodes: int = 100, database: str | None = None) -> dict[str, Any]:
         """Return nearby graph nodes and edges around one stable node ID."""
         tool_service, actor = current(database)
@@ -202,35 +230,38 @@ def create_mcp(
             actor=actor,
         ).to_dict()
 
-    @mcp.tool(annotations=read)
+    @tool(read)
     def database_explain_object(node_id: str, database: str | None = None) -> dict[str, Any]:
         """Summarize one graph object and its important columns and relationships."""
         tool_service, actor = current(database)
         return tool_service.explain_object(node_id, actor=actor)
 
-    @mcp.tool(annotations=read)
+    @tool(read)
     def database_readonly_query(sql: str, limit: int = 200, database: str | None = None) -> dict[str, Any]:
         """Run a guarded read-only SELECT/WITH query with timeout and row limit."""
         tool_service, actor = current(database)
         return tool_service.readonly_query(sql, limit=limit, actor=actor)
 
-    @mcp.tool(annotations=read)
+    @tool(read)
     def database_readonly_batch(
-        queries: list[dict[str, Any]],
+        queries: list[BatchQuery],
         max_rows_each: int = 100,
         max_bytes: int = 32768,
         database: str | None = None,
     ) -> dict[str, Any]:
-        """Run up to five guarded reads in one transaction and return compact columnar rows."""
+        """Run up to five guarded reads in one transaction and return compact columnar rows.
+
+        Each query needs a short identifier name (e.g. top_products) and one SELECT/WITH statement.
+        """
         tool_service, actor = current(database)
         return tool_service.readonly_batch(
-            queries,
+            [query.model_dump() for query in queries],
             max_rows_each=max_rows_each,
             max_bytes=max_bytes,
             actor=actor,
         )
 
-    @mcp.tool(annotations=read)
+    @tool(read)
     def database_explain_query(
         sql: str,
         include_plan: bool = False,
@@ -240,7 +271,7 @@ def create_mcp(
         tool_service, actor = current(database)
         return tool_service.explain_query(sql, include_plan=include_plan, actor=actor)
 
-    @mcp.tool(annotations=read)
+    @tool(read)
     def database_find_join_path(
         source_id: str,
         target_id: str,
@@ -256,13 +287,13 @@ def create_mcp(
             actor=actor,
         )
 
-    @mcp.tool(annotations=read)
+    @tool(read)
     def database_source_of_truth(query: str, limit: int = 5, database: str | None = None) -> dict[str, Any]:
         """Rank authoritative candidates and distinguish verified context from heuristics."""
         tool_service, actor = current(database)
         return tool_service.source_of_truth(query, limit=limit, actor=actor)
 
-    @mcp.tool(annotations=read)
+    @tool(read)
     def database_task_context(
         question: str,
         max_relations: int = 6,
@@ -284,7 +315,7 @@ def create_mcp(
             actor=actor,
         )
 
-    @mcp.tool(annotations=setting)
+    @tool(setting)
     def database_context_window(size: int | None = None, database: str | None = None) -> dict[str, Any]:
         """Read or set how many relations are remembered as already-sent.
 
@@ -296,13 +327,13 @@ def create_mcp(
             return tool_service.context_window_report()
         return tool_service.set_context_window(size, actor=actor)
 
-    @mcp.tool(annotations=read)
+    @tool(read)
     def database_schema_changes(database: str | None = None) -> dict[str, Any]:
         """Compare the configured baseline snapshot with the connected database."""
         tool_service, actor = current(database)
         return tool_service.schema_changes(actor=actor)
 
-    @mcp.tool(annotations=read)
+    @tool(read)
     def database_context_identity(database: str | None = None) -> dict[str, str]:
         """Return the safe database identity and schema fingerprint for context linking."""
         tool_service, actor = current(database)
@@ -310,7 +341,7 @@ def create_mcp(
 
     if registry is not None:
 
-        @mcp.tool(annotations=read)
+        @tool(read)
         def database_connections() -> dict[str, Any]:
             """List the user's connected databases by name, plus a private 10-minute link to add, replace, or remove one.
 
