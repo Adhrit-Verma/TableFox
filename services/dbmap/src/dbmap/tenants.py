@@ -13,6 +13,7 @@ import hashlib
 import hmac
 import ipaddress
 import json
+import re
 import secrets
 import socket
 import sqlite3
@@ -26,6 +27,7 @@ from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 from .config import Settings
 from .service import DatabaseMapService, build_service
 
+NAME_PATTERN = re.compile(r"[a-z0-9][a-z0-9_-]{0,31}")
 ALLOWED_QUERY_KEYS = {"sslmode", "connect_timeout", "application_name"}
 STRONG_SSLMODES = {"require", "verify-ca", "verify-full"}
 LINK_TTL_SECONDS = 600
@@ -115,37 +117,44 @@ class CredentialStore:
             path.parent.mkdir(parents=True, exist_ok=True)
             self._db = sqlite3.connect(path, check_same_thread=False)
         blob = "bytea" if self._postgres_url else "blob"
-        self._run(f"create table if not exists credentials (user_id text primary key, secret {blob} not null)")
+        self._run(
+            f"create table if not exists connections (user_id text, name text, secret {blob} not null, "
+            "primary key (user_id, name))"
+        )
         self._run("create table if not exists used_links (nonce text primary key, expires bigint)")
 
-    def _run(self, sql: str, params: tuple = ()) -> tuple | None:
-        """Execute one statement in its own transaction and return the first row, if any."""
+    def _run(self, sql: str, params: tuple = ()) -> list[tuple]:
+        """Execute one statement in its own transaction and return its rows."""
         if self._postgres_url:
             import psycopg
 
             # A short connection per call survives serverless databases closing idle sessions.
             with psycopg.connect(self._postgres_url, autocommit=True, connect_timeout=10) as conn:
                 cursor = conn.execute(sql.replace("?", "%s"), params)
-                return cursor.fetchone() if cursor.description else None
+                return cursor.fetchall() if cursor.description else []
         with self._lock, self._db:
-            return self._db.execute(sql, params).fetchone()
+            return self._db.execute(sql, params).fetchall()
 
     def close(self) -> None:
         if self._db is not None:
             self._db.close()
 
-    def get(self, user_id: str) -> str | None:
-        row = self._run("select secret from credentials where user_id = ?", (user_id,))
-        return self._fernet.decrypt(bytes(row[0])).decode() if row else None
+    def names(self, user_id: str) -> list[str]:
+        return [row[0] for row in self._run("select name from connections where user_id = ? order by name", (user_id,))]
 
-    def put(self, user_id: str, database_url: str) -> None:
+    def get(self, user_id: str, name: str) -> str | None:
+        rows = self._run("select secret from connections where user_id = ? and name = ?", (user_id, name))
+        return self._fernet.decrypt(bytes(rows[0][0])).decode() if rows else None
+
+    def put(self, user_id: str, name: str, database_url: str) -> None:
         self._run(
-            "insert into credentials values (?, ?) on conflict (user_id) do update set secret = excluded.secret",
-            (user_id, self._fernet.encrypt(database_url.encode())),
+            "insert into connections values (?, ?, ?) "
+            "on conflict (user_id, name) do update set secret = excluded.secret",
+            (user_id, name, self._fernet.encrypt(database_url.encode())),
         )
 
-    def delete(self, user_id: str) -> None:
-        self._run("delete from credentials where user_id = ?", (user_id,))
+    def delete(self, user_id: str, name: str) -> None:
+        self._run("delete from connections where user_id = ? and name = ?", (user_id, name))
 
     def make_link_token(self, user_id: str, now: float | None = None) -> str:
         payload = {
@@ -221,8 +230,15 @@ def _close(service: DatabaseMapService) -> None:
     atexit.unregister(introspector.close)
 
 
+def clean_name(name: str) -> str:
+    cleaned = name.strip().lower()
+    if not NAME_PATTERN.fullmatch(cleaned):
+        raise TenantError("Use a short name: lowercase letters, digits, - or _ (up to 32 characters).")
+    return cleaned
+
+
 class TenantRegistry:
-    """Builds and caches one isolated service per user, keyed by the token subject."""
+    """Builds and caches one isolated service per saved database, keyed by token subject and name."""
 
     def __init__(
         self,
@@ -237,23 +253,23 @@ class TenantRegistry:
         self.allowed_ports = allowed_ports
         self.max_active = max_active
         self._factory = factory
-        self._active: OrderedDict[str, DatabaseMapService] = OrderedDict()
+        self._active: OrderedDict[tuple[str, str], DatabaseMapService] = OrderedDict()
         self._lock = Lock()
 
     @staticmethod
     def tenant_key(user_id: str) -> str:
         return hashlib.sha256(user_id.encode()).hexdigest()[:24]
 
-    def settings_for(self, user_id: str, database_url: str) -> Settings:
+    def settings_for(self, user_id: str, name: str, database_url: str) -> Settings:
         key = self.tenant_key(user_id)
-        root = self.base.cache_dir / "tenants" / key
+        root = self.base.cache_dir / "tenants" / key / name
         return replace(
             self.base,
             database_url=database_url,
             cache_dir=root / "cache",
             audit_dir=self.base.audit_dir / key,
             runtime_file=root / "runtime.json",
-            mcp_actor=f"user:{key}",
+            mcp_actor=f"user:{key}:{name}",
             context_file=None,
             baseline_file=None,
             auth_required=False,
@@ -261,35 +277,38 @@ class TenantRegistry:
             pool_max_size=min(self.base.pool_max_size, 2),
         )
 
-    def service_for(self, user_id: str) -> DatabaseMapService | None:
+    def service_for(self, user_id: str, name: str) -> DatabaseMapService | None:
+        slot = (user_id, name)
         with self._lock:
-            service = self._active.get(user_id)
+            service = self._active.get(slot)
             if service is not None:
-                self._active.move_to_end(user_id)
+                self._active.move_to_end(slot)
                 return service
-        stored = self.store.get(user_id)
+        stored = self.store.get(user_id, name)
         if stored is None:
             return None
         # Re-resolve on every build so a stored host that moved to a private address is refused.
         pinned = pin_database_url(stored, self.allowed_ports)
-        service = self._factory(self.settings_for(user_id, pinned))
+        service = self._factory(self.settings_for(user_id, name, pinned))
         with self._lock:
-            self._active[user_id] = service
+            self._active[slot] = service
             while len(self._active) > self.max_active:
                 _, evicted = self._active.popitem(last=False)
                 _close(evicted)
         return service
 
-    def connect(self, user_id: str, database_url: str, check=check_reader_role) -> None:
+    def connect(self, user_id: str, name: str, database_url: str, check=check_reader_role) -> str:
+        name = clean_name(name)
         pinned = pin_database_url(database_url, self.allowed_ports)
         check(pinned)
-        self.store.put(user_id, database_url.strip())
-        self.forget(user_id, delete=False)
+        self.store.put(user_id, name, database_url.strip())
+        self.forget(user_id, name, delete=False)
+        return name
 
-    def forget(self, user_id: str, delete: bool = True) -> None:
+    def forget(self, user_id: str, name: str, delete: bool = True) -> None:
         with self._lock:
-            service = self._active.pop(user_id, None)
+            service = self._active.pop((user_id, name), None)
         if service is not None:
             _close(service)
         if delete:
-            self.store.delete(user_id)
+            self.store.delete(user_id, name)

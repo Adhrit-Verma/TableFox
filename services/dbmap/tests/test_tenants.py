@@ -90,12 +90,12 @@ class CredentialStoreTests(unittest.TestCase):
         self.tmp.cleanup()
 
     def test_round_trip_is_encrypted_at_rest(self):
-        self.store.put("auth0|alice", "postgresql://reader:s3cret-pw@db.example.com/app")
-        self.assertEqual(self.store.get("auth0|alice"), "postgresql://reader:s3cret-pw@db.example.com/app")
+        self.store.put("auth0|alice", "main", "postgresql://reader:s3cret-pw@db.example.com/app")
+        self.assertEqual(self.store.get("auth0|alice", "main"), "postgresql://reader:s3cret-pw@db.example.com/app")
         self.assertNotIn(b"s3cret-pw", self.path.read_bytes())
-        self.assertIsNone(self.store.get("auth0|bob"))
-        self.store.delete("auth0|alice")
-        self.assertIsNone(self.store.get("auth0|alice"))
+        self.assertIsNone(self.store.get("auth0|bob", "main"))
+        self.store.delete("auth0|alice", "main")
+        self.assertIsNone(self.store.get("auth0|alice", "main"))
 
     def test_link_tokens_are_signed_expiring_and_single_use(self):
         token = self.store.make_link_token("auth0|alice")
@@ -154,10 +154,10 @@ class TenantRegistryTests(unittest.TestCase):
         self.tmp.cleanup()
 
     def test_users_are_isolated(self):
-        self.store.put("alice", "postgresql://a:pw@a.example.com/one")
-        self.store.put("bob", "postgresql://b:pw@b.example.com/two")
-        alice = self.registry.service_for("alice").settings
-        bob = self.registry.service_for("bob").settings
+        self.store.put("alice", "main", "postgresql://a:pw@a.example.com/one")
+        self.store.put("bob", "main", "postgresql://b:pw@b.example.com/two")
+        alice = self.registry.service_for("alice", "main").settings
+        bob = self.registry.service_for("bob", "main").settings
 
         self.assertIn("a.example.com", alice.database_url)
         self.assertIn("b.example.com", bob.database_url)
@@ -170,32 +170,32 @@ class TenantRegistryTests(unittest.TestCase):
         self.assertIsNone(alice.baseline_file)
 
     def test_unknown_user_has_no_service(self):
-        self.assertIsNone(self.registry.service_for("nobody"))
+        self.assertIsNone(self.registry.service_for("nobody", "main"))
 
     def test_eviction_and_forget_close_pools(self):
-        self.store.put("alice", "postgresql://a:pw@a.example.com/one")
-        self.store.put("bob", "postgresql://b:pw@b.example.com/two")
-        alice = self.registry.service_for("alice")
-        self.registry.service_for("bob")
+        self.store.put("alice", "main", "postgresql://a:pw@a.example.com/one")
+        self.store.put("bob", "main", "postgresql://b:pw@b.example.com/two")
+        alice = self.registry.service_for("alice", "main")
+        self.registry.service_for("bob", "main")
         self.assertTrue(alice.closed)
 
-        self.registry.forget("bob")
-        self.assertIsNone(self.store.get("bob"))
+        self.registry.forget("bob", "main")
+        self.assertIsNone(self.store.get("bob", "main"))
 
     def test_connect_rejects_writer_roles_without_saving(self):
         def refuse(_url):
             raise TenantError("TableFox only accepts read-only roles")
 
         with self.assertRaises(TenantError):
-            self.registry.connect("alice", "postgresql://a:pw@a.example.com/one", check=refuse)
-        self.assertIsNone(self.store.get("alice"))
+            self.registry.connect("alice", "main", "postgresql://a:pw@a.example.com/one", check=refuse)
+        self.assertIsNone(self.store.get("alice", "main"))
 
-        self.registry.connect("alice", "postgresql://a:pw@a.example.com/one", check=lambda _url: None)
-        self.assertIsNotNone(self.store.get("alice"))
+        self.registry.connect("alice", "main", "postgresql://a:pw@a.example.com/one", check=lambda _url: None)
+        self.assertIsNotNone(self.store.get("alice", "main"))
 
 
 class MultiTenantMcpTests(TenantRegistryTests):
-    def call_as(self, mcp, user_id, name):
+    def call_as(self, mcp, user_id, name, arguments=None):
         from mcp.server.auth.middleware.auth_context import auth_context_var
         from mcp.server.auth.middleware.bearer_auth import AuthenticatedUser
         from mcp.server.auth.provider import AccessToken
@@ -204,12 +204,12 @@ class MultiTenantMcpTests(TenantRegistryTests):
             AuthenticatedUser(AccessToken(token="t", client_id="chatgpt", scopes=[], subject=user_id))
         )
         try:
-            return asyncio.run(mcp.call_tool(name, {}))
+            return asyncio.run(mcp.call_tool(name, arguments or {}))
         finally:
             auth_context_var.reset(token)
 
     def test_tools_use_the_callers_database(self):
-        self.store.put("alice", "postgresql://a:pw@a.example.com/one")
+        self.store.put("alice", "main", "postgresql://a:pw@a.example.com/one")
         mcp = create_mcp(registry=self.registry, public_url="https://tablefox.example.com")
 
         result = self.call_as(mcp, "alice", "database_connectivity_check")
@@ -223,10 +223,33 @@ class MultiTenantMcpTests(TenantRegistryTests):
         with self.assertRaisesRegex(ToolError, r"https://tablefox\.example\.com/connect\?t="):
             self.call_as(mcp, "carol", "database_connectivity_check")
 
+    def test_several_databases_ask_which_one(self):
+        from mcp.server.mcpserver.exceptions import ToolError
+
+        self.store.put("alice", "hr", "postgresql://a:pw@hr.example.com/hr")
+        self.store.put("alice", "sales", "postgresql://a:pw@sales.example.com/sales")
+        mcp = create_mcp(registry=self.registry, public_url="https://tablefox.example.com")
+
+        with self.assertRaisesRegex(ToolError, "Several databases are connected: hr, sales"):
+            self.call_as(mcp, "alice", "database_connectivity_check")
+        result = self.call_as(mcp, "alice", "database_connectivity_check", {"database": "sales"})
+        self.assertIn("sales.example.com", str(result.structured_content))
+        self.assertIn("user:", str(result.structured_content))
+        with self.assertRaisesRegex(ToolError, "No database named 'other'"):
+            self.call_as(mcp, "alice", "database_connectivity_check", {"database": "other"})
+        # another user's name is never reachable
+        with self.assertRaisesRegex(ToolError, "No database is connected"):
+            self.call_as(mcp, "bob", "database_connectivity_check", {"database": "sales"})
+
+    def test_connection_names_are_validated(self):
+        for bad in ("", "Has Space", "a" * 33, "../x", "x;drop"):
+            with self.subTest(name=bad), self.assertRaises(TenantError):
+                self.registry.connect("alice", bad, "postgresql://a:pw@a.example.com/one", check=lambda _url: None)
+
     def test_multi_tenant_tools_keep_explicit_annotations(self):
         mcp = create_mcp(registry=self.registry, public_url="https://tablefox.example.com")
         tools = asyncio.run(mcp.list_tools())
-        self.assertIn("database_connection_link", {tool.name for tool in tools})
+        self.assertIn("database_connections", {tool.name for tool in tools})
         for tool in tools:
             self.assertIsInstance(tool.annotations.read_only_hint, bool, tool.name)
             self.assertFalse(tool.annotations.destructive_hint, tool.name)

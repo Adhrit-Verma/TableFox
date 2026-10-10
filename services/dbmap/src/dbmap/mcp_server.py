@@ -21,7 +21,8 @@ SERVER_INSTRUCTIONS = (
     "bounded SELECT/WITH statements in one database_readonly_batch call. Use only the joins it "
     "returns. TableFox is read-only: never attempt writes. Never ask the user to type database "
     "credentials into the chat; if no database is connected, give them the link from "
-    "database_connection_link."
+    "database_connections. If several databases are connected and the question does not say "
+    "which, ask the user, then pass that name as the database argument."
 )
 
 PAGE_HEADERS = {
@@ -129,26 +130,36 @@ def create_mcp(
             raise ToolError("Sign in to TableFox first.")
         return token.subject
 
-    def current() -> tuple[DatabaseMapService, str]:
+    def current(database: str | None = None) -> tuple[DatabaseMapService, str]:
+        """Resolve the caller's database; single-user mode ignores the name."""
         if registry is None:
             settings = single_service.settings
             return single_service, settings.mcp_actor if settings else "local-mcp"
         user_id = caller_id()
-        try:
-            user_service = registry.service_for(user_id)
-        except TenantError as error:
-            raise ToolError(f"{error} Reconnect your database: {connect_link(user_id)}") from None
-        if user_service is None:
+        names = registry.store.names(user_id)
+        if not names:
             raise ToolError(
                 "No database is connected yet. Open this private link to connect one "
                 f"(valid for 10 minutes): {connect_link(user_id)}"
             )
+        if database is None and len(names) > 1:
+            raise ToolError(
+                f"Several databases are connected: {', '.join(names)}. Ask the user which one "
+                "to use, then call again with database set to that name."
+            )
+        name = (database or names[0]).strip().lower()
+        if name not in names:
+            raise ToolError(f"No database named '{name}'. Connected databases: {', '.join(names)}.")
+        try:
+            user_service = registry.service_for(user_id, name)
+        except TenantError as error:
+            raise ToolError(f"{error} Reconnect '{name}': {connect_link(user_id)}") from None
         return user_service, user_service.settings.mcp_actor
 
     @mcp.tool(annotations=read)
-    def database_connectivity_check() -> dict[str, Any]:
+    def database_connectivity_check(database: str | None = None) -> dict[str, Any]:
         """Validate PostgreSQL credentials and report safe connection metadata."""
-        tool_service, actor = current()
+        tool_service, actor = current(database)
         return tool_service.connectivity_check(actor=actor)
 
     @mcp.tool(annotations=read)
@@ -156,9 +167,10 @@ def create_mcp(
         refresh: bool = False,
         schemas: list[str] | None = None,
         max_nodes: int = 200,
+        database: str | None = None,
     ) -> dict[str, Any]:
         """Return a bounded graph snapshot of schemas, relations, columns, constraints, indexes, and relationships."""
-        tool_service, actor = current()
+        tool_service, actor = current(database)
         return tool_service.graph_snapshot(
             refresh=refresh,
             schemas=schemas,
@@ -167,18 +179,18 @@ def create_mcp(
         ).to_dict()
 
     @mcp.tool(annotations=read)
-    def database_search(query: str, limit: int = 25) -> dict[str, Any]:
+    def database_search(query: str, limit: int = 25, database: str | None = None) -> dict[str, Any]:
         """Search graph objects by table, column, constraint, index, comment, or data type."""
-        tool_service, actor = current()
+        tool_service, actor = current(database)
         return {
             "query": query,
             "results": tool_service.search(query, limit=limit, actor=actor),
         }
 
     @mcp.tool(annotations=read)
-    def database_neighbors(node_id: str, depth: int = 1, max_nodes: int = 100) -> dict[str, Any]:
+    def database_neighbors(node_id: str, depth: int = 1, max_nodes: int = 100, database: str | None = None) -> dict[str, Any]:
         """Return nearby graph nodes and edges around one stable node ID."""
-        tool_service, actor = current()
+        tool_service, actor = current(database)
         return tool_service.neighbors(
             node_id,
             depth=depth,
@@ -187,15 +199,15 @@ def create_mcp(
         ).to_dict()
 
     @mcp.tool(annotations=read)
-    def database_explain_object(node_id: str) -> dict[str, Any]:
+    def database_explain_object(node_id: str, database: str | None = None) -> dict[str, Any]:
         """Summarize one graph object and its important columns and relationships."""
-        tool_service, actor = current()
+        tool_service, actor = current(database)
         return tool_service.explain_object(node_id, actor=actor)
 
     @mcp.tool(annotations=read)
-    def database_readonly_query(sql: str, limit: int = 200) -> dict[str, Any]:
+    def database_readonly_query(sql: str, limit: int = 200, database: str | None = None) -> dict[str, Any]:
         """Run a guarded read-only SELECT/WITH query with timeout and row limit."""
-        tool_service, actor = current()
+        tool_service, actor = current(database)
         return tool_service.readonly_query(sql, limit=limit, actor=actor)
 
     @mcp.tool(annotations=read)
@@ -203,9 +215,10 @@ def create_mcp(
         queries: list[dict[str, Any]],
         max_rows_each: int = 100,
         max_bytes: int = 32768,
+        database: str | None = None,
     ) -> dict[str, Any]:
         """Run up to five guarded reads in one transaction and return compact columnar rows."""
-        tool_service, actor = current()
+        tool_service, actor = current(database)
         return tool_service.readonly_batch(
             queries,
             max_rows_each=max_rows_each,
@@ -217,9 +230,10 @@ def create_mcp(
     def database_explain_query(
         sql: str,
         include_plan: bool = False,
+        database: str | None = None,
     ) -> dict[str, Any]:
         """Plan a SELECT/WITH query without executing it and apply cost and row thresholds."""
-        tool_service, actor = current()
+        tool_service, actor = current(database)
         return tool_service.explain_query(sql, include_plan=include_plan, actor=actor)
 
     @mcp.tool(annotations=read)
@@ -227,9 +241,10 @@ def create_mcp(
         source_id: str,
         target_id: str,
         max_hops: int = 6,
+        database: str | None = None,
     ) -> dict[str, Any]:
         """Find a bounded path backed by declared foreign keys or catalog dependencies."""
-        tool_service, actor = current()
+        tool_service, actor = current(database)
         return tool_service.join_path(
             source_id,
             target_id,
@@ -238,9 +253,9 @@ def create_mcp(
         )
 
     @mcp.tool(annotations=read)
-    def database_source_of_truth(query: str, limit: int = 5) -> dict[str, Any]:
+    def database_source_of_truth(query: str, limit: int = 5, database: str | None = None) -> dict[str, Any]:
         """Rank authoritative candidates and distinguish verified context from heuristics."""
-        tool_service, actor = current()
+        tool_service, actor = current(database)
         return tool_service.source_of_truth(query, limit=limit, actor=actor)
 
     @mcp.tool(annotations=read)
@@ -249,13 +264,14 @@ def create_mcp(
         max_relations: int = 6,
         max_bytes: int = 6144,
         refresh_context: bool = False,
+        database: str | None = None,
     ) -> dict[str, Any]:
         """Return a compact ranked schema and declared-join context for one task.
 
         When the context window is enabled, relations already sent this session come back
         in "known" instead of being repeated. Pass refresh_context=true to force full detail.
         """
-        tool_service, actor = current()
+        tool_service, actor = current(database)
         return tool_service.task_context(
             question,
             max_relations=max_relations,
@@ -265,38 +281,40 @@ def create_mcp(
         )
 
     @mcp.tool(annotations=setting)
-    def database_context_window(size: int | None = None) -> dict[str, Any]:
+    def database_context_window(size: int | None = None, database: str | None = None) -> dict[str, Any]:
         """Read or set how many relations are remembered as already-sent.
 
         Call with no size to see the current setting, the measured token savings, and the
         cost, then ask the user which value they want before setting it. Size 0 disables it.
         """
-        tool_service, actor = current()
+        tool_service, actor = current(database)
         if size is None:
             return tool_service.context_window_report()
         return tool_service.set_context_window(size, actor=actor)
 
     @mcp.tool(annotations=read)
-    def database_schema_changes() -> dict[str, Any]:
+    def database_schema_changes(database: str | None = None) -> dict[str, Any]:
         """Compare the configured baseline snapshot with the connected database."""
-        tool_service, actor = current()
+        tool_service, actor = current(database)
         return tool_service.schema_changes(actor=actor)
 
     @mcp.tool(annotations=read)
-    def database_context_identity() -> dict[str, str]:
+    def database_context_identity(database: str | None = None) -> dict[str, str]:
         """Return the safe database identity and schema fingerprint for context linking."""
-        tool_service, actor = current()
+        tool_service, actor = current(database)
         return tool_service.snapshot_identity(actor=actor)
 
     if registry is not None:
 
         @mcp.tool(annotations=read)
-        def database_connection_link() -> dict[str, str]:
-            """Return a private 10-minute link where the user connects, replaces, or removes their database.
+        def database_connections() -> dict[str, Any]:
+            """List the user's connected databases by name, plus a private 10-minute link to add, replace, or remove one.
 
+            Pass a name as the database argument of other tools when more than one is connected.
             Never ask the user to paste database credentials into the chat; send them this link.
             """
-            return {"connect_url": connect_link(caller_id())}
+            user_id = caller_id()
+            return {"databases": registry.store.names(user_id), "manage_url": connect_link(user_id)}
 
         @mcp.custom_route("/health", methods=["GET"])
         async def health(_request):
@@ -317,31 +335,45 @@ def create_mcp(
                 link = registry.store.read_link_token(token)
             except (TenantError, ValueError, KeyError):
                 return _page("Link not valid", "<p>Ask ChatGPT for a new TableFox connect link.</p>", 403)
+            user_id = link["sub"]
             safe_token = html.escape(token, quote=True)
             if request.method == "POST":
+                name = fields.get("name", "")
                 try:
                     if fields.get("action") == "delete":
-                        registry.forget(link["sub"])
-                        message = "Your saved database connection was removed."
+                        registry.forget(user_id, name)
+                        message = f"Removed '{name}'."
                     else:
-                        registry.connect(link["sub"], fields.get("database_url", ""))
-                        message = "Connected. Go back to ChatGPT and ask your question."
+                        name = registry.connect(user_id, name, fields.get("database_url", ""))
+                        message = f"Connected '{name}'. Go back to ChatGPT and ask your question."
                 except TenantError as error:
                     retry = f"<p><a href='/connect?t={safe_token}'>Try again</a></p>"
                     return _page("Not connected", f"<p>{html.escape(str(error))}</p>{retry}", 400)
                 registry.store.consume_link(link)
-                return _page("Done", f"<p>{html.escape(message)}</p>")
+                # A fresh single-use link lets the user add or remove another database.
+                again = html.escape(registry.store.make_link_token(user_id), quote=True)
+                more = f"<p><a href='/connect?t={again}'>Add or remove another database</a></p>"
+                return _page("Done", f"<p>{html.escape(message)}</p>{more}")
             hidden = f"<input type=hidden name=t value='{safe_token}'>"
+            names = registry.store.names(user_id)
+            saved = "".join(
+                f"<li><b>{html.escape(name)}</b> <form method=post style='display:inline'>{hidden}"
+                f"<input type=hidden name=action value=delete><input type=hidden name=name value='{html.escape(name, quote=True)}'>"
+                "<button>Remove</button></form></li>"
+                for name in names
+            )
+            listing = f"<h2>Connected</h2><ul>{saved}</ul>" if names else ""
             return _page(
-                "Connect your database",
+                "Connect a database",
                 "<p>Use a <b>read-only</b> PostgreSQL role reachable from the internet over SSL. "
                 "Credentials are stored encrypted and are never shown to ChatGPT.</p>"
-                f"<form method=post>{hidden}"
-                "<label>Database URL<br><input name=database_url type=password required autocomplete=off "
-                "placeholder='postgresql://reader:password@db.example.com:5432/mydb' style='width:100%'></label>"
-                "<p><button>Connect</button></p></form>"
-                f"<form method=post>{hidden}<input type=hidden name=action value=delete>"
-                "<button>Remove my saved connection</button></form>",
+                f"{listing}<h2>Add a database</h2><form method=post>{hidden}"
+                "<label>Name (how you will refer to it in ChatGPT)<br><input name=name required "
+                f"pattern='[a-z0-9][a-z0-9_-]{{0,31}}' value='{'' if names else 'main'}' "
+                "placeholder='sales' style='width:100%'></label>"
+                "<p><label>Database URL<br><input name=database_url type=password required autocomplete=off "
+                "placeholder='postgresql://reader:password@db.example.com:5432/mydb' style='width:100%'></label></p>"
+                "<p><button>Connect</button></p></form>",
             )
 
     return mcp
