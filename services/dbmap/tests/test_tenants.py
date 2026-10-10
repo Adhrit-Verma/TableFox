@@ -249,7 +249,7 @@ class MultiTenantMcpTests(TenantRegistryTests):
         from mcp.server.mcpserver.exceptions import ToolError
 
         mcp = create_mcp(registry=self.registry, public_url="https://tablefox.example.com")
-        with self.assertRaisesRegex(ToolError, r"https://tablefox\.example\.com/connect\?t="):
+        with self.assertRaisesRegex(ToolError, r"https://tablefox\.example\.com/connect/[A-Za-z0-9_=-]+\.[0-9a-f]{64}"):
             self.call_as(mcp, "carol", "database_connectivity_check")
 
     def test_several_databases_ask_which_one(self):

@@ -214,7 +214,7 @@ def done_page(message: str, next_token: str) -> str:
         + "<section class=panel><div class=body><p style='margin:0 0 0.75rem'>"
         "Return to ChatGPT and ask your question. If you have several databases, name the one you mean, "
         "for example &ldquo;in sales, how many orders shipped last week?&rdquo;</p>"
-        f"<a class=link href='/connect?t={more}'>Add or remove another database &rarr;</a></div></section>"
+        f"<a class=link href='/connect/{more}'>Add or remove another database &rarr;</a></div></section>"
     )
     return shell("Saved", body)
 

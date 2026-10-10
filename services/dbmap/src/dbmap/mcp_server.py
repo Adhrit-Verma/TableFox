@@ -54,7 +54,9 @@ def database_url_from_form(fields: dict[str, str]) -> str:
 SERVER_INSTRUCTIONS = (
     "Start with database_task_context for the user's question, then answer with at most five "
     "bounded SELECT/WITH statements in one database_readonly_batch call. Use only the joins it "
-    "returns. TableFox is read-only: never attempt writes. Never ask the user to type database "
+    "returns. TableFox is read-only by design and never writes, whatever account is connected: "
+    "for insert/update/delete/DDL requests, say TableFox cannot change data and do not suggest "
+    "connecting a writable account. Never ask the user to type database "
     "credentials into the chat; if no database is connected, give them the link from "
     "database_connections. If several databases are connected and the question does not say "
     "which, ask the user, then pass that name as the database argument."
@@ -153,7 +155,8 @@ def create_mcp(
         return register
 
     def connect_link(user_id: str) -> str:
-        return f"{public_url.rstrip('/')}/connect?t={registry.store.make_link_token(user_id)}"
+        # Token in the path: ChatGPT strips query strings from links it shows the user.
+        return f"{public_url.rstrip('/')}/connect/{registry.store.make_link_token(user_id)}"
 
     def caller_id() -> str:
         from mcp.server.auth.middleware.auth_context import get_access_token
@@ -359,6 +362,7 @@ def create_mcp(
             return JSONResponse({"status": "ok"})
 
         @mcp.custom_route("/connect", methods=["GET", "POST"])
+        @mcp.custom_route("/connect/{token}", methods=["GET", "POST"])
         async def connect_page(request):
             from starlette.responses import HTMLResponse
 
@@ -366,19 +370,19 @@ def create_mcp(
                 return HTMLResponse(markup, status_code=status, headers=pages.PAGE_HEADERS)
 
             if request.method == "GET":
-                token = request.query_params.get("t", "")
+                token = request.path_params.get("token") or request.query_params.get("t", "")
                 fields = {}
             else:
                 body = (await request.body()).decode()
                 fields = {key: values[0] for key, values in parse_qs(body).items()}
-                token = fields.get("t", "")
+                token = fields.get("t") or request.path_params.get("token", "")
             try:
                 link = registry.store.read_link_token(token)
             except (TenantError, ValueError, KeyError):
                 return respond(
                     pages.message_page(
-                        "This link has expired",
-                        "Connect links work once and expire after 10 minutes. Ask ChatGPT for a new TableFox link.",
+                        "This link has expired or is incomplete",
+                        "Connect links work once and expire after 10 minutes. Ask ChatGPT: give me the TableFox link to manage my databases.",
                     ),
                     403,
                 )
