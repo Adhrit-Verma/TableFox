@@ -22,7 +22,7 @@ from collections import OrderedDict
 from dataclasses import replace
 from pathlib import Path
 from threading import Lock
-from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
+from urllib.parse import parse_qsl, unquote, urlencode, urlsplit, urlunsplit
 
 from .config import Settings
 from .service import DatabaseMapService, build_service
@@ -216,9 +216,12 @@ def check_reader_role(pinned_url: str) -> None:
         if flag
     ]
     if problems:
+        user = unquote(urlsplit(pinned_url).username or "this user")
         raise TenantError(
-            "TableFox only accepts read-only roles, but " + "; ".join(problems)
-            + ". Create a role with only CONNECT, USAGE and SELECT"
+            f"'{user}' is not read-only: " + "; ".join(problems)
+            + ". If this is the owner or admin account, connect with your read-only user instead"
+            + " (see 'How do I create a read-only user?'). TableFox only accepts users"
+            + " with only CONNECT, USAGE and SELECT"
             + " (on PostgreSQL 14 or older also run: revoke create on schema public from public)."
         )
 
