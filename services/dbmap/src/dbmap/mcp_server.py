@@ -126,6 +126,7 @@ def create_mcp(
     )
 
     @mcp.custom_route("/icon.png", methods=["GET"])
+    @mcp.custom_route("/favicon.ico", methods=["GET"])
     async def icon(_request):
         from starlette.responses import FileResponse
 
