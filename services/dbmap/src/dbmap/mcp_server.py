@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-import html
 import os
 from pathlib import Path
 from typing import Any
-from urllib.parse import parse_qs, urlsplit
+from urllib.parse import parse_qs, quote, urlsplit
 
+from . import pages
 from .service import DatabaseMapService, build_service
 from .tenants import TenantError, TenantRegistry
 
@@ -16,6 +16,28 @@ SERVER_DESCRIPTION = (
     "Ask questions about your PostgreSQL database in plain language. TableFox finds the few "
     "tables a question needs and runs guarded, read-only queries."
 )
+def database_url_from_form(fields: dict[str, str]) -> str:
+    """Build a postgresql:// URL from the connect form, escaping every part."""
+    pasted = fields.get("database_url", "").strip()
+    if pasted:
+        return pasted
+    host = fields.get("host", "").strip()
+    if not host or any(char in host for char in "/@?#, "):
+        raise TenantError("Enter a host name or address, e.g. db.example.com.")
+    if ":" in host and not host.startswith("["):
+        host = f"[{host}]"  # IPv6 literal
+    port = fields.get("port", "").strip() or "5432"
+    if not port.isdigit():
+        raise TenantError("The port must be a number.")
+    user, dbname = fields.get("user", "").strip(), fields.get("dbname", "").strip()
+    if not user or not dbname:
+        raise TenantError("Enter the database name and the user.")
+    sslmode = fields.get("sslmode", "require")
+    secret = quote(fields.get("password", ""), safe="")
+    credentials = f"{quote(user, safe='')}:{secret}" if secret else quote(user, safe="")
+    return f"postgresql://{credentials}@{host}:{port}/{quote(dbname, safe='')}?sslmode={quote(sslmode, safe='')}"
+
+
 SERVER_INSTRUCTIONS = (
     "Start with database_task_context for the user's question, then answer with at most five "
     "bounded SELECT/WITH statements in one database_readonly_batch call. Use only the joins it "
@@ -25,12 +47,6 @@ SERVER_INSTRUCTIONS = (
     "which, ask the user, then pass that name as the database argument."
 )
 
-PAGE_HEADERS = {
-    "Cache-Control": "no-store",
-    "Referrer-Policy": "no-referrer",
-    "X-Frame-Options": "DENY",
-    "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'",
-}
 
 
 class JwtVerifier:
@@ -69,18 +85,6 @@ class JwtVerifier:
             subject=str(claims["sub"]),
         )
 
-
-def _page(title: str, body: str, status: int = 200):
-    from starlette.responses import HTMLResponse
-
-    return HTMLResponse(
-        "<!doctype html><meta charset=utf-8><meta name=viewport content='width=device-width'>"
-        f"<title>TableFox - {html.escape(title)}</title>"
-        "<body style='font-family:system-ui;max-width:34rem;margin:3rem auto;padding:0 1rem'>"
-        f"<h1>{html.escape(title)}</h1>{body}</body>",
-        status_code=status,
-        headers=PAGE_HEADERS,
-    )
 
 
 def create_mcp(
@@ -324,6 +328,11 @@ def create_mcp(
 
         @mcp.custom_route("/connect", methods=["GET", "POST"])
         async def connect_page(request):
+            from starlette.responses import HTMLResponse
+
+            def respond(markup: str, status: int = 200):
+                return HTMLResponse(markup, status_code=status, headers=pages.PAGE_HEADERS)
+
             if request.method == "GET":
                 token = request.query_params.get("t", "")
                 fields = {}
@@ -334,47 +343,31 @@ def create_mcp(
             try:
                 link = registry.store.read_link_token(token)
             except (TenantError, ValueError, KeyError):
-                return _page("Link not valid", "<p>Ask ChatGPT for a new TableFox connect link.</p>", 403)
+                return respond(
+                    pages.message_page(
+                        "This link has expired",
+                        "Connect links work once and expire after 10 minutes. Ask ChatGPT for a new TableFox link.",
+                    ),
+                    403,
+                )
             user_id = link["sub"]
-            safe_token = html.escape(token, quote=True)
             if request.method == "POST":
                 name = fields.get("name", "")
                 try:
                     if fields.get("action") == "delete":
                         registry.forget(user_id, name)
-                        message = f"Removed '{name}'."
+                        message = f"Removed {name}."
                     else:
-                        name = registry.connect(user_id, name, fields.get("database_url", ""))
-                        message = f"Connected '{name}'. Go back to ChatGPT and ask your question."
+                        name = registry.connect(user_id, name, database_url_from_form(fields))
+                        message = f"{name} is connected and verified as read-only."
                 except TenantError as error:
-                    retry = f"<p><a href='/connect?t={safe_token}'>Try again</a></p>"
-                    return _page("Not connected", f"<p>{html.escape(str(error))}</p>{retry}", 400)
+                    kept = {key: fields.get(key, "") for key in ("name", "host", "port", "dbname", "user", "sslmode")}
+                    names = registry.store.names(user_id)
+                    return respond(pages.connect_page(token, names, kept, str(error)), 400)
                 registry.store.consume_link(link)
                 # A fresh single-use link lets the user add or remove another database.
-                again = html.escape(registry.store.make_link_token(user_id), quote=True)
-                more = f"<p><a href='/connect?t={again}'>Add or remove another database</a></p>"
-                return _page("Done", f"<p>{html.escape(message)}</p>{more}")
-            hidden = f"<input type=hidden name=t value='{safe_token}'>"
-            names = registry.store.names(user_id)
-            saved = "".join(
-                f"<li><b>{html.escape(name)}</b> <form method=post style='display:inline'>{hidden}"
-                f"<input type=hidden name=action value=delete><input type=hidden name=name value='{html.escape(name, quote=True)}'>"
-                "<button>Remove</button></form></li>"
-                for name in names
-            )
-            listing = f"<h2>Connected</h2><ul>{saved}</ul>" if names else ""
-            return _page(
-                "Connect a database",
-                "<p>Use a <b>read-only</b> PostgreSQL role reachable from the internet over SSL. "
-                "Credentials are stored encrypted and are never shown to ChatGPT.</p>"
-                f"{listing}<h2>Add a database</h2><form method=post>{hidden}"
-                "<label>Name (how you will refer to it in ChatGPT)<br><input name=name required "
-                f"pattern='[a-z0-9][a-z0-9_-]{{0,31}}' value='{'' if names else 'main'}' "
-                "placeholder='sales' style='width:100%'></label>"
-                "<p><label>Database URL<br><input name=database_url type=password required autocomplete=off "
-                "placeholder='postgresql://reader:password@db.example.com:5432/mydb' style='width:100%'></label></p>"
-                "<p><button>Connect</button></p></form>",
-            )
+                return respond(pages.done_page(message, registry.store.make_link_token(user_id)))
+            return respond(pages.connect_page(token, registry.store.names(user_id)))
 
     return mcp
 

@@ -28,7 +28,7 @@ from .config import Settings
 from .service import DatabaseMapService, build_service
 
 NAME_PATTERN = re.compile(r"[a-z0-9][a-z0-9_-]{0,31}")
-ALLOWED_QUERY_KEYS = {"sslmode", "connect_timeout", "application_name"}
+ALLOWED_QUERY_KEYS = {"sslmode", "channel_binding", "connect_timeout", "application_name"}
 STRONG_SSLMODES = {"require", "verify-ca", "verify-full"}
 LINK_TTL_SECONDS = 600
 

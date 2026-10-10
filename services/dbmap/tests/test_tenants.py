@@ -79,6 +79,35 @@ class PinDatabaseUrlTests(unittest.TestCase):
                 pin_database_url(url, {5432}, resolve=public)
 
 
+class ConnectFormTests(unittest.TestCase):
+    def test_fields_become_an_escaped_url(self):
+        from urllib.parse import unquote, urlsplit
+
+        from dbmap.mcp_server import database_url_from_form
+
+        url = database_url_from_form(
+            {"host": "db.example.com", "port": "5432", "dbname": "shop", "user": "reader", "password": "p@ss:w/rd#1?", "sslmode": "require"}
+        )
+        parts = urlsplit(url)
+        self.assertEqual((parts.hostname, parts.port, parts.path), ("db.example.com", 5432, "/shop"))
+        self.assertEqual(unquote(parts.password), "p@ss:w/rd#1?")
+        self.assertEqual(parts.query, "sslmode=require")
+        pin_database_url(url, {5432}, resolve=resolver("8.8.8.8"))
+
+    def test_bad_hosts_and_missing_fields_are_rejected(self):
+        from dbmap.mcp_server import database_url_from_form
+
+        base = {"port": "5432", "dbname": "shop", "user": "reader"}
+        for fields in ({**base, "host": "evil.com/x"}, {**base, "host": "a@b"}, {**base, "host": ""}, {**base, "host": "db.example.com", "port": "x"}, {"host": "db.example.com"}):
+            with self.subTest(fields=fields), self.assertRaises(TenantError):
+                database_url_from_form(fields)
+
+    def test_pasted_url_wins(self):
+        from dbmap.mcp_server import database_url_from_form
+
+        self.assertEqual(database_url_from_form({"database_url": " postgresql://r:p@h/db ", "host": "x"}), "postgresql://r:p@h/db")
+
+
 class CredentialStoreTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
