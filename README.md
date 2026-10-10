@@ -19,7 +19,18 @@
   <img src="https://img.shields.io/badge/Next.js-UI-000000?style=flat-square&logo=nextdotjs&logoColor=white" alt="Next.js" />
   <img src="https://img.shields.io/badge/MCP-Agent%20Tools-7C3AED?style=flat-square" alt="MCP tools" />
   <img src="https://img.shields.io/badge/Local--First-Safe%20by%20Default-16A34A?style=flat-square" alt="Local first" />
+  <img src="https://img.shields.io/badge/License-MIT-yellow?style=flat-square" alt="MIT license" />
 </p>
+
+## Start here
+
+| I want to… | Read |
+|---|---|
+| Ask my database questions from ChatGPT or Claude | [User guide](docs/USER_GUIDE.md) |
+| Use TableFox from Claude Code, Codex, Cursor, VS Code, Gemini CLI or Windsurf | [Agents and assistants](docs/AGENTS.md) |
+| Run, change or host TableFox myself | [Developer guide](docs/DEVELOPER_GUIDE.md) |
+
+Hosted: **https://tablefox.onrender.com** · MCP address `https://tablefox.onrender.com/mcp`
 
 ---
 
@@ -288,6 +299,10 @@ TableFox provides bounded, evidence-backed PostgreSQL context and guarded query 
 - [ ] Widen the reviewed corpus beyond 14 tasks and across more databases
 - [ ] Graph export as JSON and Mermaid ER diagrams
 - [ ] Index and constraint hints from plan evidence
-- [ ] External identity-provider integration for hosted deployments
+- [x] External identity-provider integration for hosted deployments (OAuth, multi-user)
+
+## License
+
+[MIT](LICENSE) © 2026 Adhrit Verma
 
 <p align="center"><strong>Give your agent a map before it queries the database.</strong></p>

@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>TableFox · Read-only PostgreSQL for ChatGPT</title><meta name="description" content="TableFox is a read-only PostgreSQL connector for ChatGPT and any MCP client. Ask in plain English; it finds the few tables a question needs and runs guarded, read-only queries."><link rel="icon" href="/icon.png"><meta property="og:title" content="TableFox"><meta property="og:description" content="Ask your PostgreSQL database anything. Read-only."><meta property="og:image" content="/icon.png">
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>TableFox · Read-only PostgreSQL for AI assistants</title><meta name="description" content="TableFox is a read-only PostgreSQL connector for ChatGPT, Claude and any MCP client. Ask in plain English; it finds the few tables a question needs and runs guarded, read-only queries."><link rel="icon" href="/icon.png"><meta property="og:title" content="TableFox"><meta property="og:description" content="Ask your PostgreSQL database anything. Read-only."><meta property="og:image" content="/icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -314,9 +314,9 @@ footer{border-top:1px solid var(--line);padding-block:2.5rem 3rem;--logo-key:var
   <div class="wrap">
     <a class="brand" href="#top" aria-label="TableFox home"><svg viewBox="145 451 309 309" aria-hidden="true"><use href="#tf-mark-g"/></svg>TableFox</a>
     <nav class="nav" aria-label="Primary">
-      <a href="#how">How it works</a><a href="#safety">Safety</a><a href="#results">Results</a><a href="https://github.com/Adhrit-Verma/TableFox" target="_blank" rel="noopener">GitHub</a>
+      <a href="#how">How it works</a><a href="#safety">Safety</a><a href="#results">Results</a><a href="https://github.com/Adhrit-Verma/TableFox/blob/main/docs/USER_GUIDE.md" target="_blank" rel="noopener">Docs</a><a href="https://github.com/Adhrit-Verma/TableFox" target="_blank" rel="noopener">GitHub</a>
     </nav>
-    <a class="btn btn-primary" href="#add">Add to ChatGPT</a>
+    <a class="btn btn-primary" href="#add">Get started</a>
   </div>
 </header>
 
@@ -324,15 +324,15 @@ footer{border-top:1px solid var(--line);padding-block:2.5rem 3rem;--logo-key:var
 <section class="hero" id="top">
   <div class="wrap grid12">
     <div class="hero-copy">
-      <p class="eyebrow">Read-only PostgreSQL for ChatGPT and MCP clients</p>
+      <p class="eyebrow">Read-only PostgreSQL for ChatGPT, Claude and any MCP client</p>
       <h1>Ask your PostgreSQL database anything. <span>Read-only.</span></h1>
-      <p class="lede">TableFox finds the few tables a question needs and runs guarded queries for ChatGPT. Your data never leaves read-only.</p>
+      <p class="lede">TableFox finds the few tables a question needs and runs guarded queries for your AI assistant. Your data never leaves read-only.</p>
       <div class="cta">
-        <a class="btn btn-primary" href="#add">Add to ChatGPT</a>
+        <a class="btn btn-primary" href="#add">Get started</a>
         <a class="btn btn-ghost" href="https://github.com/Adhrit-Verma/TableFox" target="_blank" rel="noopener"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.8.06 1.23.83 1.23.83.71 1.22 1.87.87 2.33.66.07-.52.28-.87.5-1.07-1.78-.2-3.65-.89-3.65-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.22 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.66 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg>View on GitHub</a>
       </div>
       <ul class="facts">
-        <li>SELECT / WITH only</li><li>Two tool calls per question</li><li>Credentials never shown to ChatGPT</li>
+        <li>SELECT / WITH only</li><li>Two tool calls per question</li><li>Credentials never shown to the assistant</li>
       </ul>
     </div>
     <div class="hero-side">
@@ -731,7 +731,7 @@ footer{border-top:1px solid var(--line);padding-block:2.5rem 3rem;--logo-key:var
       <article class="card">
         <span class="step-n">1</span>
         <h3>Connect</h3>
-        <p>Add a read-only database user on TableFox's own private page. Your credentials are encrypted there and never reach ChatGPT.</p>
+        <p>Add a read-only database user on TableFox's own private page. Your credentials are encrypted there and never reach your assistant.</p>
         <div class="viz" aria-label="Connection form preview">
           <div class="form">
             <div class="fld"><span>Host</span><i>db.example.com</i></div>
@@ -746,7 +746,7 @@ footer{border-top:1px solid var(--line);padding-block:2.5rem 3rem;--logo-key:var
       <article class="card">
         <span class="step-n">2</span>
         <h3>Ask</h3>
-        <p>Ask in plain English in ChatGPT. <code>database_task_context</code> ranks the relevant tables and their declared foreign-key joins into a small context pack.</p>
+        <p>Ask in plain English in your assistant. <code>database_task_context</code> ranks the relevant tables and their declared foreign-key joins into a small context pack.</p>
         <div class="viz"><pre><span class="k">database_task_context</span>(
   "top products by revenue"
 )
@@ -785,11 +785,11 @@ footer{border-top:1px solid var(--line);padding-block:2.5rem 3rem;--logo-key:var
         <li style="--i:2"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x=".5" y=".5" width="23" height="23" rx="6"/><path pathLength="1" d="M7 12.5l3.2 3.2L17 8.8"/></svg><div><b>EXPLAIN before running</b><span>Each query is planned first, then executed.</span></div></li>
         <li style="--i:3"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x=".5" y=".5" width="23" height="23" rx="6"/><path pathLength="1" d="M7 12.5l3.2 3.2L17 8.8"/></svg><div><b>Personal-data columns blocked</b><span>Columns such as emails and passwords are not returned.</span></div></li>
         <li style="--i:4"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x=".5" y=".5" width="23" height="23" rx="6"/><path pathLength="1" d="M7 12.5l3.2 3.2L17 8.8"/></svg><div><b>Read-only users only</b><span>TableFox accepts only database users that cannot write.</span></div></li>
-        <li style="--i:5"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x=".5" y=".5" width="23" height="23" rx="6"/><path pathLength="1" d="M7 12.5l3.2 3.2L17 8.8"/></svg><div><b>Encrypted credentials, never shown to ChatGPT</b><span>You enter them on TableFox's own page. ChatGPT only sees query results.</span></div></li>
+        <li style="--i:5"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x=".5" y=".5" width="23" height="23" rx="6"/><path pathLength="1" d="M7 12.5l3.2 3.2L17 8.8"/></svg><div><b>Encrypted credentials, never shown to the assistant</b><span>You enter them on TableFox's own page. The assistant only sees query results.</span></div></li>
       </ul>
       <div class="refused" id="refused">
         <figure class="chat" style="margin:0">
-          <div class="chat-bar"><span class="dot" aria-hidden="true"></span>ChatGPT · TableFox connected</div>
+          <div class="chat-bar"><span class="dot" aria-hidden="true"></span>Claude · TableFox connected</div>
           <div class="chat-body">
             <p class="msg user ask">Delete all cancelled orders</p>
             <div class="refusal" role="note">
@@ -850,11 +850,11 @@ footer{border-top:1px solid var(--line);padding-block:2.5rem 3rem;--logo-key:var
     <div class="dbs-copy">
       <p class="eyebrow">Multiple databases</p>
       <h2 id="dbs-h">Several databases, one connector</h2>
-      <p class="lede">Connect each database under a short name. Say "use sales" to switch, or pick one when ChatGPT asks.</p>
+      <p class="lede">Connect each database under a short name. Say "use sales" to switch, or pick one when your assistant asks.</p>
       <div class="chips" aria-label="Connected databases"><span class="chip">hrcore</span><span class="chip">sales</span><span class="chip">shop</span></div>
     </div>
     <figure class="chat dbs-demo" id="dbsDemo" style="margin:0">
-      <div class="chat-bar"><span class="dot" aria-hidden="true"></span>ChatGPT · TableFox connected · 3 databases</div>
+      <div class="chat-bar"><span class="dot" aria-hidden="true"></span>Codex · TableFox connected · 3 databases</div>
       <div class="chat-body">
         <p class="msg user">How many orders did we ship last month?</p>
         <div class="msg bot q"><p>Which database do you mean?</p></div>
@@ -870,14 +870,16 @@ footer{border-top:1px solid var(--line);padding-block:2.5rem 3rem;--logo-key:var
 <section id="add" aria-labelledby="add-h">
   <div class="wrap">
     <div class="sec-head">
-      <p class="eyebrow">Add to ChatGPT</p>
-      <h2 id="add-h">Three steps, about two minutes</h2>
-      <p class="lede">TableFox is awaiting review for ChatGPT's plugin directory. Until then, add it as a custom connector.</p>
+      <p class="eyebrow">Get started</p>
+      <h2 id="add-h">Works with the assistant you already use</h2>
+      <p class="lede">TableFox is a standard MCP server. Add this address to any MCP-capable assistant, sign in, and ask a question:</p>
+      <div class="viz" style="border:1px solid var(--line);border-radius:6px;background:var(--surface-2);padding:.75rem"><pre style="margin:0;font:400 .875rem/1.6 var(--mono)">https://tablefox.onrender.com/mcp</pre></div>
     </div>
     <div class="steps">
-      <article class="card"><span class="step-n">1</span><h3>Turn on developer mode</h3><p>In ChatGPT, open Settings, then Security and login, and switch on Developer mode.</p></article>
-      <article class="card"><span class="step-n">2</span><h3>Add the connector</h3><p>Add a custom MCP server with this URL and OAuth sign-in:</p><div class="viz"><pre>https://tablefox.onrender.com/mcp</pre></div></article>
-      <article class="card"><span class="step-n">3</span><h3>Sign in and connect a database</h3><p>Sign in when asked, then ask a question. TableFox replies with a private link where you add a read-only database user.</p></article>
+      <article class="card"><span class="step-n">1</span><h3>ChatGPT</h3><p>Turn on Developer mode (Settings, then Security and login), then add a custom MCP server with the address above and OAuth sign-in.</p></article>
+      <article class="card"><span class="step-n">2</span><h3>Claude</h3><p>In claude.ai or Claude Desktop, open Settings, then Connectors, and add a custom connector with the address above.</p></article>
+      <article class="card"><span class="step-n">3</span><h3>Coding agents</h3><p>Claude Code, Codex, Cursor, VS Code, Gemini CLI and Windsurf: one command or a few lines of config, or run TableFox locally.</p><div class="viz"><pre>claude mcp add --transport http \
+  tablefox https://tablefox.onrender.com/mcp</pre></div><p><a href="https://github.com/Adhrit-Verma/TableFox/blob/main/docs/AGENTS.md" target="_blank" rel="noopener">Setup for every agent &rarr;</a></p></article>
     </div>
   </div>
 </section>
@@ -891,7 +893,8 @@ footer{border-top:1px solid var(--line);padding-block:2.5rem 3rem;--logo-key:var
       <details><summary>Does TableFox store my data?</summary><p>No rows are indexed or cached. Your database credentials are stored encrypted.</p></details>
       <details><summary>Can it write to my database?</summary><p>Never. Only SELECT and WITH statements run, inside read-only transactions, using a read-only database user.</p></details>
       <details><summary>Which databases does it support?</summary><p>PostgreSQL databases reachable over SSL.</p></details>
-      <details><summary>Is it open source?</summary><p>Yes. The code is on <a href="https://github.com/Adhrit-Verma/TableFox" target="_blank" rel="noopener">GitHub</a>.</p></details>
+      <details><summary>Is it open source?</summary><p>Yes, MIT licensed. The code and <a href="https://github.com/Adhrit-Verma/TableFox/blob/main/docs/DEVELOPER_GUIDE.md" target="_blank" rel="noopener">developer guide</a> are on <a href="https://github.com/Adhrit-Verma/TableFox" target="_blank" rel="noopener">GitHub</a>, and you can run it yourself.</p></details>
+      <details><summary>Which assistants work with TableFox?</summary><p>Any MCP client: ChatGPT, Claude, Claude Code, Codex, Cursor, VS Code, Gemini CLI, Windsurf and more. See the <a href="https://github.com/Adhrit-Verma/TableFox/blob/main/docs/AGENTS.md" target="_blank" rel="noopener">setup guide</a>.</p></details>
     </div>
   </div>
 </section>
@@ -902,10 +905,10 @@ footer{border-top:1px solid var(--line);padding-block:2.5rem 3rem;--logo-key:var
     <svg viewBox="147 451 999 309" role="img" aria-label="TableFox"><use href="#tf-mark-g"/><use href="#tf-l0" class="lg-ink"/><use href="#tf-l1" class="lg-ink"/><use href="#tf-l2" class="lg-ink"/><use href="#tf-l3" class="lg-ink"/><use href="#tf-l4" class="lg-ink"/><use href="#tf-l5" class="lg-or"/><use href="#tf-l6" class="lg-or"/><use href="#tf-l7" class="lg-or"/></svg>
     <nav aria-label="Footer">
       <a href="https://github.com/Adhrit-Verma/TableFox" target="_blank" rel="noopener">GitHub</a>
-      <a href="/privacy">Privacy</a>
+      <a href="https://github.com/Adhrit-Verma/TableFox/blob/main/docs/USER_GUIDE.md" target="_blank" rel="noopener">Docs</a><a href="/privacy">Privacy</a>
       <a href="/terms">Terms</a>
     </nav>
-    <p>TableFox - read-only PostgreSQL for ChatGPT</p>
+    <p>TableFox - read-only PostgreSQL for AI assistants · MIT licensed</p>
   </div>
 </footer>
 

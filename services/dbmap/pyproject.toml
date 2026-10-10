@@ -3,6 +3,7 @@ name = "dbmap"
 version = "0.1.0"
 description = "Local PostgreSQL database graph mapper with FastAPI and MCP stdio entry points."
 requires-python = ">=3.11"
+license = "MIT"
 dependencies = [
   "fastapi>=0.115.0",
   "uvicorn[standard]>=0.30.0",

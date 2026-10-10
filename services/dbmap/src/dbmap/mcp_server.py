@@ -165,7 +165,7 @@ def create_mcp(
 
         return FileResponse(ICON_FILE, media_type="image/png", headers={"Cache-Control": "public, max-age=86400"})
 
-    # ChatGPT plugin review requires explicit booleans on every tool. All tools are
+    # Directory reviews (e.g. ChatGPT's) require explicit booleans on every tool. All tools are
     # confined to the caller's one configured database, so openWorldHint is false.
     read = ToolAnnotations(read_only_hint=True, destructive_hint=False, open_world_hint=False)
     setting = ToolAnnotations(read_only_hint=False, destructive_hint=False, open_world_hint=False)
@@ -186,7 +186,7 @@ def create_mcp(
         return register
 
     def connect_link(user_id: str) -> str:
-        # Token in the path: ChatGPT strips query strings from links it shows the user.
+        # Token in the path: some assistants (ChatGPT) strip query strings from links they show.
         return f"{public_url.rstrip('/')}/connect/{registry.store.make_link_token(user_id)}"
 
     def caller_id() -> str:
@@ -413,7 +413,7 @@ def create_mcp(
                 return respond(
                     pages.message_page(
                         "This link has expired or is incomplete",
-                        "Connect links work once and expire after 10 minutes. Ask ChatGPT: give me the TableFox link to manage my databases.",
+                        "Connect links work once and expire after 10 minutes. Ask your assistant: give me the TableFox link to manage my databases.",
                     ),
                     403,
                 )

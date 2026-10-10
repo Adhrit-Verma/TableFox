@@ -131,7 +131,7 @@ def shell(title: str, body: str, meta: str = "", wide: bool = False) -> str:
         f"<style>{STYLE}</style></head><body{' class=wide' if wide else ''}>"
         "<div class=top><div class=top-inner><img src=/icon.png alt=''>"
         f"<span class=brand>TableFox</span><span class=meta>{escape(meta)}</span></div></div>"
-        f"<main>{body}<footer>TableFox · read-only PostgreSQL for ChatGPT</footer></main></body></html>"
+        f"<main>{body}<footer>TableFox · read-only PostgreSQL for AI assistants</footer></main></body></html>"
     )
 
 
@@ -163,7 +163,7 @@ def connect_page(token: str, names: list[str], values: dict[str, str] | None = N
     body = (
         "<h1>Connect a database</h1>"
         "<p class=lead>Add a read-only PostgreSQL connection. TableFox tests it before saving, "
-        "and ChatGPT never sees these details.</p>"
+        "and your AI assistant never sees these details.</p>"
         + (_banner("error", "Not connected", error) if error else "")
         + "<div class=layout>"
         "<section class='panel rail' aria-labelledby=saved-h><header><span class=step>1</span><h2 id=saved-h>Connected</h2>"
@@ -173,7 +173,7 @@ def connect_page(token: str, names: list[str], values: dict[str, str] | None = N
         "<div class=full><label for=name>Name</label>"
         f"<input id=name name=name required maxlength=32 pattern='[a-zA-Z0-9][a-zA-Z0-9_\\-]{{0,31}}' "
         f"value='{value('name', default_name)}' placeholder='sales' autocomplete=off>"
-        "<span class=hint>How you refer to it in ChatGPT, e.g. &ldquo;use sales&rdquo;.</span></div>"
+        "<span class=hint>How you refer to it when asking, e.g. &ldquo;use sales&rdquo;.</span></div>"
         "<div><label for=host>Host</label>"
         f"<input id=host name=host value='{value('host')}' placeholder='db.example.com' autocomplete=off spellcheck=false></div>"
         "<div><label for=port>Port</label>"
@@ -212,7 +212,7 @@ def done_page(message: str, next_token: str) -> str:
         "<h1>All set</h1>"
         + _banner("ok", "Saved", message)
         + "<section class=panel><div class=body><p style='margin:0 0 0.75rem'>"
-        "Return to ChatGPT and ask your question. If you have several databases, name the one you mean, "
+        "Return to your AI assistant and ask your question. If you have several databases, name the one you mean, "
         "for example &ldquo;in sales, how many orders shipped last week?&rdquo;</p>"
         f"<a class=link href='/connect/{more}'>Add or remove another database &rarr;</a></div></section>"
     )
@@ -250,14 +250,14 @@ def privacy_page() -> str:
              "<li>An audit log of tool calls: time, action, object names, counts and a SHA-256 fingerprint of each SQL "
              "statement. Never the SQL text or any query results.</li>"
              "<li>Single-use connect-link records, kept until they expire.</li></ul>")),
-            ("What TableFox does not store", ("<p>Query results and table rows are returned to your ChatGPT conversation "
+            ("What TableFox does not store", ("<p>Query results and table rows are returned to your AI assistant conversation "
              "and are not saved, indexed or cached by TableFox.</p>")),
             ("Who processes data", ("<ul class=facts>"
-             "<li>OpenAI (ChatGPT) receives the results of the questions you ask, under OpenAI's own privacy policy.</li>"
+             "<li>The AI assistant you connect (for example ChatGPT by OpenAI or Claude by Anthropic) receives the results of the questions you ask, under that provider's own privacy policy.</li>"
              "<li>Auth0 handles sign-in. Render hosts the TableFox server. Neon stores the encrypted connection records.</li>"
              "<li>Your database provider is contacted only with the read-only user you supply.</li></ul>")),
-            ("Your choices", ("<p>Remove any saved database at any time on your private manage page (ask ChatGPT for "
-             "&ldquo;the TableFox link to manage my databases&rdquo;). Disconnecting TableFox in ChatGPT stops all access. "
+            ("Your choices", ("<p>Remove any saved database at any time on your private manage page (ask your assistant for "
+             "&ldquo;the TableFox link to manage my databases&rdquo;). Disconnecting TableFox in your assistant stops all access. "
              "To delete everything associated with your account, open an issue on "
              "<a class=link href='https://github.com/Adhrit-Verma/TableFox/issues'>GitHub</a>.</p>")),
             ("Security", ("<p>Connections require SSL and a public address; only read-only database users are accepted; "
@@ -271,11 +271,11 @@ def terms_page() -> str:
     return _policy(
         "Terms",
         [
-            ("Using TableFox", ("<p>TableFox lets ChatGPT read a PostgreSQL database you connect. Only connect databases "
+            ("Using TableFox", ("<p>TableFox lets an AI assistant read a PostgreSQL database you connect. Only connect databases "
              "you are authorised to access, using a read-only user. You are responsible for the data you choose to expose "
              "and for complying with the rules that apply to it.</p>")),
             ("No warranty", ("<p>TableFox is provided free of charge and &ldquo;as is&rdquo;, without warranties of any kind. "
-             "Answers are generated by ChatGPT from query results and can be wrong; verify anything important.</p>")),
+             "Answers are generated by your AI assistant from query results and can be wrong; verify anything important.</p>")),
             ("Limits and changes", ("<p>The service may change, be rate-limited or stop at any time. Access may be removed "
              "for misuse, including attempts to reach systems you do not own or to bypass TableFox's safety controls.</p>")),
             ("Liability", ("<p>To the extent permitted by law, the authors are not liable for any loss arising from use "
