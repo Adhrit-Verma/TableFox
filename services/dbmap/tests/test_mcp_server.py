@@ -62,6 +62,19 @@ class McpServerTests(unittest.TestCase):
         self.assertIn("A-Za-z0-9_-", schema)
         self.assertIn("sql", schema)
 
+    def test_site_pages_are_served(self):
+        from starlette.testclient import TestClient
+
+        client = TestClient(create_mcp(public_url="https://x").streamable_http_app())
+        home = client.get("/")
+        self.assertEqual(home.status_code, 200)
+        self.assertIn("Ask your PostgreSQL database anything", home.text)
+        self.assertIn("frame-ancestors 'none'", home.headers["content-security-policy"])
+        for path, text in (("/privacy", "What TableFox stores"), ("/terms", "No warranty")):
+            response = client.get(path)
+            self.assertEqual(response.status_code, 200, path)
+            self.assertIn(text, response.text)
+
 
 if __name__ == "__main__":
     unittest.main()

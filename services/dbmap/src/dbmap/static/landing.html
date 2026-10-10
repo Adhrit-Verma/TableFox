@@ -1,0 +1,980 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>TableFox · Read-only PostgreSQL for ChatGPT</title><meta name="description" content="TableFox is a read-only PostgreSQL connector for ChatGPT and any MCP client. Ask in plain English; it finds the few tables a question needs and runs guarded, read-only queries."><link rel="icon" href="/icon.png"><meta property="og:title" content="TableFox"><meta property="og:description" content="Ask your PostgreSQL database anything. Read-only."><meta property="og:image" content="/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: 76rem column on a 12-track grid (3 content columns); ruled-cell motif with one orange cell marks section breaks. */
+:root{
+  --bg:oklch(0.985 0.003 40); --surface:oklch(1 0 0); --surface-2:oklch(0.972 0.004 40);
+  --ink:oklch(0.18 0.018 40); --muted:oklch(0.46 0.018 40); --line:oklch(0.9 0.008 40);
+  --primary:oklch(0.5 0.151 40); --primary-ink:oklch(1 0 0); --primary-hover:oklch(0.44 0.14 40);
+  --success:oklch(0.48 0.12 152); --danger:oklch(0.55 0.16 28);
+  --fox:#F7631A; --logo-ink:#1F2630; --logo-key:var(--surface); --logo-slate:#1F2630;
+  --ring:oklch(0.5 0.151 40 / .35); --shadow:0 1px 2px oklch(0.18 0.018 40 / .06), 0 6px 18px oklch(0.18 0.018 40 / .06);
+  --font:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+  --r:8px; --cell:24px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:oklch(0.17 0.01 40); --surface:oklch(0.205 0.011 40); --surface-2:oklch(0.235 0.012 40);
+  --ink:oklch(0.94 0.008 40); --muted:oklch(0.74 0.014 40); --line:oklch(0.32 0.012 40);
+  --primary:oklch(0.66 0.15 42); --primary-ink:oklch(0.17 0.01 40); --primary-hover:oklch(0.72 0.14 42);
+  --success:oklch(0.74 0.13 152); --danger:oklch(0.72 0.15 28);
+  --logo-ink:oklch(0.94 0.008 40); --ring:oklch(0.66 0.15 42 / .35);
+  --shadow:0 1px 2px oklch(0 0 0 / .3), 0 6px 18px oklch(0 0 0 / .25); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:oklch(0.17 0.01 40); --surface:oklch(0.205 0.011 40); --surface-2:oklch(0.235 0.012 40);
+  --ink:oklch(0.94 0.008 40); --muted:oklch(0.74 0.014 40); --line:oklch(0.32 0.012 40);
+  --primary:oklch(0.66 0.15 42); --primary-ink:oklch(0.17 0.01 40); --primary-hover:oklch(0.72 0.14 42);
+  --success:oklch(0.74 0.13 152); --danger:oklch(0.72 0.15 28);
+  --logo-ink:oklch(0.94 0.008 40); --ring:oklch(0.66 0.15 42 / .35);
+  --shadow:0 1px 2px oklch(0 0 0 / .3), 0 6px 18px oklch(0 0 0 / .25); color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:5rem}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:1rem;line-height:1.55;-webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss01"}
+a{color:inherit}
+code,.mono{font-family:var(--mono);font-size:.875em}
+h1,h2,h3{margin:0;letter-spacing:-.022em;line-height:1.15;text-wrap:balance;font-weight:650}
+h2{font-size:2rem} h3{font-size:1.125rem;letter-spacing:-.012em}
+p{margin:0}
+.wrap{max-width:76rem;margin-inline:auto;padding-inline:clamp(16px,4vw,2rem)}
+.grid12{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:1.5rem}
+.eyebrow{font-family:var(--mono);font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.lede{color:var(--muted);font-size:1.0625rem;max-width:38rem}
+section{padding-block:5rem}
+.sec-head{display:grid;gap:.75rem;margin-bottom:2.5rem;max-width:44rem}
+:focus-visible{outline:3px solid var(--ring);outline-offset:2px;border-radius:4px}
+.skip{position:absolute;left:-999px;top:0}.skip:focus{left:16px;top:16px;z-index:50;background:var(--surface);padding:.5rem .75rem;border-radius:var(--r)}
+
+/* logo colour roles */
+.lg-ink{fill:var(--logo-ink)} .lg-inks{fill:none;stroke:var(--logo-ink)} .lg-or{fill:var(--fox)}
+.lg-shade{fill:#E85C10} .lg-slate{fill:var(--logo-slate)} .lg-white{fill:#fff}
+.lg-key{fill:var(--logo-key);stroke:var(--logo-key);stroke-width:16;stroke-linejoin:round}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:.5rem;height:2.5rem;padding:0 1rem;border-radius:var(--r);font:600 .9375rem/1 var(--font);text-decoration:none;border:1px solid transparent;transition:background .18s ease,border-color .18s ease,transform .18s ease;cursor:pointer;white-space:nowrap}
+.btn-primary{background:var(--primary);color:var(--primary-ink)}
+.btn-primary:hover{background:var(--primary-hover)}
+.btn-ghost{border-color:var(--line);background:var(--surface);color:var(--ink)}
+.btn-ghost:hover{border-color:var(--muted)}
+.btn svg{width:1rem;height:1rem;flex:none}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in oklch,var(--bg) 92%,transparent);backdrop-filter:saturate(1.2) blur(8px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:1.5rem;height:3.75rem}
+.brand{display:flex;align-items:center;gap:.5rem;text-decoration:none;font-weight:650;letter-spacing:-.015em;font-size:1.0625rem;--logo-key:var(--bg)}
+.brand svg{width:2rem;height:2rem}
+.nav{display:flex;gap:1.25rem;margin-left:auto}
+.nav a{text-decoration:none;color:var(--muted);font-size:.9375rem;font-weight:500}
+.nav a:hover{color:var(--ink)}
+@media (max-width:760px){.nav{display:none}.top .btn{margin-left:auto}}
+
+/* ruled divider */
+.rule{height:var(--cell);border-block:1px solid var(--line);position:relative;overflow:hidden;
+  background-image:linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:var(--cell) 100%}
+.rule::after{content:"";position:absolute;top:0;bottom:0;width:calc(var(--cell) - 1px);left:calc(var(--c,7) * var(--cell) + 1px);background:var(--fox)}
+
+/* hero */
+.hero{padding-block:4.5rem 4rem}
+.hero-copy{grid-column:1 / span 7;display:grid;align-content:center;gap:1.5rem;min-width:0}
+.hero h1{font-size:3.25rem;letter-spacing:-.035em;font-weight:700;max-width:16ch}
+.hero h1 span{color:var(--primary)}
+.cta{display:flex;flex-wrap:wrap;gap:.75rem}
+.facts{display:flex;flex-wrap:wrap;gap:.5rem 1.25rem;color:var(--muted);font-size:.875rem;padding:0;margin:0;list-style:none}
+.facts li{display:flex;align-items:center;gap:.4rem}
+.facts li::before{content:"";width:.5rem;height:.5rem;background:var(--fox);border-radius:1px}
+.hero-side{grid-column:8 / span 5;display:grid;gap:1rem;min-width:0}
+.stage{position:relative;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);padding:1.75rem 1.5rem;overflow:hidden;--logo-key:var(--surface)}
+.stage::before{content:"";position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:var(--cell) var(--cell);opacity:.55;
+  -webkit-mask-image:radial-gradient(ellipse at center,transparent 35%,#000 95%);mask-image:radial-gradient(ellipse at center,transparent 35%,#000 95%)}
+.stage svg{position:relative;display:block;width:100%;height:auto}
+
+/* chat mock */
+.chat{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);overflow:hidden}
+.chat-bar{display:flex;align-items:center;gap:.5rem;padding:.6rem .9rem;border-bottom:1px solid var(--line);font-size:.8125rem;color:var(--muted)}
+.chat-bar .dot{width:.5rem;height:.5rem;border-radius:50%;background:var(--success)}
+.chat-body{display:grid;gap:.75rem;padding:1rem}
+.msg{max-width:88%;padding:.6rem .85rem;border-radius:12px;font-size:.9375rem;line-height:1.45}
+.msg.user{justify-self:end;background:var(--surface-2);border:1px solid var(--line)}
+.msg.bot{justify-self:start;padding-inline:0;max-width:100%;width:100%}
+.calls{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.6rem}
+.call{font-family:var(--mono);font-size:.75rem;border:1px solid var(--line);border-radius:6px;padding:.15rem .45rem;color:var(--muted);background:var(--surface-2)}
+.call b{color:var(--ink);font-weight:500}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:6px}
+table{border-collapse:collapse;width:100%;font-size:.8125rem;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:.4rem .65rem;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-weight:600;color:var(--muted);background:var(--surface-2);font-size:.75rem}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right}
+.demo-note{font-size:.75rem;color:var(--muted);margin-top:.5rem}
+
+/* problem */
+.problem .grid12>*{min-width:0}
+.dump{grid-column:1 / span 7;border:1px solid var(--line);border-radius:var(--r);background:var(--surface-2);overflow:hidden;display:flex;flex-direction:column}
+.pane-head{display:flex;justify-content:space-between;gap:1rem;align-items:center;padding:.6rem .9rem;border-bottom:1px solid var(--line);font-size:.8125rem;color:var(--muted);background:var(--surface)}
+.pane-head b{color:var(--ink);font-weight:600}
+.dump-view{height:24rem;overflow:hidden;position:relative;-webkit-mask-image:linear-gradient(transparent,#000 12%,#000 85%,transparent);mask-image:linear-gradient(transparent,#000 12%,#000 85%,transparent)}
+.dump-track{will-change:transform}
+.dump pre{margin:0;padding:.75rem 1rem;font:400 .75rem/1.6 var(--mono);color:var(--muted);white-space:pre}
+.dump .ln{display:inline-block;width:2.5rem;color:color-mix(in oklch,var(--muted) 55%,transparent);user-select:none}
+.pack{grid-column:8 / span 5;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);align-self:start;box-shadow:var(--shadow)}
+.pack-body{padding:1rem;display:grid;gap:.75rem}
+.ptable{border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.ptable h4{margin:0;padding:.4rem .65rem;font:500 .8125rem/1.3 var(--mono);background:var(--surface-2);border-bottom:1px solid var(--line);display:flex;justify-content:space-between}
+.ptable h4 span{color:var(--muted);font-weight:400}
+.ptable ul{list-style:none;margin:0;padding:.4rem .65rem;font:400 .75rem/1.7 var(--mono);color:var(--muted)}
+.joins{font:400 .75rem/1.7 var(--mono);color:var(--muted);border-top:1px dashed var(--line);padding-top:.6rem}
+.joins b{color:var(--ink);font-weight:500}
+.caption{grid-column:1 / -1;font-size:1.25rem;font-weight:600;letter-spacing:-.015em;text-wrap:balance}
+
+/* steps */
+.steps{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.5rem}
+.card{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);padding:1.25rem;display:grid;grid-template-rows:auto auto auto 1fr;gap:.75rem;min-width:0;transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
+.card:hover{transform:translateY(-2px);border-color:color-mix(in oklch,var(--primary) 45%,var(--line));box-shadow:var(--shadow)}
+.step-n{width:2rem;height:2rem;border-radius:6px;display:grid;place-items:center;font:600 .875rem/1 var(--mono);border:1px solid var(--line);background:var(--fox);color:#1F2630;transition:background .25s ease,color .25s ease}
+.steps.armed .step-n{background:var(--surface-2);color:var(--muted)}
+.steps.armed .step-n.lit{background:var(--fox);color:#1F2630;animation:none}
+.card p{color:var(--muted);font-size:.9375rem}
+.card .viz{border:1px solid var(--line);border-radius:6px;background:var(--surface-2);padding:.75rem;font-size:.8125rem;min-width:0;align-self:end}
+.form{display:grid;grid-template-columns:1fr 5rem;gap:.5rem}
+.fld{display:grid;gap:.2rem;min-width:0}
+.fld span{font-size:.6875rem;color:var(--muted);font-weight:500}
+.fld i{font-style:normal;display:block;height:1.9rem;line-height:1.9rem;padding:0 .5rem;border:1px solid var(--line);border-radius:6px;background:var(--surface);font-family:var(--mono);font-size:.75rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fld.wide{grid-column:1 / -1}
+.form .btn{grid-column:1 / -1;height:2.1rem;justify-content:center;font-size:.8125rem}
+.viz pre{margin:0;font:400 .75rem/1.6 var(--mono);white-space:pre;overflow-x:auto;color:var(--ink)}
+.viz .k{color:var(--primary);font-weight:500}
+.viz .c{color:var(--muted)}
+.tokenline{position:absolute;inset:0;pointer-events:none;overflow:visible;width:100%;height:100%}
+.tokenline path{fill:none;stroke:var(--line);stroke-width:1.5;stroke-dasharray:3 4}
+.tokenline rect{fill:var(--fox)}
+
+/* safety */
+.safety-grid>*{min-width:0}
+.checks{grid-column:1 / span 7;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);padding:.5rem 1.25rem;list-style:none;margin:0}
+.checks li{display:grid;grid-template-columns:1.5rem 1fr;gap:.75rem;padding:.9rem 0;border-bottom:1px solid var(--line)}
+.checks li:last-child{border-bottom:0}
+.checks svg{width:1.5rem;height:1.5rem;margin-top:.05rem}
+.checks svg rect{fill:color-mix(in oklch,var(--success) 14%,var(--surface));stroke:color-mix(in oklch,var(--success) 40%,var(--surface))}
+.checks svg path{fill:none;stroke:var(--success);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.checks b{display:block;font-weight:600}
+.checks span{color:var(--muted);font-size:.9375rem}
+.refused{grid-column:8 / span 5;display:grid;gap:.75rem;align-content:start}
+.refused .chat-body{gap:.9rem}
+.refusal{display:grid;gap:.35rem;border:1px solid color-mix(in oklch,var(--danger) 45%,var(--line));background:color-mix(in oklch,var(--danger) 7%,var(--surface));border-radius:var(--r);padding:.75rem .9rem}
+.refusal strong{color:var(--danger);font-size:.75rem;font-family:var(--mono);letter-spacing:.04em;text-transform:uppercase}
+.refusal p{font-weight:600}
+.refusal small{color:var(--muted);font-size:.8125rem}
+
+/* results */
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.5rem}
+.tile{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);padding:1.25rem;display:grid;gap:.9rem;align-content:start;transition:transform .2s ease,border-color .2s ease}
+.tile:hover{transform:translateY(-2px);border-color:color-mix(in oklch,var(--primary) 45%,var(--line))}
+.tile .lbl{font-size:.875rem;color:var(--muted);font-weight:500}
+.big{font-size:2.5rem;font-weight:650;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+.big small{font-size:1rem;color:var(--muted);font-weight:500;letter-spacing:0;margin-left:.25rem}
+.bars{display:grid;gap:.45rem;font-size:.8125rem;font-variant-numeric:tabular-nums}
+.bar{display:grid;grid-template-columns:6.5rem 1fr auto;gap:.6rem;align-items:center}
+.bar span:first-child{color:var(--muted)}
+.bar i{display:block;height:.6rem;border-radius:2px;background:var(--line)}
+.bar.tf i{background:var(--primary)}
+.cells{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;max-width:15rem}
+.cells i{aspect-ratio:1;border-radius:2px;background:var(--success);max-width:100%}
+.context{margin-top:1.25rem;display:flex;flex-wrap:wrap;justify-content:space-between;gap:.75rem;font-size:.9375rem;color:var(--muted)}
+.context strong{color:var(--ink);font-weight:600}
+
+/* databases */
+.dbs .grid12>*{min-width:0}
+.dbs-copy{grid-column:1 / span 5;display:grid;gap:1rem;align-content:start}
+.dbs-demo{grid-column:7 / span 6}
+.chips{display:flex;flex-wrap:wrap;gap:.5rem}
+.chip{font:500 .8125rem/1 var(--mono);border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:.5rem .8rem;color:var(--ink);transition:transform .2s ease,background .2s ease,border-color .2s ease,box-shadow .2s ease}
+.chip.picked{transform:translateY(-3px);background:color-mix(in oklch,var(--primary) 12%,var(--surface));border-color:var(--primary);box-shadow:var(--shadow)}
+
+/* faq */
+.faq{display:grid;gap:.5rem;max-width:48rem}
+details{border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+summary{cursor:pointer;list-style:none;padding:1rem 1.25rem;font-weight:600;display:flex;justify-content:space-between;gap:1rem}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-family:var(--mono);color:var(--muted);transition:transform .2s ease}
+details[open] summary::after{transform:rotate(45deg)}
+details p{padding:0 1.25rem 1rem;color:var(--muted)}
+
+/* footer */
+footer{border-top:1px solid var(--line);padding-block:2.5rem 3rem;--logo-key:var(--bg)}
+.foot{display:flex;flex-wrap:wrap;gap:1.5rem;align-items:center;justify-content:space-between}
+.foot svg{height:2.25rem;width:7.3rem}
+.foot nav{display:flex;flex-wrap:wrap;gap:1.25rem;font-size:.9375rem}
+.foot nav a{color:var(--muted);text-decoration:none}.foot nav a:hover{color:var(--ink)}
+.foot p{width:100%;color:var(--muted);font-size:.875rem}
+
+/* responsive */
+@media (max-width:1024px){
+  .hero-copy,.hero-side{grid-column:1 / -1}
+  .hero-side{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+  .dump,.pack{grid-column:span 6}
+  .checks,.refused{grid-column:1 / -1}
+  .refused{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .steps,.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .steps .card:last-child,.tiles .tile:last-child{grid-column:1 / -1}
+  .dbs-copy,.dbs-demo{grid-column:1 / -1}
+}
+@media (max-width:640px){
+  section{padding-block:3.5rem}
+  h2{font-size:1.625rem}
+  .hero{padding-block:2.5rem 3rem}
+  .hero h1{font-size:2.25rem}
+  .hero-side,.refused{grid-template-columns:minmax(0,1fr)}
+  .dump,.pack{grid-column:1 / -1}
+  .dump-view{height:16rem}
+  .steps,.tiles{grid-template-columns:minmax(0,1fr)}
+  .card{grid-template-columns:2rem minmax(0,1fr);grid-template-rows:none;column-gap:1rem}
+  .card>*:not(.step-n){grid-column:2}
+  .card .step-n{grid-row:1 / span 4}
+  .caption{font-size:1.0625rem}
+  .big{font-size:2.125rem}
+  .rule::after{left:calc(var(--cp,5) * var(--cell) + 1px)}
+}
+
+/* motion (all decorative; static final frame without it) */
+@media (prefers-reduced-motion:no-preference){
+  .tf-anim .a-top{transform-box:fill-box;transform-origin:left center;animation:tf-growx .26s ease-out both}
+  .tf-anim .a-frame{stroke-dasharray:1 1;animation:tf-draw .5s cubic-bezier(.4,0,.2,1) both}
+  .tf-anim .a-c1{stroke-dasharray:1 1;animation:tf-draw .24s ease-out .2s both}
+  .tf-anim .a-c2{stroke-dasharray:1 1;animation:tf-draw .24s ease-out .28s both}
+  .tf-anim .a-r1{stroke-dasharray:1 1;animation:tf-draw .24s ease-out .38s both}
+  .tf-anim .a-r2{stroke-dasharray:1 1;animation:tf-draw .24s ease-out .46s both}
+  .tf-anim .a-cell{transform-box:fill-box;transform-origin:center;animation:tf-pop .3s cubic-bezier(.2,.8,.2,1) .64s both}
+  .tf-anim .a-head{animation:tf-rise .52s cubic-bezier(.34,1.56,.64,1) .86s both}
+  .tf-anim .a-body{animation:tf-fade .36s ease-out .98s both}
+  .tf-anim .a-eyes{transform-box:fill-box;transform-origin:center;animation:tf-blink .22s ease-in-out 1.42s,tf-blink-idle 6s ease-in-out 3.2s infinite}
+  .tf-anim .a-tail{transform-box:view-box;transform-origin:175px 692px;animation:tf-sweep .56s cubic-bezier(.2,.8,.2,1) 1.22s both,tf-sway 5s ease-in-out 2.6s infinite}
+  .tf-anim .a-l{animation:tf-type .09s linear calc(1.5s + var(--i) * 70ms) both}
+  .tf-anim .a-fox{animation:tf-type .09s linear calc(1.5s + var(--i) * 70ms) both,tf-tint .32s ease 2.08s both}
+  .dump-track.loop{animation:tf-scroll 70s linear infinite}
+  .checks.go li svg path{stroke-dasharray:1 1;animation:tf-draw .3s ease-out calc(var(--i) * 120ms + .1s) both}
+  .refused.go .ask{animation:tf-shake .42s ease-in-out .2s both}
+  .refused.go .refusal{animation:tf-fade-up .3s ease-out .7s both}
+  .dbs-demo.go .q{animation:tf-fade-up .3s ease-out .15s both}
+  .dbs-demo.go .chip{animation:tf-fade-up .25s ease-out calc(.4s + var(--i) * 80ms) both}
+  .dbs-demo.go .chip.picked{animation:tf-fade-up .25s ease-out calc(.4s + var(--i) * 80ms) both,tf-lift .35s cubic-bezier(.34,1.56,.64,1) 1.15s both}
+  .dbs-demo.go .ans{animation:tf-fade-up .3s ease-out 1.5s both}
+}
+@keyframes tf-draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@keyframes tf-growx{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes tf-pop{from{transform:scale(0)}to{transform:scale(1)}}
+@keyframes tf-rise{0%{transform:translateY(90px);opacity:0}25%{opacity:1}100%{transform:translateY(0);opacity:1}}
+@keyframes tf-fade{from{opacity:0}to{opacity:1}}
+@keyframes tf-blink{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.1)}}
+@keyframes tf-blink-idle{0%,95%,100%{transform:scaleY(1)}97.5%{transform:scaleY(.1)}}
+@keyframes tf-sweep{0%{transform:rotate(-50deg);opacity:0}35%{opacity:1}100%{transform:rotate(0);opacity:1}}
+@keyframes tf-sway{0%,100%{transform:rotate(0)}50%{transform:rotate(2deg)}}
+@keyframes tf-type{from{opacity:0}to{opacity:1}}
+@keyframes tf-tint{from{fill:var(--logo-ink)}to{fill:var(--fox)}}
+@keyframes tf-scroll{from{transform:translateY(0)}to{transform:translateY(-50%)}}
+@keyframes tf-shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
+@keyframes tf-fade-up{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes tf-lift{from{transform:translateY(0)}to{transform:translateY(-3px)}}
+</style>
+</head><body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <path id="tf-p-sil" d="M224.88 751.96C214.49 751.73 210.55 751.16 203.62 748.88C197.89 746.99 194.37 745.43 190.60 743.10C189.63 742.49 188.75 742.00 188.65 742.00C188.41 742.00 182.41 737.91 180.88 736.70C177.86 734.31 172.81 729.00 170.09 725.33C169.28 724.26 168.57 723.32 168.50 723.25C168.22 722.98 167.00 721.28 167.00 721.16C167.00 721.09 166.50 720.30 165.90 719.40C164.78 717.73 161.98 712.20 160.51 708.75C160.07 707.72 159.56 706.54 159.38 706.12C159.20 705.71 158.97 704.98 158.88 704.50C158.78 704.02 158.55 703.39 158.37 703.10C158.19 702.82 157.96 702.03 157.87 701.35C157.77 700.68 157.55 699.79 157.38 699.38C157.22 698.96 157.00 697.89 156.90 697.00C156.80 696.11 156.56 694.76 156.37 694.00C156.18 693.24 155.90 691.44 155.76 690.00C155.62 688.56 155.39 686.92 155.26 686.38C154.95 685.10 154.95 677.71 155.26 675.25C155.39 674.22 155.62 671.97 155.76 670.25C155.91 668.53 156.14 666.68 156.29 666.14C156.43 665.60 156.69 664.25 156.88 663.14C157.22 661.05 157.55 659.67 158.18 657.75C158.38 657.13 158.68 655.95 158.86 655.12C159.32 653.00 160.48 649.43 161.38 647.38C162.25 645.41 162.68 644.31 162.85 643.65C162.95 643.26 163.40 642.17 163.87 641.23C164.33 640.30 164.78 639.29 164.88 638.99C164.97 638.69 166.02 636.76 167.21 634.70C171.44 627.39 172.48 625.78 175.51 621.81C176.26 620.83 177.23 619.54 177.67 618.95C179.41 616.59 184.03 611.76 189.25 606.86C191.71 604.55 195.80 601.27 197.38 600.36C198.06 599.96 198.85 599.36 199.12 599.03C200.13 597.79 203.10 593.33 203.88 591.88C204.32 591.05 205.17 589.48 205.76 588.38C207.26 585.59 209.14 581.76 212.35 574.95C213.12 573.33 213.04 572.98 211.70 571.94C211.25 571.59 210.62 571.06 210.31 570.77C210.00 570.47 208.77 569.51 207.56 568.63C206.36 567.75 204.83 566.61 204.16 566.10C202.78 565.04 196.76 561.00 196.58 561.00C196.25 561.00 185.93 553.61 185.81 553.29C185.73 553.09 185.78 552.62 185.92 552.25C186.27 551.34 189.76 546.05 191.48 543.84C192.25 542.85 193.61 541.06 194.50 539.85C196.34 537.36 201.54 530.74 203.10 528.92C203.66 528.26 204.55 527.23 205.06 526.64C206.20 525.35 206.24 524.77 205.48 520.54C204.18 513.21 203.96 511.87 203.37 507.88C203.03 505.54 202.75 503.09 202.75 502.43C202.75 501.77 202.59 500.42 202.39 499.43C201.46 494.72 201.12 488.93 201.13 477.50C201.13 467.31 201.18 466.14 201.65 463.57C202.05 461.43 202.33 460.56 202.85 459.89C203.86 458.56 204.55 458.68 206.92 460.54C208.00 461.38 209.05 462.26 209.27 462.48C209.49 462.70 210.44 463.55 211.39 464.38C213.65 466.33 217.21 469.75 220.25 472.88C222.64 475.33 223.75 476.55 226.50 479.74C227.26 480.62 228.19 481.69 228.59 482.11C230.61 484.29 242.31 499.21 242.97 500.45C243.41 501.26 244.13 501.33 246.46 500.79C253.40 499.18 257.13 498.64 264.38 498.22C270.93 497.84 281.23 498.47 285.75 499.53C287.29 499.89 290.97 500.52 291.85 500.58C292.51 500.62 292.80 500.32 294.85 497.58C296.10 495.90 297.74 493.67 298.50 492.61C299.73 490.89 304.12 485.31 304.50 485.00C304.58 484.93 305.87 483.36 307.37 481.50C310.97 477.06 313.58 474.18 318.12 469.65C325.08 462.73 329.73 459.01 331.43 459.00C332.91 459.00 333.77 460.35 334.36 463.63C335.25 468.56 335.52 473.90 335.26 481.62C334.94 490.79 334.43 497.09 333.48 503.38C333.33 504.34 333.06 506.16 332.88 507.41C332.71 508.67 332.48 509.82 332.39 509.97C332.30 510.12 332.06 511.28 331.86 512.56C331.65 513.83 331.38 515.44 331.25 516.12C330.81 518.41 330.21 521.86 330.08 522.82C329.96 523.63 330.07 523.91 330.90 524.92C331.68 525.87 333.82 528.20 336.25 530.74C337.23 531.76 341.12 536.64 342.71 538.83C343.69 540.19 345.59 542.70 346.93 544.41C348.28 546.13 349.54 547.78 349.75 548.08C349.95 548.38 350.60 549.28 351.18 550.09C351.77 550.90 352.25 551.82 352.25 552.14C352.25 552.79 351.26 553.61 348.88 554.90C348.46 555.13 347.23 555.89 346.12 556.61C344.04 557.96 340.45 560.24 336.62 562.64C333.27 564.75 331.58 565.87 329.50 567.38C328.47 568.13 326.56 569.47 325.25 570.37C323.94 571.26 321.81 572.88 320.50 573.95C318.44 575.65 318.13 576.00 318.15 576.64C318.18 577.35 318.40 577.95 320.85 583.96C322.16 587.18 322.24 587.68 321.44 587.88C321.13 587.95 315.53 587.98 309.00 587.94L297.12 587.88L297.05 587.33C296.99 586.92 297.60 586.12 299.42 584.22C305.52 577.85 310.25 573.24 311.62 572.31C312.45 571.75 313.35 571.09 313.62 570.82C316.40 568.18 319.87 565.57 326.00 561.51C327.31 560.64 328.99 559.52 329.75 559.01C332.35 557.26 340.75 552.79 342.95 551.98C343.99 551.60 343.96 550.81 342.88 550.26C342.46 550.06 341.45 549.47 340.62 548.96C338.46 547.63 335.08 546.31 328.83 544.36C325.79 543.42 324.77 543.22 321.78 542.99C315.63 542.53 308.80 543.49 302.76 545.67C296.13 548.06 290.85 552.57 285.97 560.00C283.60 563.62 283.39 563.96 283.06 564.88C282.91 565.29 282.56 566.19 282.29 566.88C280.84 570.52 280.25 572.17 280.24 572.62C280.23 572.90 280.05 573.58 279.84 574.12C279.62 574.67 279.30 575.86 279.13 576.75C278.95 577.64 278.62 579.05 278.40 579.87C278.18 580.68 278.00 581.70 278.00 582.12C278.00 582.53 277.83 583.49 277.62 584.25C277.42 585.01 277.25 586.02 277.25 586.50C277.24 586.98 277.07 588.16 276.87 589.12C276.66 590.09 276.39 591.83 276.25 593.00C275.90 596.10 276.16 595.99 269.55 595.93L264.13 595.88L263.82 595.23C263.65 594.87 263.34 593.43 263.13 592.01C262.91 590.59 262.69 589.35 262.63 589.25C262.57 589.16 262.39 588.24 262.24 587.22C261.65 583.18 260.34 577.27 259.50 574.88C259.26 574.19 258.95 573.17 258.80 572.62C258.22 570.33 255.61 564.22 254.49 562.50C250.48 556.37 248.27 553.78 244.38 550.67C242.74 549.36 241.05 548.28 239.50 547.55C236.27 546.04 229.96 544.12 226.88 543.72C222.08 543.10 213.17 543.47 210.61 544.39C210.05 544.59 208.87 544.97 207.98 545.23C203.48 546.55 194.39 550.60 194.07 551.43C193.86 551.98 194.30 552.57 195.06 552.77C195.42 552.87 197.36 553.94 199.37 555.16C201.38 556.38 203.63 557.71 204.36 558.12C210.96 561.86 222.63 570.07 227.90 574.69C229.42 576.03 232.01 578.25 233.65 579.62C239.34 584.41 241.92 587.18 241.29 587.81C241.13 587.97 238.28 588.11 233.83 588.18C226.70 588.28 226.60 588.29 223.94 589.05C220.86 589.93 217.34 591.87 214.20 594.44C211.64 596.53 210.66 597.71 209.35 600.32C208.07 602.85 207.50 604.32 206.72 607.12L206.16 609.12L206.00 639.25C205.91 655.82 205.75 669.57 205.64 669.81C205.41 670.32 204.91 670.38 204.57 669.94C204.04 669.24 202.25 663.47 202.25 662.43C202.24 662.13 202.13 661.71 201.99 661.50C201.77 661.18 201.69 661.19 201.37 661.61C200.80 662.36 200.67 663.59 200.82 666.73C201.05 671.18 202.31 675.46 204.16 678.07C204.63 678.73 205.33 679.91 205.71 680.70C207.03 683.40 208.04 684.75 211.01 687.76C214.85 691.65 222.68 695.10 229.75 696.02C230.78 696.15 235.56 696.37 240.38 696.50C250.02 696.76 252.50 696.96 257.50 697.89C265.29 699.34 269.21 700.49 276.25 703.40C281.87 705.72 289.12 709.83 294.50 713.73C301.64 718.91 310.87 728.28 316.64 736.23C318.15 738.30 321.33 743.57 322.84 746.50C323.59 747.94 324.44 749.59 324.73 750.15C325.70 752.01 325.75 752.00 318.79 752.03C296.15 752.14 230.85 752.10 224.88 751.96ZM269.25 608.39C268.91 608.21 267.67 607.74 266.50 607.35C264.63 606.73 264.19 606.46 262.88 605.13C261.10 603.35 259.87 601.07 260.12 600.05C260.32 599.25 261.73 597.48 262.73 596.77C263.40 596.29 263.84 596.25 269.96 596.22L276.48 596.17L277.39 596.87C279.47 598.46 279.76 600.14 278.37 602.62C277.12 604.85 275.42 606.34 272.61 607.65C271.32 608.25 270.17 608.75 270.07 608.74C269.96 608.73 269.59 608.58 269.25 608.39ZM247.12 567.49C246.80 566.98 243.67 565.75 242.67 565.75C242.11 565.75 240.43 565.50 238.93 565.20C236.33 564.68 236.18 564.62 235.87 563.89C235.70 563.47 235.36 562.67 235.12 562.12C234.80 561.37 233.89 560.47 231.49 558.50C229.73 557.06 228.22 555.72 228.13 555.52C227.84 554.83 228.48 554.66 231.25 554.72C235.04 554.81 238.55 555.33 239.56 555.96C240.01 556.24 240.94 556.79 241.62 557.20C242.31 557.60 243.39 558.48 244.01 559.16C245.01 560.23 245.52 561.14 247.53 565.38C248.10 566.58 248.15 567.75 247.64 567.75C247.44 567.75 247.21 567.63 247.12 567.49ZM290.36 567.44C290.17 566.94 291.81 563.25 293.01 561.49C294.16 559.79 295.79 558.05 297.25 556.96C298.34 556.14 300.97 555.09 302.76 554.75C304.60 554.40 309.75 554.70 309.75 555.15C309.75 555.33 309.10 556.13 308.30 556.93C306.50 558.72 304.66 560.90 303.57 562.51C302.46 564.16 301.02 564.96 298.71 565.23C296.94 565.44 293.21 566.65 292.07 567.39C291.39 567.83 290.53 567.86 290.36 567.44Z" fill-rule="evenodd"/>
+    <path id="tf-p-fox" d="M224.88 751.96C214.49 751.73 210.55 751.16 203.62 748.88C197.89 746.99 194.37 745.43 190.60 743.10C189.63 742.49 188.75 742.00 188.65 742.00C188.41 742.00 182.41 737.91 180.88 736.70C177.86 734.31 172.81 729.00 170.09 725.33C169.28 724.26 168.57 723.32 168.50 723.25C168.22 722.98 167.00 721.28 167.00 721.16C167.00 721.09 166.50 720.30 165.90 719.40C164.78 717.73 161.98 712.20 160.51 708.75C160.07 707.72 159.56 706.54 159.38 706.12C159.20 705.71 158.97 704.98 158.88 704.50C158.78 704.02 158.55 703.39 158.37 703.10C158.19 702.82 157.96 702.03 157.87 701.35C157.77 700.68 157.55 699.79 157.38 699.38C157.22 698.96 157.00 697.89 156.90 697.00C156.80 696.11 156.56 694.76 156.37 694.00C156.18 693.24 155.90 691.44 155.76 690.00C155.62 688.56 155.39 686.92 155.26 686.38C154.95 685.10 154.95 677.71 155.26 675.25C155.39 674.22 155.62 671.97 155.76 670.25C155.91 668.53 156.14 666.68 156.29 666.14C156.43 665.60 156.69 664.25 156.88 663.14C157.22 661.05 157.55 659.67 158.18 657.75C158.38 657.13 158.68 655.95 158.86 655.12C159.32 653.00 160.48 649.43 161.38 647.38C162.25 645.41 162.68 644.31 162.85 643.65C162.95 643.26 163.40 642.17 163.87 641.23C164.33 640.30 164.78 639.29 164.88 638.99C164.97 638.69 166.02 636.76 167.21 634.70C171.44 627.39 172.48 625.78 175.51 621.81C176.26 620.83 177.23 619.54 177.67 618.95C179.41 616.59 184.03 611.76 189.25 606.86C191.71 604.55 195.80 601.27 197.38 600.36C198.06 599.96 198.85 599.36 199.12 599.03C200.13 597.79 203.10 593.33 203.88 591.88C204.32 591.05 205.17 589.48 205.76 588.38C207.26 585.59 209.14 581.76 212.35 574.95C213.12 573.33 213.04 572.98 211.70 571.94C211.25 571.59 210.62 571.06 210.31 570.77C210.00 570.47 208.77 569.51 207.56 568.63C206.36 567.75 204.83 566.61 204.16 566.10C202.78 565.04 196.76 561.00 196.58 561.00C196.25 561.00 185.93 553.61 185.81 553.29C185.73 553.09 185.78 552.62 185.92 552.25C186.27 551.34 189.76 546.05 191.48 543.84C192.25 542.85 193.61 541.06 194.50 539.85C196.34 537.36 201.54 530.74 203.10 528.92C203.66 528.26 204.55 527.23 205.06 526.64C206.20 525.35 206.24 524.77 205.48 520.54C204.18 513.21 203.96 511.87 203.37 507.88C203.03 505.54 202.75 503.09 202.75 502.43C202.75 501.77 202.59 500.42 202.39 499.43C201.46 494.72 201.12 488.93 201.13 477.50C201.13 467.31 201.18 466.14 201.65 463.57C202.05 461.43 202.33 460.56 202.85 459.89C203.86 458.56 204.55 458.68 206.92 460.54C208.00 461.38 209.05 462.26 209.27 462.48C209.49 462.70 210.44 463.55 211.39 464.38C213.65 466.33 217.21 469.75 220.25 472.88C222.64 475.33 223.75 476.55 226.50 479.74C227.26 480.62 228.19 481.69 228.59 482.11C230.61 484.29 242.31 499.21 242.97 500.45C243.41 501.26 244.13 501.33 246.46 500.79C253.40 499.18 257.13 498.64 264.38 498.22C270.93 497.84 281.23 498.47 285.75 499.53C287.29 499.89 290.97 500.52 291.85 500.58C292.51 500.62 292.80 500.32 294.85 497.58C296.10 495.90 297.74 493.67 298.50 492.61C299.73 490.89 304.12 485.31 304.50 485.00C304.58 484.93 305.87 483.36 307.37 481.50C310.97 477.06 313.58 474.18 318.12 469.65C325.08 462.73 329.73 459.01 331.43 459.00C332.91 459.00 333.77 460.35 334.36 463.63C335.25 468.56 335.52 473.90 335.26 481.62C334.94 490.79 334.43 497.09 333.48 503.38C333.33 504.34 333.06 506.16 332.88 507.41C332.71 508.67 332.48 509.82 332.39 509.97C332.30 510.12 332.06 511.28 331.86 512.56C331.65 513.83 331.38 515.44 331.25 516.12C330.81 518.41 330.21 521.86 330.08 522.82C329.96 523.63 330.07 523.91 330.90 524.92C331.68 525.87 333.82 528.20 336.25 530.74C337.23 531.76 341.12 536.64 342.71 538.83C343.69 540.19 345.59 542.70 346.93 544.41C348.28 546.13 349.54 547.78 349.75 548.08C349.95 548.38 350.60 549.28 351.18 550.09C351.77 550.90 352.25 551.82 352.25 552.14C352.25 552.79 351.26 553.61 348.88 554.90C348.46 555.13 347.23 555.89 346.12 556.61C344.04 557.96 340.45 560.24 336.62 562.64C333.27 564.75 331.58 565.87 329.50 567.38C328.47 568.13 326.56 569.47 325.25 570.37C323.94 571.26 321.81 572.88 320.50 573.95C318.44 575.65 318.13 576.00 318.15 576.64C318.18 577.35 318.40 577.95 320.85 583.96C322.16 587.18 322.24 587.68 321.44 587.88C321.13 587.95 315.53 587.98 309.00 587.94L297.12 587.88L297.05 587.33C296.99 586.92 297.60 586.12 299.42 584.22C305.52 577.85 310.25 573.24 311.62 572.31C312.45 571.75 313.35 571.09 313.62 570.82C316.40 568.18 319.87 565.57 326.00 561.51C327.31 560.64 328.99 559.52 329.75 559.01C332.35 557.26 340.75 552.79 342.95 551.98C343.99 551.60 343.96 550.81 342.88 550.26C342.46 550.06 341.45 549.47 340.62 548.96C338.46 547.63 335.08 546.31 328.83 544.36C325.79 543.42 324.77 543.22 321.78 542.99C315.63 542.53 308.80 543.49 302.76 545.67C296.13 548.06 290.85 552.57 285.97 560.00C283.60 563.62 283.39 563.96 283.06 564.88C282.91 565.29 282.56 566.19 282.29 566.88C280.84 570.52 280.25 572.17 280.24 572.62C280.23 572.90 280.05 573.58 279.84 574.12C279.62 574.67 279.30 575.86 279.13 576.75C278.95 577.64 278.62 579.05 278.40 579.87C278.18 580.68 278.00 581.70 278.00 582.12C278.00 582.53 277.83 583.49 277.62 584.25C277.42 585.01 277.25 586.02 277.25 586.50C277.24 586.98 277.07 588.16 276.87 589.12C276.66 590.09 276.39 591.83 276.25 593.00C275.90 596.10 276.16 595.99 269.55 595.93L264.13 595.88L263.82 595.23C263.65 594.87 263.34 593.43 263.13 592.01C262.91 590.59 262.69 589.35 262.63 589.25C262.57 589.16 262.39 588.24 262.24 587.22C261.65 583.18 260.34 577.27 259.50 574.88C259.26 574.19 258.95 573.17 258.80 572.62C258.22 570.33 255.61 564.22 254.49 562.50C250.48 556.37 248.27 553.78 244.38 550.67C242.74 549.36 241.05 548.28 239.50 547.55C236.27 546.04 229.96 544.12 226.88 543.72C222.08 543.10 213.17 543.47 210.61 544.39C210.05 544.59 208.87 544.97 207.98 545.23C203.48 546.55 194.39 550.60 194.07 551.43C193.86 551.98 194.30 552.57 195.06 552.77C195.42 552.87 197.36 553.94 199.37 555.16C201.38 556.38 203.63 557.71 204.36 558.12C210.96 561.86 222.63 570.07 227.90 574.69C229.42 576.03 232.01 578.25 233.65 579.62C239.34 584.41 241.92 587.18 241.29 587.81C241.13 587.97 238.28 588.11 233.83 588.18C226.70 588.28 226.60 588.29 223.94 589.05C220.86 589.93 217.34 591.87 214.20 594.44C211.64 596.53 210.66 597.71 209.35 600.32C208.07 602.85 207.50 604.32 206.72 607.12L206.16 609.12L206.00 639.25C205.91 655.82 205.75 669.57 205.64 669.81C205.41 670.32 204.91 670.38 204.57 669.94C204.04 669.24 202.25 663.47 202.25 662.43C202.24 662.13 202.13 661.71 201.99 661.50C201.77 661.18 201.69 661.19 201.37 661.61C200.80 662.36 200.67 663.59 200.82 666.73C201.05 671.18 202.31 675.46 204.16 678.07C204.63 678.73 205.33 679.91 205.71 680.70C207.03 683.40 208.04 684.75 211.01 687.76C214.85 691.65 222.68 695.10 229.75 696.02C230.78 696.15 235.56 696.37 240.38 696.50C250.02 696.76 252.50 696.96 257.50 697.89C265.29 699.34 269.21 700.49 276.25 703.40C281.87 705.72 289.12 709.83 294.50 713.73C301.64 718.91 310.87 728.28 316.64 736.23C318.15 738.30 321.33 743.57 322.84 746.50C323.59 747.94 324.44 749.59 324.73 750.15C325.70 752.01 325.75 752.00 318.79 752.03C296.15 752.14 230.85 752.10 224.88 751.96Z" fill-rule="evenodd"/>
+    <path id="tf-p-shade" d="M323.51 518.05C322.01 516.57 320.47 515.20 320.08 515.02C319.69 514.84 319.21 514.61 319.01 514.51C318.81 514.42 318.31 513.92 317.91 513.42C317.27 512.63 317.21 512.42 317.45 511.94C318.06 510.71 318.55 509.32 318.75 508.25C318.96 507.08 319.96 504.53 320.43 503.96C320.93 503.34 321.67 501.88 321.85 501.12C321.96 500.71 322.21 500.19 322.41 499.96C322.73 499.60 322.87 499.59 323.42 499.88C323.86 500.11 324.62 500.16 325.91 500.07C327.70 499.93 327.80 499.95 328.51 500.63C328.97 501.08 329.25 501.60 329.25 502.02C329.25 502.59 329.39 502.73 330.24 502.94C331.03 503.14 331.30 503.12 331.53 502.84C331.78 502.54 331.88 502.54 332.26 502.89C332.63 503.22 332.66 503.43 332.45 504.20C332.31 504.71 332.14 505.23 332.06 505.35C331.98 505.47 331.88 506.37 331.83 507.35C331.73 509.41 331.42 510.52 330.77 511.11C330.33 511.50 330.28 511.49 329.81 510.90L329.32 510.27L329.04 510.90C328.88 511.24 328.75 511.69 328.75 511.90C328.75 512.11 328.39 512.72 327.96 513.27L327.16 514.25L327.53 517.14C327.86 519.76 327.86 520.05 327.49 520.39C327.27 520.59 326.89 520.75 326.66 520.75C326.42 520.75 325.00 519.54 323.51 518.05ZM212.20 518.06C211.64 517.40 211.00 515.87 211.00 515.19C211.00 514.85 211.21 514.39 211.46 514.16C211.88 513.78 211.95 513.79 212.50 514.38C213.17 515.09 213.66 515.16 214.25 514.63C214.62 514.29 214.73 514.33 215.35 514.97L216.03 515.68L214.70 516.79C212.52 518.60 212.62 518.55 212.20 518.06ZM216.41 514.54C215.85 513.92 215.88 512.44 216.47 511.90C216.92 511.49 216.97 511.51 217.47 512.15C218.12 512.97 218.15 514.03 217.54 514.59C216.97 515.10 216.92 515.10 216.41 514.54ZM208.42 501.30C208.05 500.91 207.75 500.46 207.75 500.30C207.75 499.93 206.09 499.90 205.87 500.26C205.76 500.44 205.59 500.42 205.33 500.21C205.05 499.98 204.85 499.97 204.51 500.19C203.80 500.63 203.34 499.88 203.15 498.00C203.06 497.11 202.83 495.63 202.64 494.72C202.45 493.81 202.26 491.75 202.23 490.16C202.17 487.66 202.23 487.19 202.61 486.76C203.06 486.27 203.07 486.28 204.12 487.13C204.70 487.61 205.40 488.00 205.67 488.00C205.95 488.00 206.38 488.23 206.62 488.50C206.87 488.77 207.30 489.00 207.57 489.00C207.84 489.00 208.60 489.45 209.26 490.01C210.81 491.31 212.75 495.00 212.75 496.65C212.75 497.26 212.96 498.11 213.23 498.59L213.71 499.44L212.90 500.22C212.46 500.65 211.87 501.00 211.59 501.00C211.31 501.00 210.87 501.23 210.62 501.50C210.00 502.20 209.21 502.12 208.42 501.30Z" fill-rule="evenodd"/>
+    <path id="tf-p-eyes" d="M247.12 567.49C246.80 566.98 243.67 565.75 242.67 565.75C242.11 565.75 240.43 565.50 238.93 565.20C236.33 564.68 236.18 564.62 235.87 563.89C235.70 563.47 235.36 562.67 235.12 562.12C234.80 561.37 233.89 560.47 231.49 558.50C229.73 557.06 228.22 555.72 228.13 555.52C227.84 554.83 228.48 554.66 231.25 554.72C235.04 554.81 238.55 555.33 239.56 555.96C240.01 556.24 240.94 556.79 241.62 557.20C242.31 557.60 243.39 558.48 244.01 559.16C245.01 560.23 245.52 561.14 247.53 565.38C248.10 566.58 248.15 567.75 247.64 567.75C247.44 567.75 247.21 567.63 247.12 567.49ZM290.36 567.44C290.17 566.94 291.81 563.25 293.01 561.49C294.16 559.79 295.79 558.05 297.25 556.96C298.34 556.14 300.97 555.09 302.76 554.75C304.60 554.40 309.75 554.70 309.75 555.15C309.75 555.33 309.10 556.13 308.30 556.93C306.50 558.72 304.66 560.90 303.57 562.51C302.46 564.16 301.02 564.96 298.71 565.23C296.94 565.44 293.21 566.65 292.07 567.39C291.39 567.83 290.53 567.86 290.36 567.44Z" fill-rule="evenodd"/>
+    <path id="tf-p-nose" d="M269.25 608.39C268.91 608.21 267.67 607.74 266.50 607.35C264.63 606.73 264.19 606.46 262.88 605.13C261.10 603.35 259.87 601.07 260.12 600.05C260.32 599.25 261.73 597.48 262.73 596.77C263.40 596.29 263.84 596.25 269.96 596.22L276.48 596.17L277.39 596.87C279.47 598.46 279.76 600.14 278.37 602.62C277.12 604.85 275.42 606.34 272.61 607.65C271.32 608.25 270.17 608.75 270.07 608.74C269.96 608.73 269.59 608.58 269.25 608.39Z" fill-rule="evenodd"/>
+    <path id="tf-l0" d="M525.74 709.32C525.25 708.98 525.25 708.50 525.25 662.00C525.25 619.64 525.21 615.00 524.86 614.64C524.51 614.29 522.66 614.25 508.24 614.25C492.52 614.25 492.01 614.24 491.76 613.77C491.48 613.24 491.57 597.41 491.86 596.72C492.13 596.07 498.68 595.98 540.45 596.03C573.14 596.06 578.58 596.12 578.89 596.43C579.39 596.93 579.43 613.54 578.93 613.96C578.71 614.14 573.42 614.25 562.41 614.30C546.79 614.37 546.20 614.39 545.86 614.85C545.56 615.26 545.51 622.19 545.50 660.28C545.50 685.01 545.42 706.08 545.34 707.12C545.25 708.15 545.05 709.10 544.90 709.23C544.75 709.35 540.49 709.50 535.43 709.56C527.88 709.64 526.15 709.60 525.74 709.32Z" fill-rule="evenodd"/>
+    <path id="tf-l1" d="M601.50 711.57C597.04 711.05 592.92 709.64 588.50 707.13C584.23 704.71 580.40 699.97 578.77 695.08C576.82 689.23 577.23 680.75 579.69 675.88C581.39 672.53 584.38 669.05 587.27 667.08C590.00 665.21 593.80 663.50 597.38 662.55C602.68 661.12 602.60 661.13 617.12 661.12C624.55 661.11 630.77 661.02 630.94 660.92C631.33 660.67 631.36 657.08 630.99 654.75C630.54 651.86 629.60 650.11 627.25 647.74C625.30 645.78 622.37 644.00 621.08 644.00C620.83 644.00 620.29 643.80 619.88 643.56C619.22 643.18 618.38 643.12 613.12 643.12C608.09 643.12 607.00 643.19 606.38 643.53C605.96 643.75 605.16 644.00 604.58 644.09C604.01 644.18 603.22 644.41 602.83 644.60C602.44 644.80 601.51 645.22 600.75 645.53C598.73 646.38 595.64 648.43 593.24 650.49C592.07 651.49 591.09 652.41 591.04 652.53C591.00 652.65 590.77 652.75 590.54 652.74C590.14 652.74 589.12 651.46 586.74 648.00C585.02 645.49 583.04 642.77 581.83 641.29C581.24 640.56 580.75 639.75 580.75 639.49C580.75 638.94 583.49 636.67 586.62 634.65C587.86 633.85 589.16 633.00 589.50 632.77C590.89 631.84 597.11 629.00 597.76 629.00C597.92 629.00 598.40 628.84 598.84 628.64C599.86 628.18 602.39 627.52 604.75 627.11C605.78 626.93 607.23 626.66 607.97 626.51C610.05 626.11 618.99 626.18 621.77 626.63C625.85 627.30 626.61 627.44 627.38 627.70C627.79 627.85 629.08 628.26 630.25 628.62C635.85 630.34 639.44 632.83 644.12 638.26C645.08 639.36 646.00 640.71 646.00 640.99C646.00 641.11 646.14 641.36 646.32 641.54C646.79 642.03 648.00 644.17 648.00 644.52C648.00 644.68 648.21 645.28 648.47 645.85C649.11 647.26 650.01 651.14 650.02 652.50C650.02 653.12 650.12 654.13 650.25 654.75C650.37 655.37 650.48 667.84 650.50 682.49C650.52 705.23 650.47 709.15 650.17 709.37C649.94 709.54 646.81 709.63 641.32 709.63C634.49 709.63 632.75 709.56 632.41 709.28C632.06 708.99 632.00 708.33 632.00 704.59C632.00 699.69 631.84 699.26 630.57 700.78C629.13 702.51 626.07 705.35 624.62 706.30C622.63 707.62 619.09 709.31 616.62 710.12C612.82 711.37 605.67 712.06 601.50 711.57ZM615.45 696.35C621.84 695.16 626.46 692.02 629.04 687.09C630.58 684.12 631.05 682.21 631.18 678.23C631.28 675.15 631.24 674.53 630.91 674.20C630.25 673.53 619.03 673.31 612.18 673.83C608.52 674.11 606.49 674.37 606.00 674.62C605.60 674.83 605.07 675.00 604.82 675.00C603.57 675.01 600.07 677.23 598.68 678.90C596.71 681.26 595.97 685.19 596.85 688.58C597.84 692.38 601.69 695.37 607.03 696.49C609.65 697.04 611.92 697.00 615.45 696.35Z" fill-rule="evenodd"/>
+    <path id="tf-l2" d="M709.88 711.59C706.17 711.02 701.55 709.56 698.89 708.13C695.28 706.18 691.68 703.22 689.58 700.48C688.68 699.29 688.02 698.91 687.99 699.56C687.98 699.73 687.93 701.11 687.87 702.62C687.73 706.77 687.49 708.72 687.08 709.13C686.77 709.44 685.33 709.50 678.01 709.50C670.22 709.50 669.28 709.46 668.97 709.09C668.68 708.74 668.62 699.78 668.62 652.72C668.62 611.65 668.70 596.70 668.91 596.49C669.10 596.30 672.07 596.17 678.31 596.07L687.44 595.93L687.82 596.53C688.14 597.05 688.18 599.83 688.14 617.58C688.12 629.54 688.19 638.09 688.32 638.17C688.72 638.42 689.60 637.74 690.84 636.22C694.34 631.94 701.02 628.24 707.62 626.94C711.33 626.21 718.61 626.15 721.62 626.83C726.10 627.83 732.08 630.21 733.77 631.66C733.99 631.85 734.25 632.00 734.35 632.00C734.56 632.00 737.09 633.92 738.47 635.12C741.93 638.14 744.95 642.24 747.35 647.16C748.14 648.79 749.01 650.54 749.27 651.05C749.53 651.56 749.75 652.18 749.76 652.42C749.77 652.67 749.94 653.33 750.15 653.88C750.66 655.20 751.16 657.52 751.66 660.88C752.14 664.06 752.24 675.13 751.80 677.00C751.66 677.62 751.37 679.02 751.15 680.12C749.93 686.34 746.62 693.85 743.38 697.75C737.07 705.35 730.22 709.46 721.25 711.04C718.48 711.52 711.61 711.86 709.88 711.59ZM714.15 693.49C717.52 692.79 720.25 691.68 722.25 690.19C723.33 689.39 726.49 686.18 727.49 684.88C730.52 680.91 732.75 673.43 732.42 668.28C732.10 663.15 731.46 660.63 729.46 656.54C727.40 652.35 724.45 649.03 721.00 647.02C716.32 644.30 710.00 643.29 705.12 644.50C704.02 644.77 703.00 645.00 702.85 645.00C702.54 645.00 699.66 646.32 698.89 646.81C696.68 648.22 693.95 650.70 692.38 652.75C691.18 654.31 689.15 658.25 688.88 659.52C688.78 659.99 688.55 660.88 688.37 661.50C687.32 665.00 687.02 669.78 687.62 673.56C688.77 680.80 692.08 686.67 696.95 690.05C698.48 691.11 701.76 692.71 703.31 693.15C704.03 693.36 704.96 693.62 705.38 693.74C706.86 694.16 711.56 694.02 714.15 693.49Z" fill-rule="evenodd"/>
+    <path id="tf-l3" d="M765.65 709.22C765.15 708.81 765.15 708.58 765.13 652.85C765.10 599.37 765.12 596.88 765.55 596.45C765.97 596.03 766.67 596.00 774.82 596.00C782.40 596.00 783.72 596.05 784.19 596.39L784.75 596.78L784.75 652.86C784.75 699.16 784.69 708.99 784.42 709.21C784.19 709.40 781.19 709.51 775.12 709.56C767.14 709.62 766.10 709.58 765.65 709.22Z" fill-rule="evenodd"/>
+    <path id="tf-l4" d="M834.12 711.36C824.56 710.12 816.88 706.65 810.70 700.78C808.60 698.79 805.98 695.65 804.81 693.75C803.25 691.20 802.06 688.96 801.55 687.62C801.23 686.80 800.75 685.64 800.48 685.06C800.22 684.47 800.00 683.74 800.00 683.43C800.00 683.13 799.83 682.55 799.62 682.16C799.42 681.77 799.09 680.42 798.88 679.16C798.68 677.90 798.40 676.37 798.27 675.75C797.95 674.29 797.95 664.71 798.27 663.25C798.40 662.63 798.66 661.11 798.83 659.88C799.01 658.64 799.27 657.40 799.42 657.12C799.56 656.85 799.76 656.12 799.85 655.50C799.95 654.88 800.17 654.15 800.35 653.88C800.53 653.60 800.75 653.04 800.86 652.62C801.17 651.36 804.03 645.72 805.30 643.88C808.18 639.68 811.88 635.96 815.98 633.12C817.63 631.99 823.37 629.00 823.91 629.00C824.12 629.00 824.60 628.84 824.96 628.63C825.33 628.43 826.24 628.10 827.00 627.90C832.47 626.45 834.53 626.17 839.62 626.18C842.95 626.19 844.53 626.29 845.66 626.59C846.51 626.82 847.50 627.00 847.87 627.00C848.47 627.00 850.12 627.51 854.00 628.88C855.26 629.33 857.18 630.17 857.75 630.52C857.96 630.65 858.39 630.86 858.71 631.00C859.03 631.14 860.38 631.97 861.71 632.85C864.33 634.58 867.72 637.76 869.48 640.13C870.09 640.95 870.90 642.03 871.28 642.53C872.19 643.72 874.80 649.17 875.51 651.38C875.82 652.34 876.23 653.52 876.42 654.00C876.61 654.48 876.93 656.06 877.13 657.50C877.34 658.94 877.61 660.69 877.74 661.38C877.87 662.06 877.98 665.12 877.99 668.17C878.00 672.64 877.93 673.78 877.65 674.07C877.13 674.58 869.39 674.73 841.76 674.76C824.54 674.77 818.30 674.85 818.05 675.06C817.79 675.28 817.74 675.73 817.87 676.91C818.07 678.80 818.79 680.88 820.26 683.88C821.18 685.76 821.75 686.52 823.76 688.52C825.93 690.69 826.43 691.06 829.08 692.36C831.77 693.68 832.74 694.00 836.38 694.78C837.11 694.94 839.26 695.01 841.62 694.94C845.64 694.83 846.32 694.71 850.25 693.45C854.14 692.20 858.03 689.63 861.29 686.15C862.13 685.24 862.98 684.50 863.17 684.50C863.37 684.50 864.05 685.00 864.70 685.60C867.18 687.92 869.73 690.23 872.57 692.71C875.02 694.86 875.49 695.39 875.37 695.84C875.17 696.58 869.86 701.66 867.12 703.74C864.67 705.59 863.03 706.55 860.21 707.75C856.43 709.38 852.31 710.53 848.62 711.01C847.52 711.15 845.84 711.37 844.88 711.50C842.47 711.82 837.14 711.75 834.12 711.36ZM858.99 660.86C859.33 660.51 858.90 656.47 858.44 655.74C858.23 655.40 857.98 654.80 857.89 654.40C857.60 653.16 855.50 650.20 853.51 648.25C851.63 646.40 848.68 644.42 847.32 644.10C846.94 644.01 846.13 643.71 845.53 643.45C843.33 642.47 834.07 642.59 831.61 643.63C826.46 645.81 822.37 649.45 820.17 653.79C819.53 655.08 819.00 656.27 819.00 656.44C819.00 656.61 818.77 657.42 818.48 658.24C818.20 659.07 818.00 660.00 818.04 660.31L818.12 660.88L834.75 661.01C855.24 661.18 858.69 661.16 858.99 660.86Z" fill-rule="evenodd"/>
+    <path id="tf-l5" d="M903.83 709.17C903.35 708.57 903.35 707.47 903.37 652.96C903.39 611.20 903.47 597.25 903.68 596.85C903.96 596.35 904.22 596.32 909.80 596.20C913.00 596.13 928.56 596.10 944.36 596.13C971.95 596.20 973.11 596.22 973.45 596.66C973.74 597.05 973.77 598.56 973.63 605.75C973.48 613.26 973.41 614.42 973.06 614.69C972.74 614.93 967.43 615.00 948.46 615.00C925.67 615.00 924.25 615.03 924.04 615.44C923.92 615.68 923.80 622.07 923.77 629.64C923.72 642.62 923.74 643.43 924.17 643.96L924.62 644.51L945.05 644.59C961.25 644.65 965.55 644.73 965.86 644.99C966.20 645.27 966.25 646.44 966.25 653.86C966.25 660.17 966.17 662.48 965.95 662.70C965.72 662.93 960.75 663.00 945.08 663.00L924.51 663.00L924.16 663.56C923.86 664.04 923.80 667.63 923.77 686.49C923.75 703.88 923.67 708.93 923.43 709.17C923.21 709.40 920.67 709.52 913.72 709.63L904.31 709.78L903.83 709.17Z" fill-rule="evenodd"/>
+    <path id="tf-l6" d="M1010.75 711.25C1006.20 710.61 1003.00 709.61 998.50 707.42C994.31 705.39 992.07 703.98 989.65 701.86C987.21 699.73 983.14 694.69 982.09 692.50C981.99 692.29 981.54 691.55 981.09 690.84C979.30 688.03 977.35 682.61 976.75 678.75C976.61 677.86 976.38 676.67 976.23 676.12C976.09 675.58 975.91 672.92 975.83 670.23C975.70 665.94 975.75 665.01 976.20 662.61C976.49 661.11 976.79 659.42 976.88 658.88C977.07 657.69 977.99 654.57 978.86 652.12C980.79 646.72 985.43 640.17 990.41 635.81C991.80 634.58 991.79 634.59 993.12 633.73C996.61 631.46 997.18 631.15 1001.12 629.36C1002.78 628.61 1007.77 627.23 1009.71 626.99C1010.84 626.85 1012.05 626.62 1012.40 626.49C1013.25 626.17 1022.15 626.18 1023.25 626.51C1023.73 626.65 1024.97 626.87 1025.99 627.01C1028.49 627.33 1034.72 629.27 1036.50 630.27C1036.71 630.38 1037.66 630.89 1038.62 631.38C1040.45 632.32 1043.91 634.97 1047.17 637.90C1049.24 639.77 1051.25 642.16 1053.05 644.88C1054.29 646.75 1056.63 651.50 1056.89 652.67C1056.97 653.06 1057.26 653.90 1057.52 654.55C1057.78 655.19 1058.00 656.01 1058.00 656.37C1058.00 656.72 1058.18 657.43 1058.40 657.95C1058.79 658.88 1058.96 660.00 1059.53 665.78C1059.82 668.66 1059.80 669.41 1059.30 674.09C1058.99 676.92 1058.65 679.49 1058.52 679.81C1058.40 680.12 1058.01 681.33 1057.64 682.50C1056.90 684.88 1056.39 686.16 1054.93 689.25C1052.97 693.42 1050.60 696.64 1046.84 700.26C1040.06 706.79 1033.09 710.09 1023.62 711.25C1018.85 711.84 1014.98 711.84 1010.75 711.25ZM1021.96 693.21C1027.39 691.90 1030.94 689.74 1034.23 685.74C1035.88 683.73 1036.06 683.45 1037.20 681.12C1039.00 677.48 1039.87 674.20 1040.10 670.25C1040.33 666.29 1039.58 661.39 1038.34 658.75C1036.74 655.33 1036.97 655.75 1035.35 653.25C1033.83 650.89 1030.43 647.86 1028.00 646.71C1025.46 645.50 1024.24 645.00 1023.83 645.00C1023.58 645.00 1022.76 644.83 1022.00 644.62C1017.78 643.49 1010.75 644.68 1006.97 647.17C1006.27 647.63 1005.60 648.00 1005.47 648.00C1005.05 648.00 1000.62 652.60 999.69 654.00C997.77 656.91 996.33 660.78 995.85 664.38C995.14 669.61 995.58 674.86 997.12 679.33C998.39 683.05 999.57 684.95 1002.11 687.33C1005.85 690.84 1008.35 692.19 1013.12 693.28C1015.33 693.78 1019.76 693.75 1021.96 693.21Z" fill-rule="evenodd"/>
+    <path id="tf-l7" d="M1059.18 709.59C1058.87 709.29 1058.98 708.32 1059.36 708.01C1059.56 707.85 1060.45 706.63 1061.35 705.30C1062.25 703.96 1063.78 701.75 1064.73 700.38C1066.72 697.52 1069.54 693.44 1071.30 690.88C1071.95 689.91 1072.94 688.51 1073.49 687.75C1074.04 686.99 1075.89 684.29 1077.61 681.75C1081.70 675.69 1082.01 675.25 1082.96 674.06C1084.34 672.30 1086.50 668.92 1086.50 668.49C1086.50 668.11 1084.53 665.05 1081.12 660.12C1080.05 658.57 1074.71 650.68 1072.00 646.63C1071.79 646.33 1071.41 645.75 1071.14 645.35C1070.87 644.95 1070.13 643.95 1069.50 643.12C1068.87 642.30 1068.13 641.30 1067.86 640.90C1067.59 640.50 1067.21 639.92 1067.00 639.62C1065.58 637.52 1064.60 636.09 1064.43 635.88C1064.31 635.74 1063.64 634.73 1062.94 633.62C1062.24 632.52 1061.35 631.14 1060.96 630.55C1060.12 629.28 1060.10 629.10 1060.71 628.77C1061.25 628.48 1080.99 628.34 1082.03 628.61C1082.73 628.80 1083.48 629.67 1084.11 631.03C1084.50 631.87 1085.13 632.87 1087.78 636.79C1088.55 637.94 1089.77 639.83 1090.49 641.00C1092.15 643.69 1092.29 643.91 1096.85 650.94C1097.77 652.35 1098.60 653.50 1098.70 653.50C1099.05 653.50 1100.00 652.72 1100.00 652.44C1100.00 652.28 1100.71 651.08 1101.59 649.77C1102.46 648.45 1103.60 646.70 1104.12 645.88C1109.28 637.76 1114.62 629.69 1115.18 629.18C1115.63 628.78 1116.65 628.73 1126.14 628.56C1135.67 628.39 1136.65 628.41 1137.11 628.79C1137.68 629.25 1137.75 629.14 1134.51 633.50C1133.75 634.53 1132.84 635.83 1132.50 636.39C1132.16 636.95 1130.92 638.72 1129.75 640.34C1126.29 645.10 1124.57 647.60 1121.46 652.38C1118.41 657.04 1118.02 657.62 1116.77 659.38C1116.09 660.34 1114.88 662.08 1114.09 663.25C1113.30 664.42 1112.29 665.84 1111.84 666.40C1110.60 667.96 1110.57 668.45 1111.61 669.89C1112.09 670.57 1112.67 671.44 1112.89 671.83C1113.23 672.45 1114.44 674.18 1116.97 677.65C1118.10 679.21 1123.23 686.95 1124.50 689.02C1125.12 690.03 1125.90 691.25 1126.23 691.74C1126.56 692.23 1127.79 694.03 1128.96 695.75C1130.13 697.47 1132.25 700.62 1133.66 702.75C1135.07 704.88 1136.59 707.12 1137.03 707.73C1138.44 709.68 1138.78 709.62 1127.10 709.69C1120.05 709.74 1116.67 709.67 1116.20 709.48C1115.78 709.31 1115.04 708.44 1114.23 707.16C1113.51 706.04 1112.69 704.79 1112.41 704.38C1111.19 702.60 1110.00 700.76 1110.00 700.65C1110.00 700.58 1109.34 699.54 1108.53 698.33C1104.88 692.85 1099.67 684.72 1099.12 683.65C1098.57 682.56 1097.81 683.08 1096.44 685.50C1096.01 686.26 1095.04 687.83 1094.29 689.00C1093.53 690.17 1092.52 691.74 1092.04 692.50C1090.99 694.14 1089.96 695.70 1087.48 699.39C1086.46 700.91 1084.84 703.43 1083.88 704.99C1082.91 706.55 1081.79 708.20 1081.38 708.67L1080.62 709.52L1069.99 709.65C1064.14 709.71 1059.27 709.69 1059.18 709.59Z" fill-rule="evenodd"/>
+    <path id="tf-p-pupils" d="M238.29999999999998 560.2a1.9 1.9 0 1 0 3.8 0a1.9 1.9 0 1 0 -3.8 0ZM297.3 559.9a1.9 1.9 0 1 0 3.8 0a1.9 1.9 0 1 0 -3.8 0Z"/>
+    <clipPath id="tf-outer-clip"><rect x="215.5" y="596.5" width="227.75" height="154.5" rx="14"/></clipPath>
+    <g id="tf-mark-g">
+      <rect class="lg-or" x="297" y="660.5" width="65.5" height="38"/>
+      <rect class="lg-ink" x="215.5" y="596.5" width="227.75" height="18.5" clip-path="url(#tf-outer-clip)"/>
+      <rect class="lg-inks" x="219.5" y="600.5" width="219.75" height="146.5" rx="10" stroke-width="8"/>
+      <path class="lg-inks" d="M293.5 615V747M366 615V747" stroke-width="7.5"/>
+      <path class="lg-inks" d="M219.5 657H439.25M219.5 701.5H439.25" stroke-width="7"/>
+      <use href="#tf-p-sil" class="lg-key"/><use href="#tf-p-sil" class="lg-white"/>
+      <use href="#tf-p-fox" class="lg-or"/><use href="#tf-p-shade" class="lg-shade"/>
+      <use href="#tf-p-eyes" class="lg-slate"/><use href="#tf-p-pupils" class="lg-white"/><use href="#tf-p-nose" class="lg-slate"/>
+    </g>
+  </defs>
+</svg>
+
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="TableFox home"><svg viewBox="145 451 309 309" aria-hidden="true"><use href="#tf-mark-g"/></svg>TableFox</a>
+    <nav class="nav" aria-label="Primary">
+      <a href="#how">How it works</a><a href="#safety">Safety</a><a href="#results">Results</a><a href="https://github.com/Adhrit-Verma/TableFox" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <a class="btn btn-primary" href="#add">Add to ChatGPT</a>
+  </div>
+</header>
+
+<main id="main">
+<section class="hero" id="top">
+  <div class="wrap grid12">
+    <div class="hero-copy">
+      <p class="eyebrow">Read-only PostgreSQL for ChatGPT and MCP clients</p>
+      <h1>Ask your PostgreSQL database anything. <span>Read-only.</span></h1>
+      <p class="lede">TableFox finds the few tables a question needs and runs guarded queries for ChatGPT. Your data never leaves read-only.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="#add">Add to ChatGPT</a>
+        <a class="btn btn-ghost" href="https://github.com/Adhrit-Verma/TableFox" target="_blank" rel="noopener"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.8.06 1.23.83 1.23.83.71 1.22 1.87.87 2.33.66.07-.52.28-.87.5-1.07-1.78-.2-3.65-.89-3.65-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.22 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.66 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg>View on GitHub</a>
+      </div>
+      <ul class="facts">
+        <li>SELECT / WITH only</li><li>Two tool calls per question</li><li>Credentials never shown to ChatGPT</li>
+      </ul>
+    </div>
+    <div class="hero-side">
+      <div class="stage">
+        <svg class="tf-anim" viewBox="147 451 999 309" role="img" aria-label="TableFox logo: a fox wrapped around a table grid">
+          <defs>
+            <clipPath id="cz-head"><rect x="100" y="380" width="420" height="234"/></clipPath>
+            <clipPath id="cz-body"><rect x="100" y="606" width="420" height="92"/></clipPath>
+            <clipPath id="cz-tail"><rect x="60" y="690" width="460" height="120"/></clipPath>
+          </defs>
+          <rect class="a-cell lg-or" x="297" y="660.5" width="65.5" height="38"/>
+          <g clip-path="url(#tf-outer-clip)"><rect class="a-top lg-ink" x="215.5" y="596.5" width="227.75" height="18.5"/></g>
+          <rect class="a-frame lg-inks" pathLength="1" x="219.5" y="600.5" width="219.75" height="146.5" rx="10" stroke-width="8"/>
+          <path class="a-c1 lg-inks" pathLength="1" d="M293.5 615V747" stroke-width="7.5"/>
+          <path class="a-c2 lg-inks" pathLength="1" d="M366 615V747" stroke-width="7.5"/>
+          <path class="a-r1 lg-inks" pathLength="1" d="M219.5 657H439.25" stroke-width="7"/>
+          <path class="a-r2 lg-inks" pathLength="1" d="M219.5 701.5H439.25" stroke-width="7"/>
+          <g clip-path="url(#cz-tail)"><g class="a-tail"><use href="#tf-p-sil" class="lg-key"/><use href="#tf-p-sil" class="lg-white"/><use href="#tf-p-fox" class="lg-or"/></g></g>
+          <g clip-path="url(#cz-body)"><g class="a-body"><use href="#tf-p-sil" class="lg-key"/><use href="#tf-p-sil" class="lg-white"/><use href="#tf-p-fox" class="lg-or"/></g></g>
+          <g clip-path="url(#cz-head)"><g class="a-head"><use href="#tf-p-sil" class="lg-key"/><use href="#tf-p-sil" class="lg-white"/><use href="#tf-p-fox" class="lg-or"/><use href="#tf-p-shade" class="lg-shade"/><g class="a-eyes"><use href="#tf-p-eyes" class="lg-slate"/><use href="#tf-p-pupils" class="lg-white"/></g><use href="#tf-p-nose" class="lg-slate"/></g></g>
+          <g><use href="#tf-l0" class="a-l lg-ink" style="--i:0"/><use href="#tf-l1" class="a-l lg-ink" style="--i:1"/><use href="#tf-l2" class="a-l lg-ink" style="--i:2"/><use href="#tf-l3" class="a-l lg-ink" style="--i:3"/><use href="#tf-l4" class="a-l lg-ink" style="--i:4"/><use href="#tf-l5" class="a-fox lg-or" style="--i:5"/><use href="#tf-l6" class="a-fox lg-or" style="--i:6"/><use href="#tf-l7" class="a-fox lg-or" style="--i:7"/></g>
+        </svg>
+      </div>
+      <figure class="chat" style="margin:0" aria-label="Example ChatGPT exchange using TableFox, with demo data">
+        <div class="chat-bar"><span class="dot" aria-hidden="true"></span>ChatGPT · TableFox connected · <span class="mono">shop</span></div>
+        <div class="chat-body">
+          <p class="msg user">Which 5 products earned the most revenue?</p>
+          <div class="msg bot">
+            <div class="calls"><span class="call"><b>database_task_context</b> → 3 tables</span><span class="call"><b>database_readonly_batch</b> → 1 query</span></div>
+            <div class="tbl-wrap"><table>
+              <thead><tr><th>Product</th><th class="num">Units</th><th class="num">Revenue</th></tr></thead>
+              <tbody>
+                <tr><td>Classic Notebook</td><td class="num">1,284</td><td class="num">$15,408.00</td></tr>
+                <tr><td>Linen Desk Mat</td><td class="num">412</td><td class="num">$13,184.00</td></tr>
+                <tr><td>Brass Fountain Pen</td><td class="num">231</td><td class="num">$11,319.00</td></tr>
+                <tr><td>Weekly Planner</td><td class="num">688</td><td class="num">$9,632.00</td></tr>
+                <tr><td>Canvas Pencil Roll</td><td class="num">503</td><td class="num">$7,042.00</td></tr>
+              </tbody>
+            </table></div>
+            <p class="demo-note">Demo data from an invented store.</p>
+          </div>
+        </div>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<div class="wrap"><div class="rule" style="--c:5;--cp:3" aria-hidden="true"></div></div>
+
+<section class="problem" aria-labelledby="problem-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">The problem</p>
+      <h2 id="problem-h">A full schema dump is mostly noise</h2>
+      <p class="lede">Pasting every CREATE TABLE into a prompt costs tokens and buries the tables that matter. TableFox hands the model a small context pack instead.</p>
+    </div>
+    <div class="grid12">
+      <div class="dump">
+        <div class="pane-head"><span><b>Full schema</b> · demo store, 38 tables</span><span class="mono">schema.sql</span></div>
+        <div class="dump-view" aria-label="A long PostgreSQL schema dump, scrolling" role="img">
+          <div class="dump-track" id="dumpTrack"><pre><span class="ln">1</span>CREATE TABLE public.customers (
+<span class="ln">2</span>  id bigserial PRIMARY KEY,
+<span class="ln">3</span>  email text NOT NULL,
+<span class="ln">4</span>  full_name text,
+<span class="ln">5</span>  created_at timestamptz DEFAULT now(),
+<span class="ln">6</span>  marketing_opt_in boolean
+<span class="ln">7</span>);
+<span class="ln">8</span>COMMENT ON TABLE public.customers IS NULL;
+<span class="ln">9</span>
+<span class="ln">10</span>CREATE TABLE public.addresses (
+<span class="ln">11</span>  id bigserial PRIMARY KEY,
+<span class="ln">12</span>  customer_id bigint REFERENCES customers(id),
+<span class="ln">13</span>  line1 text,
+<span class="ln">14</span>  city text,
+<span class="ln">15</span>  postcode text,
+<span class="ln">16</span>  country_code char(2)
+<span class="ln">17</span>);
+<span class="ln">18</span>COMMENT ON TABLE public.addresses IS NULL;
+<span class="ln">19</span>
+<span class="ln">20</span>CREATE TABLE public.categories (
+<span class="ln">21</span>  id serial PRIMARY KEY,
+<span class="ln">22</span>  parent_id int REFERENCES categories(id),
+<span class="ln">23</span>  name text,
+<span class="ln">24</span>  slug text UNIQUE
+<span class="ln">25</span>);
+<span class="ln">26</span>COMMENT ON TABLE public.categories IS NULL;
+<span class="ln">27</span>
+<span class="ln">28</span>CREATE TABLE public.products (
+<span class="ln">29</span>  id bigserial PRIMARY KEY,
+<span class="ln">30</span>  category_id int REFERENCES categories(id),
+<span class="ln">31</span>  sku text UNIQUE,
+<span class="ln">32</span>  name text NOT NULL,
+<span class="ln">33</span>  price numeric(10,2),
+<span class="ln">34</span>  is_active boolean
+<span class="ln">35</span>);
+<span class="ln">36</span>COMMENT ON TABLE public.products IS NULL;
+<span class="ln">37</span>
+<span class="ln">38</span>CREATE TABLE public.product_images (
+<span class="ln">39</span>  id bigserial PRIMARY KEY,
+<span class="ln">40</span>  product_id bigint REFERENCES products(id),
+<span class="ln">41</span>  url text,
+<span class="ln">42</span>  position smallint
+<span class="ln">43</span>);
+<span class="ln">44</span>COMMENT ON TABLE public.product_images IS NULL;
+<span class="ln">45</span>
+<span class="ln">46</span>CREATE TABLE public.orders (
+<span class="ln">47</span>  id bigserial PRIMARY KEY,
+<span class="ln">48</span>  customer_id bigint REFERENCES customers(id),
+<span class="ln">49</span>  status text,
+<span class="ln">50</span>  created_at timestamptz,
+<span class="ln">51</span>  total numeric(12,2)
+<span class="ln">52</span>);
+<span class="ln">53</span>COMMENT ON TABLE public.orders IS NULL;
+<span class="ln">54</span>
+<span class="ln">55</span>CREATE TABLE public.order_items (
+<span class="ln">56</span>  id bigserial PRIMARY KEY,
+<span class="ln">57</span>  order_id bigint REFERENCES orders(id),
+<span class="ln">58</span>  product_id bigint REFERENCES products(id),
+<span class="ln">59</span>  quantity int,
+<span class="ln">60</span>  unit_price numeric(10,2)
+<span class="ln">61</span>);
+<span class="ln">62</span>COMMENT ON TABLE public.order_items IS NULL;
+<span class="ln">63</span>
+<span class="ln">64</span>CREATE TABLE public.payments (
+<span class="ln">65</span>  id bigserial PRIMARY KEY,
+<span class="ln">66</span>  order_id bigint REFERENCES orders(id),
+<span class="ln">67</span>  provider text,
+<span class="ln">68</span>  amount numeric(12,2),
+<span class="ln">69</span>  captured_at timestamptz
+<span class="ln">70</span>);
+<span class="ln">71</span>COMMENT ON TABLE public.payments IS NULL;
+<span class="ln">72</span>
+<span class="ln">73</span>CREATE TABLE public.refunds (
+<span class="ln">74</span>  id bigserial PRIMARY KEY,
+<span class="ln">75</span>  payment_id bigint REFERENCES payments(id),
+<span class="ln">76</span>  amount numeric(12,2),
+<span class="ln">77</span>  reason text
+<span class="ln">78</span>);
+<span class="ln">79</span>COMMENT ON TABLE public.refunds IS NULL;
+<span class="ln">80</span>
+<span class="ln">81</span>CREATE TABLE public.shipments (
+<span class="ln">82</span>  id bigserial PRIMARY KEY,
+<span class="ln">83</span>  order_id bigint REFERENCES orders(id),
+<span class="ln">84</span>  carrier_id int REFERENCES carriers(id),
+<span class="ln">85</span>  shipped_at timestamptz,
+<span class="ln">86</span>  tracking_code text
+<span class="ln">87</span>);
+<span class="ln">88</span>COMMENT ON TABLE public.shipments IS NULL;
+<span class="ln">89</span>
+<span class="ln">90</span>CREATE TABLE public.carriers (
+<span class="ln">91</span>  id serial PRIMARY KEY,
+<span class="ln">92</span>  name text,
+<span class="ln">93</span>  service_level text
+<span class="ln">94</span>);
+<span class="ln">95</span>COMMENT ON TABLE public.carriers IS NULL;
+<span class="ln">96</span>
+<span class="ln">97</span>CREATE TABLE public.warehouses (
+<span class="ln">98</span>  id serial PRIMARY KEY,
+<span class="ln">99</span>  code text UNIQUE,
+<span class="ln">100</span>  city text
+<span class="ln">101</span>);
+<span class="ln">102</span>COMMENT ON TABLE public.warehouses IS NULL;
+<span class="ln">103</span>
+<span class="ln">104</span>CREATE TABLE public.inventory (
+<span class="ln">105</span>  product_id bigint REFERENCES products(id),
+<span class="ln">106</span>  warehouse_id int REFERENCES warehouses(id),
+<span class="ln">107</span>  on_hand int,
+<span class="ln">108</span>  reserved int,
+<span class="ln">109</span>  PRIMARY KEY (product_id, warehouse_id)
+<span class="ln">110</span>);
+<span class="ln">111</span>COMMENT ON TABLE public.inventory IS NULL;
+<span class="ln">112</span>
+<span class="ln">113</span>CREATE TABLE public.suppliers (
+<span class="ln">114</span>  id serial PRIMARY KEY,
+<span class="ln">115</span>  name text,
+<span class="ln">116</span>  contact_email text,
+<span class="ln">117</span>  lead_time_days int
+<span class="ln">118</span>);
+<span class="ln">119</span>COMMENT ON TABLE public.suppliers IS NULL;
+<span class="ln">120</span>
+<span class="ln">121</span>CREATE TABLE public.purchase_orders (
+<span class="ln">122</span>  id bigserial PRIMARY KEY,
+<span class="ln">123</span>  supplier_id int REFERENCES suppliers(id),
+<span class="ln">124</span>  status text,
+<span class="ln">125</span>  expected_at date
+<span class="ln">126</span>);
+<span class="ln">127</span>COMMENT ON TABLE public.purchase_orders IS NULL;
+<span class="ln">128</span>
+<span class="ln">129</span>CREATE TABLE public.purchase_order_lines (
+<span class="ln">130</span>  id bigserial PRIMARY KEY,
+<span class="ln">131</span>  purchase_order_id bigint REFERENCES purchase_orders(id),
+<span class="ln">132</span>  product_id bigint REFERENCES products(id),
+<span class="ln">133</span>  quantity int,
+<span class="ln">134</span>  unit_cost numeric(10,2)
+<span class="ln">135</span>);
+<span class="ln">136</span>COMMENT ON TABLE public.purchase_order_lines IS NULL;
+<span class="ln">137</span>
+<span class="ln">138</span>CREATE TABLE public.coupons (
+<span class="ln">139</span>  id serial PRIMARY KEY,
+<span class="ln">140</span>  code text UNIQUE,
+<span class="ln">141</span>  percent_off smallint,
+<span class="ln">142</span>  expires_at timestamptz
+<span class="ln">143</span>);
+<span class="ln">144</span>COMMENT ON TABLE public.coupons IS NULL;
+<span class="ln">145</span>
+<span class="ln">146</span>CREATE TABLE public.order_coupons (
+<span class="ln">147</span>  order_id bigint REFERENCES orders(id),
+<span class="ln">148</span>  coupon_id int REFERENCES coupons(id)
+<span class="ln">149</span>);
+<span class="ln">150</span>COMMENT ON TABLE public.order_coupons IS NULL;
+<span class="ln">151</span>
+<span class="ln">152</span>CREATE TABLE public.reviews (
+<span class="ln">153</span>  id bigserial PRIMARY KEY,
+<span class="ln">154</span>  product_id bigint REFERENCES products(id),
+<span class="ln">155</span>  customer_id bigint REFERENCES customers(id),
+<span class="ln">156</span>  rating smallint,
+<span class="ln">157</span>  body text
+<span class="ln">158</span>);
+<span class="ln">159</span>COMMENT ON TABLE public.reviews IS NULL;
+<span class="ln">160</span>
+<span class="ln">161</span>CREATE TABLE public.carts (
+<span class="ln">162</span>  id bigserial PRIMARY KEY,
+<span class="ln">163</span>  customer_id bigint REFERENCES customers(id),
+<span class="ln">164</span>  updated_at timestamptz
+<span class="ln">165</span>);
+<span class="ln">166</span>COMMENT ON TABLE public.carts IS NULL;
+<span class="ln">167</span>
+<span class="ln">168</span>CREATE TABLE public.cart_items (
+<span class="ln">169</span>  cart_id bigint REFERENCES carts(id),
+<span class="ln">170</span>  product_id bigint REFERENCES products(id),
+<span class="ln">171</span>  quantity int
+<span class="ln">172</span>);
+<span class="ln">173</span>COMMENT ON TABLE public.cart_items IS NULL;
+<span class="ln">174</span>
+<span class="ln">175</span>CREATE TABLE public.wishlists (
+<span class="ln">176</span>  id bigserial PRIMARY KEY,
+<span class="ln">177</span>  customer_id bigint REFERENCES customers(id),
+<span class="ln">178</span>  name text
+<span class="ln">179</span>);
+<span class="ln">180</span>COMMENT ON TABLE public.wishlists IS NULL;
+<span class="ln">181</span>
+<span class="ln">182</span>CREATE TABLE public.wishlist_items (
+<span class="ln">183</span>  wishlist_id bigint REFERENCES wishlists(id),
+<span class="ln">184</span>  product_id bigint REFERENCES products(id)
+<span class="ln">185</span>);
+<span class="ln">186</span>COMMENT ON TABLE public.wishlist_items IS NULL;
+<span class="ln">187</span>
+<span class="ln">188</span>CREATE TABLE public.sessions (
+<span class="ln">189</span>  id uuid PRIMARY KEY,
+<span class="ln">190</span>  customer_id bigint REFERENCES customers(id),
+<span class="ln">191</span>  started_at timestamptz,
+<span class="ln">192</span>  user_agent text
+<span class="ln">193</span>);
+<span class="ln">194</span>COMMENT ON TABLE public.sessions IS NULL;
+<span class="ln">195</span>
+<span class="ln">196</span>CREATE TABLE public.page_views (
+<span class="ln">197</span>  id bigserial PRIMARY KEY,
+<span class="ln">198</span>  session_id uuid REFERENCES sessions(id),
+<span class="ln">199</span>  path text,
+<span class="ln">200</span>  viewed_at timestamptz
+<span class="ln">201</span>);
+<span class="ln">202</span>COMMENT ON TABLE public.page_views IS NULL;
+<span class="ln">203</span>
+<span class="ln">204</span>CREATE TABLE public.search_queries (
+<span class="ln">205</span>  id bigserial PRIMARY KEY,
+<span class="ln">206</span>  session_id uuid REFERENCES sessions(id),
+<span class="ln">207</span>  query text,
+<span class="ln">208</span>  results int
+<span class="ln">209</span>);
+<span class="ln">210</span>COMMENT ON TABLE public.search_queries IS NULL;
+<span class="ln">211</span>
+<span class="ln">212</span>CREATE TABLE public.employees (
+<span class="ln">213</span>  id serial PRIMARY KEY,
+<span class="ln">214</span>  email text,
+<span class="ln">215</span>  full_name text,
+<span class="ln">216</span>  department_id int REFERENCES departments(id),
+<span class="ln">217</span>  hired_on date
+<span class="ln">218</span>);
+<span class="ln">219</span>COMMENT ON TABLE public.employees IS NULL;
+<span class="ln">220</span>
+<span class="ln">221</span>CREATE TABLE public.departments (
+<span class="ln">222</span>  id serial PRIMARY KEY,
+<span class="ln">223</span>  name text,
+<span class="ln">224</span>  cost_center text
+<span class="ln">225</span>);
+<span class="ln">226</span>COMMENT ON TABLE public.departments IS NULL;
+<span class="ln">227</span>
+<span class="ln">228</span>CREATE TABLE public.support_tickets (
+<span class="ln">229</span>  id bigserial PRIMARY KEY,
+<span class="ln">230</span>  customer_id bigint REFERENCES customers(id),
+<span class="ln">231</span>  assignee_id int REFERENCES employees(id),
+<span class="ln">232</span>  status text,
+<span class="ln">233</span>  opened_at timestamptz
+<span class="ln">234</span>);
+<span class="ln">235</span>COMMENT ON TABLE public.support_tickets IS NULL;
+<span class="ln">236</span>
+<span class="ln">237</span>CREATE TABLE public.ticket_messages (
+<span class="ln">238</span>  id bigserial PRIMARY KEY,
+<span class="ln">239</span>  ticket_id bigint REFERENCES support_tickets(id),
+<span class="ln">240</span>  author text,
+<span class="ln">241</span>  body text,
+<span class="ln">242</span>  sent_at timestamptz
+<span class="ln">243</span>);
+<span class="ln">244</span>COMMENT ON TABLE public.ticket_messages IS NULL;
+<span class="ln">245</span>
+<span class="ln">246</span>CREATE TABLE public.returns (
+<span class="ln">247</span>  id bigserial PRIMARY KEY,
+<span class="ln">248</span>  order_item_id bigint REFERENCES order_items(id),
+<span class="ln">249</span>  reason text,
+<span class="ln">250</span>  received_at timestamptz
+<span class="ln">251</span>);
+<span class="ln">252</span>COMMENT ON TABLE public.returns IS NULL;
+<span class="ln">253</span>
+<span class="ln">254</span>CREATE TABLE public.tax_rates (
+<span class="ln">255</span>  id serial PRIMARY KEY,
+<span class="ln">256</span>  country_code char(2),
+<span class="ln">257</span>  region text,
+<span class="ln">258</span>  rate numeric(5,4)
+<span class="ln">259</span>);
+<span class="ln">260</span>COMMENT ON TABLE public.tax_rates IS NULL;
+<span class="ln">261</span>
+<span class="ln">262</span>CREATE TABLE public.currencies (
+<span class="ln">263</span>  code char(3) PRIMARY KEY,
+<span class="ln">264</span>  symbol text,
+<span class="ln">265</span>  minor_units smallint
+<span class="ln">266</span>);
+<span class="ln">267</span>COMMENT ON TABLE public.currencies IS NULL;
+<span class="ln">268</span>
+<span class="ln">269</span>CREATE TABLE public.exchange_rates (
+<span class="ln">270</span>  base char(3) REFERENCES currencies(code),
+<span class="ln">271</span>  quote char(3) REFERENCES currencies(code),
+<span class="ln">272</span>  rate numeric(14,6),
+<span class="ln">273</span>  as_of date
+<span class="ln">274</span>);
+<span class="ln">275</span>COMMENT ON TABLE public.exchange_rates IS NULL;
+<span class="ln">276</span>
+<span class="ln">277</span>CREATE TABLE public.price_history (
+<span class="ln">278</span>  id bigserial PRIMARY KEY,
+<span class="ln">279</span>  product_id bigint REFERENCES products(id),
+<span class="ln">280</span>  price numeric(10,2),
+<span class="ln">281</span>  valid_from timestamptz
+<span class="ln">282</span>);
+<span class="ln">283</span>COMMENT ON TABLE public.price_history IS NULL;
+<span class="ln">284</span>
+<span class="ln">285</span>CREATE TABLE public.newsletter_sends (
+<span class="ln">286</span>  id bigserial PRIMARY KEY,
+<span class="ln">287</span>  campaign text,
+<span class="ln">288</span>  sent_at timestamptz,
+<span class="ln">289</span>  recipients int
+<span class="ln">290</span>);
+<span class="ln">291</span>COMMENT ON TABLE public.newsletter_sends IS NULL;
+<span class="ln">292</span>
+<span class="ln">293</span>CREATE TABLE public.audit_log (
+<span class="ln">294</span>  id bigserial PRIMARY KEY,
+<span class="ln">295</span>  actor text,
+<span class="ln">296</span>  action text,
+<span class="ln">297</span>  entity text,
+<span class="ln">298</span>  entity_id text,
+<span class="ln">299</span>  at timestamptz
+<span class="ln">300</span>);
+<span class="ln">301</span>COMMENT ON TABLE public.audit_log IS NULL;
+<span class="ln">302</span>
+<span class="ln">303</span>CREATE TABLE public.feature_flags (
+<span class="ln">304</span>  key text PRIMARY KEY,
+<span class="ln">305</span>  enabled boolean,
+<span class="ln">306</span>  updated_at timestamptz
+<span class="ln">307</span>);
+<span class="ln">308</span>COMMENT ON TABLE public.feature_flags IS NULL;
+<span class="ln">309</span></pre></div>
+        </div>
+      </div>
+      <div class="pack">
+        <div class="pane-head"><span><b>Context pack</b> · 3 tables</span><span class="mono">database_task_context</span></div>
+        <div class="pack-body">
+          <div class="ptable"><h4>products <span>ranked 1</span></h4><ul><li>id bigint</li><li>name text</li><li>price numeric</li></ul></div>
+          <div class="ptable"><h4>order_items <span>ranked 2</span></h4><ul><li>order_id bigint</li><li>product_id bigint</li><li>quantity int · unit_price numeric</li></ul></div>
+          <div class="ptable"><h4>orders <span>ranked 3</span></h4><ul><li>id bigint</li><li>status text · created_at timestamptz</li></ul></div>
+          <div class="joins"><b>Declared joins</b><br>order_items.product_id → products.id<br>order_items.order_id → orders.id</div>
+        </div>
+      </div>
+      <p class="caption">Agents don't need the whole schema. They need the right three tables.</p>
+    </div>
+  </div>
+</section>
+
+<div class="wrap"><div class="rule" style="--c:21;--cp:9" aria-hidden="true"></div></div>
+
+<section id="how" aria-labelledby="how-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">How it works</p>
+      <h2 id="how-h">Connect once. Then two calls per question.</h2>
+    </div>
+    <div class="steps" id="steps">
+      <svg class="tokenline" aria-hidden="true"><path id="tokPath" d=""/><rect id="tok" width="10" height="10" x="-5" y="-5" rx="1.5" opacity="0"/></svg>
+      <article class="card">
+        <span class="step-n">1</span>
+        <h3>Connect</h3>
+        <p>Add a read-only database user on TableFox's own private page. Your credentials are encrypted there and never reach ChatGPT.</p>
+        <div class="viz" aria-label="Connection form preview">
+          <div class="form">
+            <div class="fld"><span>Host</span><i>db.example.com</i></div>
+            <div class="fld"><span>Port</span><i>5432</i></div>
+            <div class="fld wide"><span>Database</span><i>sales</i></div>
+            <div class="fld"><span>User</span><i>tablefox_ro</i></div>
+            <div class="fld"><span>Password</span><i>••••••••</i></div>
+            <span class="btn btn-primary" aria-hidden="true">Test and connect</span>
+          </div>
+        </div>
+      </article>
+      <article class="card">
+        <span class="step-n">2</span>
+        <h3>Ask</h3>
+        <p>Ask in plain English in ChatGPT. <code>database_task_context</code> ranks the relevant tables and their declared foreign-key joins into a small context pack.</p>
+        <div class="viz"><pre><span class="k">database_task_context</span>(
+  "top products by revenue"
+)
+<span class="c">→ products, order_items, orders</span>
+<span class="c">→ 2 joins</span></pre></div>
+      </article>
+      <article class="card">
+        <span class="step-n">3</span>
+        <h3>Answer</h3>
+        <p><code>database_readonly_batch</code> runs up to five SELECT statements in one read-only transaction. Compact rows come back.</p>
+        <div class="viz"><pre><span class="c">-- read-only transaction, 1 of 5</span>
+<span class="k">SELECT</span> p.name,
+  <span class="k">SUM</span>(oi.quantity * oi.unit_price) <span class="k">AS</span> revenue
+<span class="k">FROM</span> order_items oi
+<span class="k">JOIN</span> products p <span class="k">ON</span> p.id = oi.product_id
+<span class="k">GROUP BY</span> p.name
+<span class="k">ORDER BY</span> revenue <span class="k">DESC LIMIT</span> 5;</pre></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<div class="wrap"><div class="rule" style="--c:11;--cp:6" aria-hidden="true"></div></div>
+
+<section id="safety" aria-labelledby="safety-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">Safety</p>
+      <h2 id="safety-h">Read-only at every layer</h2>
+      <p class="lede">Each guard works on its own. A request has to pass all of them before a single row is read.</p>
+    </div>
+    <div class="grid12 safety-grid">
+      <ul class="checks" id="checks">
+        <li style="--i:0"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x=".5" y=".5" width="23" height="23" rx="6"/><path pathLength="1" d="M7 12.5l3.2 3.2L17 8.8"/></svg><div><b>SELECT and WITH only</b><span>Any other statement type is rejected before it reaches the database.</span></div></li>
+        <li style="--i:1"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x=".5" y=".5" width="23" height="23" rx="6"/><path pathLength="1" d="M7 12.5l3.2 3.2L17 8.8"/></svg><div><b>Read-only transactions with timeouts</b><span>Queries run inside a read-only transaction and stop when the timeout is reached.</span></div></li>
+        <li style="--i:2"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x=".5" y=".5" width="23" height="23" rx="6"/><path pathLength="1" d="M7 12.5l3.2 3.2L17 8.8"/></svg><div><b>EXPLAIN before running</b><span>Each query is planned first, then executed.</span></div></li>
+        <li style="--i:3"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x=".5" y=".5" width="23" height="23" rx="6"/><path pathLength="1" d="M7 12.5l3.2 3.2L17 8.8"/></svg><div><b>Personal-data columns blocked</b><span>Columns such as emails and passwords are not returned.</span></div></li>
+        <li style="--i:4"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x=".5" y=".5" width="23" height="23" rx="6"/><path pathLength="1" d="M7 12.5l3.2 3.2L17 8.8"/></svg><div><b>Read-only users only</b><span>TableFox accepts only database users that cannot write.</span></div></li>
+        <li style="--i:5"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x=".5" y=".5" width="23" height="23" rx="6"/><path pathLength="1" d="M7 12.5l3.2 3.2L17 8.8"/></svg><div><b>Encrypted credentials, never shown to ChatGPT</b><span>You enter them on TableFox's own page. ChatGPT only sees query results.</span></div></li>
+      </ul>
+      <div class="refused" id="refused">
+        <figure class="chat" style="margin:0">
+          <div class="chat-bar"><span class="dot" aria-hidden="true"></span>ChatGPT · TableFox connected</div>
+          <div class="chat-body">
+            <p class="msg user ask">Delete all cancelled orders</p>
+            <div class="refusal" role="note">
+              <strong>Refused</strong>
+              <p>TableFox can't change data.</p>
+              <small>Only SELECT and WITH statements run, inside a read-only transaction.</small>
+            </div>
+          </div>
+        </figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap"><div class="rule" style="--c:30;--cp:11" aria-hidden="true"></div></div>
+
+<section id="results" aria-labelledby="results-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">Results</p>
+      <h2 id="results-h">Faster, smaller, and the same answers</h2>
+      <p class="lede">Compared with a conventional approach on one live PostgreSQL database: 14 reviewed tasks, each run 3 times.</p>
+    </div>
+    <div class="tiles" id="tiles">
+      <div class="tile">
+        <span class="lbl">Warm median latency</span>
+        <span class="big"><span data-count="1200" data-fmt="int">1,200</span><small>ms</small></span>
+        <div class="bars" aria-label="TableFox 1,200 ms versus conventional 2,396 ms">
+          <div class="bar tf"><span>TableFox</span><i style="width:50.08%"></i><span>1,200</span></div>
+          <div class="bar"><span>Conventional</span><i style="width:100%"></i><span>2,396</span></div>
+        </div>
+      </div>
+      <div class="tile">
+        <span class="lbl">Estimated tokens per task</span>
+        <span class="big">~<span data-count="976" data-fmt="int">976</span></span>
+        <div class="bars" aria-label="TableFox about 976 tokens versus conventional about 1,240">
+          <div class="bar tf"><span>TableFox</span><i style="width:78.71%"></i><span>~976</span></div>
+          <div class="bar"><span>Conventional</span><i style="width:100%"></i><span>~1,240</span></div>
+        </div>
+      </div>
+      <div class="tile">
+        <span class="lbl">Answers matching the direct-SQL baseline</span>
+        <span class="big"><span data-count="14" data-fmt="int">14</span>/14</span>
+        <div class="cells" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      </div>
+    </div>
+    <div class="context">
+      <span><strong>Measured on one 38-table database; your results will vary.</strong></span>
+      <a href="https://github.com/Adhrit-Verma/TableFox/blob/main/scripts/benchmark_corpus.py" target="_blank" rel="noopener">Benchmark script in the repo →</a>
+    </div>
+  </div>
+</section>
+
+<div class="wrap"><div class="rule" style="--c:16;--cp:2" aria-hidden="true"></div></div>
+
+<section class="dbs" aria-labelledby="dbs-h">
+  <div class="wrap grid12">
+    <div class="dbs-copy">
+      <p class="eyebrow">Multiple databases</p>
+      <h2 id="dbs-h">Several databases, one connector</h2>
+      <p class="lede">Connect each database under a short name. Say "use sales" to switch, or pick one when ChatGPT asks.</p>
+      <div class="chips" aria-label="Connected databases"><span class="chip">hrcore</span><span class="chip">sales</span><span class="chip">shop</span></div>
+    </div>
+    <figure class="chat dbs-demo" id="dbsDemo" style="margin:0">
+      <div class="chat-bar"><span class="dot" aria-hidden="true"></span>ChatGPT · TableFox connected · 3 databases</div>
+      <div class="chat-body">
+        <p class="msg user">How many orders did we ship last month?</p>
+        <div class="msg bot q"><p>Which database do you mean?</p></div>
+        <div class="chips" role="group" aria-label="Database choices"><span class="chip" style="--i:0">hrcore</span><span class="chip picked" style="--i:1">sales</span><span class="chip" style="--i:2">shop</span></div>
+        <p class="msg user ans">use sales</p>
+      </div>
+    </figure>
+  </div>
+</section>
+
+<div class="wrap"><div class="rule" style="--c:9;--cp:8" aria-hidden="true"></div></div>
+
+<section id="add" aria-labelledby="add-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">Add to ChatGPT</p>
+      <h2 id="add-h">Three steps, about two minutes</h2>
+      <p class="lede">TableFox is awaiting review for ChatGPT's plugin directory. Until then, add it as a custom connector.</p>
+    </div>
+    <div class="steps">
+      <article class="card"><span class="step-n">1</span><h3>Turn on developer mode</h3><p>In ChatGPT, open Settings, then Security and login, and switch on Developer mode.</p></article>
+      <article class="card"><span class="step-n">2</span><h3>Add the connector</h3><p>Add a custom MCP server with this URL and OAuth sign-in:</p><div class="viz"><pre>https://tablefox.onrender.com/mcp</pre></div></article>
+      <article class="card"><span class="step-n">3</span><h3>Sign in and connect a database</h3><p>Sign in when asked, then ask a question. TableFox replies with a private link where you add a read-only database user.</p></article>
+    </div>
+  </div>
+</section>
+
+<div class="wrap"><div class="rule" style="--c:26;--cp:4" aria-hidden="true"></div></div>
+
+<section aria-labelledby="faq-h">
+  <div class="wrap">
+    <div class="sec-head"><p class="eyebrow">FAQ</p><h2 id="faq-h">Questions</h2></div>
+    <div class="faq">
+      <details><summary>Does TableFox store my data?</summary><p>No rows are indexed or cached. Your database credentials are stored encrypted.</p></details>
+      <details><summary>Can it write to my database?</summary><p>Never. Only SELECT and WITH statements run, inside read-only transactions, using a read-only database user.</p></details>
+      <details><summary>Which databases does it support?</summary><p>PostgreSQL databases reachable over SSL.</p></details>
+      <details><summary>Is it open source?</summary><p>Yes. The code is on <a href="https://github.com/Adhrit-Verma/TableFox" target="_blank" rel="noopener">GitHub</a>.</p></details>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <svg viewBox="147 451 999 309" role="img" aria-label="TableFox"><use href="#tf-mark-g"/><use href="#tf-l0" class="lg-ink"/><use href="#tf-l1" class="lg-ink"/><use href="#tf-l2" class="lg-ink"/><use href="#tf-l3" class="lg-ink"/><use href="#tf-l4" class="lg-ink"/><use href="#tf-l5" class="lg-or"/><use href="#tf-l6" class="lg-or"/><use href="#tf-l7" class="lg-or"/></svg>
+    <nav aria-label="Footer">
+      <a href="https://github.com/Adhrit-Verma/TableFox" target="_blank" rel="noopener">GitHub</a>
+      <a href="/privacy">Privacy</a>
+      <a href="/terms">Terms</a>
+    </nav>
+    <p>TableFox - read-only PostgreSQL for ChatGPT</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var motion = !window.matchMedia || window.matchMedia('(prefers-reduced-motion: no-preference)').matches;
+
+  // schema dump: duplicate content for a seamless loop
+  var track=document.getElementById('dumpTrack');
+  if(track && motion){ var pre=track.querySelector('pre'); var c=pre.cloneNode(true); c.setAttribute('aria-hidden','true'); track.appendChild(c); track.classList.add('loop'); }
+
+  if(!motion || !('IntersectionObserver' in window)) return;
+
+  function onView(el, fn, opts){
+    if(!el) return;
+    var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ io.disconnect(); fn(el); } }); }, opts||{threshold:.35});
+    io.observe(el);
+  }
+  onView(document.getElementById('checks'), function(el){ el.classList.add('go'); });
+  onView(document.getElementById('refused'), function(el){ el.classList.add('go'); });
+  onView(document.getElementById('dbsDemo'), function(el){ el.classList.add('go'); });
+
+  // stat count-up (values stay final until this runs)
+  onView(document.getElementById('tiles'), function(el){
+    el.querySelectorAll('[data-count]').forEach(function(n){
+      var to=+n.dataset.count, t0=null, D=900;
+      function f(t){ if(!t0) t0=t; var p=Math.min(1,(t-t0)/D), e=1-Math.pow(1-p,3);
+        n.textContent=Math.round(to*e).toLocaleString('en-US'); if(p<1) requestAnimationFrame(f); }
+      requestAnimationFrame(f);
+    });
+  });
+
+  // how-it-works token: travels badge to badge along a measured path
+  var steps=document.getElementById('steps'), path=document.getElementById('tokPath'), tok=document.getElementById('tok');
+  function centers(){
+    var b=steps.getBoundingClientRect();
+    return Array.prototype.map.call(steps.querySelectorAll('.step-n'), function(n){ var r=n.getBoundingClientRect(); return {x:r.left-b.left+r.width/2, y:r.top-b.top+r.height/2, hw:r.width/2, hh:r.height/2}; });
+  }
+  // segments run edge to edge, so the line never crosses a number badge
+  function segments(){
+    var c=centers(), s=[], pad=6;
+    for(var i=1;i<c.length;i++){
+      var a=c[i-1], z=c[i], dx=z.x-a.x, dy=z.y-a.y, L=Math.hypot(dx,dy)||1, ux=dx/L, uy=dy/L;
+      var ta=Math.min(Math.abs(ux)>1e-6?a.hw/Math.abs(ux):1e9, Math.abs(uy)>1e-6?a.hh/Math.abs(uy):1e9)+pad;
+      var tz=Math.min(Math.abs(ux)>1e-6?z.hw/Math.abs(ux):1e9, Math.abs(uy)>1e-6?z.hh/Math.abs(uy):1e9)+pad;
+      s.push([[a.x+ux*ta,a.y+uy*ta],[z.x-ux*tz,z.y-uy*tz]]);
+    }
+    return s;
+  }
+  function drawPath(){ var s=segments(); path.setAttribute('d', s.map(function(g){return 'M'+g[0][0]+' '+g[0][1]+'L'+g[1][0]+' '+g[1][1];}).join('')); return s; }
+  drawPath(); window.addEventListener('resize', drawPath);
+  onView(steps, function(){
+    var nums=steps.querySelectorAll('.step-n'), s=drawPath();
+    steps.classList.add('armed');
+    nums[0].classList.add('lit');
+    var T=2200, lead=.12, per=(1-2*lead)/s.length, kf=[], times=[];
+    function at(p,o,off){ return {transform:'translate('+p[0]+'px,'+p[1]+'px)',opacity:o,offset:off}; }
+    kf.push(at(s[0][0],0,0));
+    s.forEach(function(g,k){
+      var o0=lead+k*per, o1=o0+per*0.92;
+      kf.push(at(g[0],0,Math.max(o0-0.001,0))); kf.push(at(g[0],1,o0)); kf.push(at(g[1],1,o1)); kf.push(at(g[1],0,o1+0.001));
+      times.push(o1*T);
+    });
+    kf.push(at(s[s.length-1][1],0,1));
+    tok.style.transformBox='view-box';
+    tok.animate(kf,{duration:T,easing:'linear',fill:'forwards'});
+    times.forEach(function(t,k){ setTimeout(function(){ nums[k+1].classList.add('lit'); }, t); });
+  }, {threshold:.5});
+})();
+</script>
+
+</body></html>

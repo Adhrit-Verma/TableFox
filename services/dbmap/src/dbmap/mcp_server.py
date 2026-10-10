@@ -15,6 +15,19 @@ from .tenants import TenantError, TenantRegistry
 service = build_service()
 
 ICON_FILE = Path(__file__).with_name("static") / "icon.png"
+LANDING_FILE = Path(__file__).with_name("static") / "landing.html"
+LANDING_HEADERS = {
+    "Cache-Control": "public, max-age=600",
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    # Inline styles/script are the page's own; fonts are the only third-party requests.
+    "Content-Security-Policy": (
+        "default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline' https://fonts.googleapis.com; "
+        "font-src https://fonts.gstatic.com; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; "
+        "frame-ancestors 'none'"
+    ),
+}
 SERVER_DESCRIPTION = (
     "Ask questions about your PostgreSQL database in plain language. TableFox finds the few "
     "tables a question needs and runs guarded, read-only queries."
@@ -126,6 +139,24 @@ def create_mcp(
         icons=icons,
         **server_options,
     )
+
+    @mcp.custom_route("/", methods=["GET"])
+    async def landing(_request):
+        from starlette.responses import HTMLResponse
+
+        return HTMLResponse(LANDING_FILE.read_text(encoding="utf-8"), headers=LANDING_HEADERS)
+
+    @mcp.custom_route("/privacy", methods=["GET"])
+    async def privacy(_request):
+        from starlette.responses import HTMLResponse
+
+        return HTMLResponse(pages.privacy_page(), headers=pages.PAGE_HEADERS)
+
+    @mcp.custom_route("/terms", methods=["GET"])
+    async def terms(_request):
+        from starlette.responses import HTMLResponse
+
+        return HTMLResponse(pages.terms_page(), headers=pages.PAGE_HEADERS)
 
     @mcp.custom_route("/icon.png", methods=["GET"])
     @mcp.custom_route("/favicon.ico", methods=["GET"])
