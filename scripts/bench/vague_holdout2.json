@@ -1,0 +1,750 @@
+{
+  "description": "Second held-out set of 40 vague business questions (varied roles, typos, slang, loose area names, fixed dates; data ends 2026-10-10) against the 71-table bench DB. Written without reading services/ or the other question sets. For a one-time final retrieval score.",
+  "tasks": [
+    {
+      "name": "hr_hires_per_month_2026",
+      "category": "vague_holdout2",
+      "question": "how many ppl did we hire each month in 2026 so far?",
+      "needed_relations": [
+        "hr.employees"
+      ],
+      "catalog_terms": [
+        "hire"
+      ],
+      "queries": [
+        {
+          "name": "hr_hires_per_month_2026",
+          "sql": "select date_trunc('month', hire_dt)::date as month, count(*) as hires from hr.employees where hire_dt between '2026-01-01' and '2026-10-10' group by 1 order by 1 limit 12"
+        }
+      ]
+    },
+    {
+      "name": "hr_why_people_leave",
+      "category": "vague_holdout2",
+      "question": "Why are people leaving us?",
+      "needed_relations": [
+        "hr.employees"
+      ],
+      "catalog_terms": [
+        "termination",
+        "reason"
+      ],
+      "queries": [
+        {
+          "name": "hr_why_people_leave",
+          "sql": "select coalesce(termination_reason, 'unknown') as reason, count(*) as leavers from hr.employees where term_dt is not null group by 1 order by 2 desc limit 10"
+        }
+      ]
+    },
+    {
+      "name": "hr_vacation_by_dept_aug_2026",
+      "category": "vague_holdout2",
+      "question": "the people stuff: which departments had the most staff off on vacation in August 2026?",
+      "needed_relations": [
+        "hr.time_off",
+        "hr.employees",
+        "hr.departments"
+      ],
+      "catalog_terms": [
+        "vacation",
+        "department"
+      ],
+      "queries": [
+        {
+          "name": "hr_vacation_by_dept_aug_2026",
+          "sql": "select d.dept_name, count(distinct t.employee_id) as people_on_vacation from hr.time_off t join hr.employees e on e.employee_id = t.employee_id join hr.departments d on d.department_id = e.department_id where t.leave_type = 'vacation' and t.status = 'approved' and t.start_dt <= '2026-08-31' and t.end_dt >= '2026-08-01' group by d.dept_name order by 2 desc limit 10"
+        }
+      ]
+    },
+    {
+      "name": "hr_payroll_moolah_by_currency",
+      "category": "vague_holdout2",
+      "question": "how much moolah goes out the door in pay every month? split it by currency, last 12 months is fine",
+      "needed_relations": [
+        "hr.payroll"
+      ],
+      "catalog_terms": [
+        "payroll",
+        "gross"
+      ],
+      "queries": [
+        {
+          "name": "hr_payroll_moolah_by_currency",
+          "sql": "select date_trunc('month', pay_period)::date as month, currency_code, sum(gross_amt) as gross_pay from hr.payroll where pay_period >= '2025-10-01' and pay_period < '2026-11-01' group by 1, 2 order by 1, 2 limit 300"
+        }
+      ]
+    },
+    {
+      "name": "fin_failing_payment_method",
+      "category": "vague_holdout2",
+      "question": "On the money side, which way of paying fails on us the most?",
+      "needed_relations": [
+        "finance.payments"
+      ],
+      "catalog_terms": [
+        "payment",
+        "method",
+        "failed"
+      ],
+      "queries": [
+        {
+          "name": "fin_failing_payment_method",
+          "sql": "select method, count(*) as attempts, round(avg((status = 'failed')::int), 4) as fail_rate from finance.payments group by method order by fail_rate desc limit 10"
+        }
+      ]
+    },
+    {
+      "name": "fin_deadbeat_subscriptions",
+      "category": "vague_holdout2",
+      "question": "deadbeats - which clients are behind on their subscription and how much monthly revenue is riding on them?",
+      "needed_relations": [
+        "finance.subscriptions",
+        "crm.accounts"
+      ],
+      "catalog_terms": [
+        "subscription",
+        "past_due",
+        "mrr"
+      ],
+      "queries": [
+        {
+          "name": "fin_deadbeat_subscriptions",
+          "sql": "select a.account_name, s.mrr_amt, s.seats from finance.subscriptions s join crm.accounts a on a.account_id = s.account_id where s.status = 'past_due' order by s.mrr_amt desc limit 25"
+        }
+      ]
+    },
+    {
+      "name": "fin_upgrade_vs_downgrade_mrr",
+      "category": "vague_holdout2",
+      "question": "I'm an investor and I want to see expansion vs contraction. Month by month, how much recurring revenue did customers add by moving up a plan and how much did we lose from people moving down?",
+      "needed_relations": [
+        "finance.subscription_events"
+      ],
+      "catalog_terms": [
+        "upgrade",
+        "downgrade",
+        "mrr"
+      ],
+      "queries": [
+        {
+          "name": "fin_upgrade_vs_downgrade_mrr",
+          "sql": "select date_trunc('month', event_dt)::date as month, sum(new_mrr - old_mrr) filter (where event_type = 'upgrade') as expansion, sum(old_mrr - new_mrr) filter (where event_type = 'downgrade') as contraction from finance.subscription_events where event_type in ('upgrade', 'downgrade') group by 1 order by 1 limit 48"
+        }
+      ]
+    },
+    {
+      "name": "fin_ledger_balance_2026",
+      "category": "vague_holdout2",
+      "question": "accountant question: do debits and credits tie out for every month of 2026 in the general ledger?",
+      "needed_relations": [
+        "finance.gl_entries"
+      ],
+      "catalog_terms": [
+        "debit",
+        "credit",
+        "ledger"
+      ],
+      "queries": [
+        {
+          "name": "fin_ledger_balance_2026",
+          "sql": "select date_trunc('month', entry_dt)::date as month, sum(debit_amt) as debits, sum(credit_amt) as credits, sum(debit_amt) - sum(credit_amt) as diff from finance.gl_entries where entry_dt between '2026-01-01' and '2026-12-31' group by 1 order by 1 limit 12"
+        }
+      ]
+    },
+    {
+      "name": "fin_trials_by_plan",
+      "category": "vague_holdout2",
+      "question": "trials by plan",
+      "needed_relations": [
+        "finance.subscriptions",
+        "finance.plans"
+      ],
+      "catalog_terms": [
+        "trial",
+        "plan"
+      ],
+      "queries": [
+        {
+          "name": "fin_trials_by_plan",
+          "sql": "select p.plan_name, count(*) as trials from finance.subscriptions s join finance.plans p on p.plan_id = s.plan_id where s.status = 'trialing' group by p.plan_name order by 2 desc limit 10"
+        }
+      ]
+    },
+    {
+      "name": "pub_euro_since_july",
+      "category": "vague_holdout2",
+      "question": "What has the euro been doing against the dollar since July 1st 2026?",
+      "needed_relations": [
+        "public.fx_rates"
+      ],
+      "catalog_terms": [
+        "euro",
+        "exchange rate"
+      ],
+      "queries": [
+        {
+          "name": "pub_euro_since_july",
+          "sql": "select rate_dt, usd_rate from public.fx_rates where currency_code = 'EUR' and rate_dt >= '2026-07-01' order by rate_dt limit 200"
+        }
+      ]
+    },
+    {
+      "name": "pub_permission_changes_last_week",
+      "category": "vague_holdout2",
+      "question": "I need to know who has been changing access rights in the system between Oct 4 and Oct 10 2026, and how many times each",
+      "needed_relations": [
+        "public.audit_log",
+        "ops.app_users"
+      ],
+      "catalog_terms": [
+        "permission",
+        "audit"
+      ],
+      "queries": [
+        {
+          "name": "pub_permission_changes_last_week",
+          "sql": "select u.username, u.user_type, count(*) as permission_changes from public.audit_log a join ops.app_users u on u.user_id = a.actor_user_id where a.action = 'permission_change' and a.occurred_at >= '2026-10-04' and a.occurred_at < '2026-10-11' group by u.username, u.user_type order by permission_changes desc limit 50"
+        }
+      ]
+    },
+    {
+      "name": "crm_open_pipeline_by_stage",
+      "category": "vague_holdout2",
+      "question": "Give me the open pipeline by stage, how many deals and how many dollars are sitting in each",
+      "needed_relations": [
+        "crm.opportunities"
+      ],
+      "catalog_terms": [
+        "pipeline",
+        "stage"
+      ],
+      "queries": [
+        {
+          "name": "crm_open_pipeline_by_stage",
+          "sql": "select stage, count(*) as deals, sum(amt) as amount_usd from crm.opportunities where stage not in ('closed_won', 'closed_lost') group by stage order by amount_usd desc limit 10"
+        }
+      ]
+    },
+    {
+      "name": "crm_lead_source_conversion",
+      "category": "vague_holdout2",
+      "question": "Where do our good leads come from? Which source actually turns into customers most often?",
+      "needed_relations": [
+        "crm.leads"
+      ],
+      "catalog_terms": [
+        "lead",
+        "source",
+        "converted"
+      ],
+      "queries": [
+        {
+          "name": "crm_lead_source_conversion",
+          "sql": "select lead_source, count(*) as leads, round(avg((status = 'converted')::int), 4) as conversion_rate from crm.leads group by lead_source order by conversion_rate desc limit 10"
+        }
+      ]
+    },
+    {
+      "name": "crm_churners_q3_by_industry",
+      "category": "vague_holdout2",
+      "question": "churners last quarter, by industry",
+      "needed_relations": [
+        "crm.accounts"
+      ],
+      "catalog_terms": [
+        "churn",
+        "industry"
+      ],
+      "queries": [
+        {
+          "name": "crm_churners_q3_by_industry",
+          "sql": "select industry, count(*) as churned_accounts from crm.accounts where churned_at >= '2026-07-01' and churned_at < '2026-10-01' group by industry order by 2 desc limit 20"
+        }
+      ]
+    },
+    {
+      "name": "crm_unhappy_big_clients",
+      "category": "vague_holdout2",
+      "question": "customer success here. which of our big clients (strategic and enterprise) look unhappy right now - like poor health and negative nps - so I can call them before they walk?",
+      "needed_relations": [
+        "crm.accounts"
+      ],
+      "catalog_terms": [
+        "health",
+        "nps",
+        "tier"
+      ],
+      "queries": [
+        {
+          "name": "crm_unhappy_big_clients",
+          "sql": "select account_name, tier, health_score, nps_score from crm.accounts where tier in ('strategic', 'enterprise') and churned_at is null and health_score < 40 and nps_score < 0 order by health_score, nps_score limit 50"
+        }
+      ]
+    },
+    {
+      "name": "sup_csat_by_team",
+      "category": "vague_holdout2",
+      "question": "CSAT by support team",
+      "needed_relations": [
+        "support.tickets",
+        "support.agents"
+      ],
+      "catalog_terms": [
+        "csat",
+        "team"
+      ],
+      "queries": [
+        {
+          "name": "sup_csat_by_team",
+          "sql": "select ag.team_name, round(avg(t.csat_score), 2) as avg_csat, count(t.csat_score) as rated_tickets from support.tickets t join support.agents ag on ag.agent_id = t.assigned_agent_id group by ag.team_name order by avg_csat desc limit 20"
+        }
+      ]
+    },
+    {
+      "name": "sup_products_most_tickets",
+      "category": "vague_holdout2",
+      "question": "which of our products cause the most tickts?",
+      "needed_relations": [
+        "support.tickets",
+        "inventory.products"
+      ],
+      "catalog_terms": [
+        "ticket",
+        "product"
+      ],
+      "queries": [
+        {
+          "name": "sup_products_most_tickets",
+          "sql": "select p.sku, p.product_name, count(*) as tickets from support.tickets t join inventory.products p on p.product_id = t.product_id group by p.sku, p.product_name order by tickets desc limit 10"
+        }
+      ]
+    },
+    {
+      "name": "sup_weekly_volume_sept_2026",
+      "category": "vague_holdout2",
+      "question": "show me how many help requests came in each week during September 2026",
+      "needed_relations": [
+        "support.tickets"
+      ],
+      "catalog_terms": [
+        "ticket",
+        "opened"
+      ],
+      "queries": [
+        {
+          "name": "sup_weekly_volume_sept_2026",
+          "sql": "select date_trunc('week', opened_at)::date as week, count(*) as tickets from support.tickets where opened_at >= '2026-09-01' and opened_at < '2026-10-01' group by 1 order by 1 limit 6"
+        }
+      ]
+    },
+    {
+      "name": "sup_first_response_misses_by_priority",
+      "category": "vague_holdout2",
+      "question": "Are we missing our first-reply promises more on the urgent stuff than the low priority stuff? break the misses down by priority",
+      "needed_relations": [
+        "support.sla_breaches",
+        "support.tickets"
+      ],
+      "catalog_terms": [
+        "sla",
+        "breach",
+        "priority"
+      ],
+      "queries": [
+        {
+          "name": "sup_first_response_misses_by_priority",
+          "sql": "select t.priority, count(*) as first_response_breaches from support.sla_breaches b join support.tickets t on t.ticket_id = b.ticket_id where b.breach_type = 'first_response' group by t.priority order by 2 desc limit 10"
+        }
+      ]
+    },
+    {
+      "name": "mkt_unsubscribes_per_month",
+      "category": "vague_holdout2",
+      "question": "Unsubscribes per month - are people bailing on our emails more lately?",
+      "needed_relations": [
+        "marketing.email_events"
+      ],
+      "catalog_terms": [
+        "unsubscribe",
+        "email"
+      ],
+      "queries": [
+        {
+          "name": "mkt_unsubscribes_per_month",
+          "sql": "select date_trunc('month', event_ts)::date as month, count(*) as unsubscribes from marketing.email_events where event_type = 'unsubscribe' group by 1 order by 1 limit 48"
+        }
+      ]
+    },
+    {
+      "name": "mkt_campaigns_over_budget",
+      "category": "vague_holdout2",
+      "question": "As the marketer I have to explain this: which campaigns spent more than we gave them?",
+      "needed_relations": [
+        "marketing.campaigns"
+      ],
+      "catalog_terms": [
+        "campaign",
+        "budget",
+        "spend"
+      ],
+      "queries": [
+        {
+          "name": "mkt_campaigns_over_budget",
+          "sql": "select campaign_name, budget_amt, actual_spend_amt, actual_spend_amt - budget_amt as overspend from marketing.campaigns where actual_spend_amt > budget_amt order by overspend desc limit 50"
+        }
+      ]
+    },
+    {
+      "name": "mkt_newsletter_signup_sources",
+      "category": "vague_holdout2",
+      "question": "where are our newsletter sign-ups coming from?",
+      "needed_relations": [
+        "marketing.newsletter_subscribers"
+      ],
+      "catalog_terms": [
+        "newsletter",
+        "source"
+      ],
+      "queries": [
+        {
+          "name": "mkt_newsletter_signup_sources",
+          "sql": "select source, count(*) as subscribers from marketing.newsletter_subscribers group by source order by 2 desc limit 20"
+        }
+      ]
+    },
+    {
+      "name": "mkt_campaign_response_rate",
+      "category": "vague_holdout2",
+      "question": "Of everyone we added to each campaign, what share actually responded? Best ones first.",
+      "needed_relations": [
+        "marketing.campaign_members",
+        "marketing.campaigns"
+      ],
+      "catalog_terms": [
+        "campaign",
+        "responded"
+      ],
+      "queries": [
+        {
+          "name": "mkt_campaign_response_rate",
+          "sql": "select c.campaign_name, count(*) as members, round(avg(m.responded::int), 4) as response_rate from marketing.campaign_members m join marketing.campaigns c on c.campaign_id = m.campaign_id group by c.campaign_id, c.campaign_name order by response_rate desc limit 25"
+        }
+      ]
+    },
+    {
+      "name": "inv_discontinued_on_hand",
+      "category": "vague_holdout2",
+      "question": "discontinued stuff still sitting on our shelves",
+      "needed_relations": [
+        "inventory.stock_levels",
+        "inventory.products"
+      ],
+      "catalog_terms": [
+        "discontinued",
+        "stock"
+      ],
+      "queries": [
+        {
+          "name": "inv_discontinued_on_hand",
+          "sql": "select p.sku, p.product_name, sum(s.qty_on_hand) as on_hand from inventory.stock_levels s join inventory.products p on p.product_id = s.product_id where p.discontinued_at is not null and s.qty_on_hand > 0 group by p.sku, p.product_name order by on_hand desc limit 50"
+        }
+      ]
+    },
+    {
+      "name": "inv_adjustments_by_site_sept_2026",
+      "category": "vague_holdout2",
+      "question": "warehose lead here - how many manual stock corrections did each site book in September 2026?",
+      "needed_relations": [
+        "inventory.stock_movements",
+        "inventory.warehouses"
+      ],
+      "catalog_terms": [
+        "adjustment",
+        "warehouse"
+      ],
+      "queries": [
+        {
+          "name": "inv_adjustments_by_site_sept_2026",
+          "sql": "select w.warehouse_code, count(*) as adjustments from inventory.stock_movements m join inventory.warehouses w on w.warehouse_id = m.warehouse_id where m.movement_type = 'adjustment' and m.moved_at >= '2026-09-01' and m.moved_at < '2026-10-01' group by w.warehouse_code order by 2 desc limit 30"
+        }
+      ]
+    },
+    {
+      "name": "inv_vendor_quoted_lead_time",
+      "category": "vague_holdout2",
+      "question": "Which vendors quote us the longest lead times on what they sell us?",
+      "needed_relations": [
+        "inventory.product_suppliers",
+        "inventory.suppliers"
+      ],
+      "catalog_terms": [
+        "supplier",
+        "lead time"
+      ],
+      "queries": [
+        {
+          "name": "inv_vendor_quoted_lead_time",
+          "sql": "select s.supplier_name, round(avg(ps.lead_time_days), 1) as avg_lead_days, count(*) as products from inventory.product_suppliers ps join inventory.suppliers s on s.supplier_id = ps.supplier_id group by s.supplier_id, s.supplier_name order by avg_lead_days desc limit 15"
+        }
+      ]
+    },
+    {
+      "name": "inv_hazmat_per_warehouse",
+      "category": "vague_holdout2",
+      "question": "how much dangerous goods are we holding in each warehouse? safety audit coming up",
+      "needed_relations": [
+        "inventory.stock_levels",
+        "inventory.products",
+        "inventory.warehouses"
+      ],
+      "catalog_terms": [
+        "hazmat",
+        "warehouse"
+      ],
+      "queries": [
+        {
+          "name": "inv_hazmat_per_warehouse",
+          "sql": "select w.warehouse_code, count(*) as hazmat_skus, sum(sl.qty_on_hand) as units from inventory.stock_levels sl join inventory.products p on p.product_id = sl.product_id join inventory.warehouses w on w.warehouse_id = sl.warehouse_id where p.is_hazmat group by w.warehouse_code order by units desc limit 30"
+        }
+      ]
+    },
+    {
+      "name": "sales_sept_2026_vs_2025",
+      "category": "vague_holdout2",
+      "question": "How did we do in September 2026 compared to September 2025? order count and revenue",
+      "needed_relations": [
+        "sales.orders"
+      ],
+      "catalog_terms": [
+        "revenue",
+        "orders"
+      ],
+      "queries": [
+        {
+          "name": "sales_sept_2026_vs_2025",
+          "sql": "select to_char(order_dt, 'YYYY-MM') as month, count(*) as orders, sum(total_usd) as revenue_usd from sales.orders where status not in ('cancelled', 'draft') and ((order_dt >= '2025-09-01' and order_dt < '2025-10-01') or (order_dt >= '2026-09-01' and order_dt < '2026-10-01')) group by 1 order by 1 limit 2"
+        }
+      ]
+    },
+    {
+      "name": "sales_top_sellers_units",
+      "category": "vague_holdout2",
+      "question": "top sellers by units",
+      "needed_relations": [
+        "sales.order_items",
+        "inventory.products"
+      ],
+      "catalog_terms": [
+        "units",
+        "product"
+      ],
+      "queries": [
+        {
+          "name": "sales_top_sellers_units",
+          "sql": "select p.sku, p.product_name, sum(oi.qty) as units from sales.order_items oi join inventory.products p on p.product_id = oi.product_id group by p.sku, p.product_name order by units desc limit 10"
+        }
+      ]
+    },
+    {
+      "name": "sales_revenue_mix_by_channel",
+      "category": "vague_holdout2",
+      "question": "Give me the revenue mix by channel, what percent comes from each route to market",
+      "needed_relations": [
+        "sales.orders"
+      ],
+      "catalog_terms": [
+        "channel",
+        "revenue"
+      ],
+      "queries": [
+        {
+          "name": "sales_revenue_mix_by_channel",
+          "sql": "select channel, sum(total_usd) as revenue_usd, round(sum(total_usd) / sum(sum(total_usd)) over (), 4) as share from sales.orders where status not in ('cancelled', 'draft') group by channel order by revenue_usd desc limit 10"
+        }
+      ]
+    },
+    {
+      "name": "sales_quote_acceptance",
+      "category": "vague_holdout2",
+      "question": "how many of the price proposals we send out actually get accepted?",
+      "needed_relations": [
+        "sales.quotes"
+      ],
+      "catalog_terms": [
+        "quote",
+        "accepted"
+      ],
+      "queries": [
+        {
+          "name": "sales_quote_acceptance",
+          "sql": "select status, count(*) as quotes, round(count(*)::numeric / sum(count(*)) over (), 4) as share from sales.quotes group by status order by quotes desc limit 10"
+        }
+      ]
+    },
+    {
+      "name": "sales_discount_code_revenue",
+      "category": "vague_holdout2",
+      "question": "which discount codes brought in the most sales?",
+      "needed_relations": [
+        "sales.orders"
+      ],
+      "catalog_terms": [
+        "promo",
+        "discount"
+      ],
+      "queries": [
+        {
+          "name": "sales_discount_code_revenue",
+          "sql": "select promo_code, count(*) as orders, sum(total_usd) as revenue_usd from sales.orders where promo_code is not null and status not in ('cancelled', 'draft') group by promo_code order by revenue_usd desc limit 10"
+        }
+      ]
+    },
+    {
+      "name": "ops_carrier_delivery_problems",
+      "category": "vague_holdout2",
+      "question": "ops manager: which shipping companies have the most deliveries go wrong?",
+      "needed_relations": [
+        "ops.shipments",
+        "ops.carriers"
+      ],
+      "catalog_terms": [
+        "carrier",
+        "exception"
+      ],
+      "queries": [
+        {
+          "name": "ops_carrier_delivery_problems",
+          "sql": "select c.carrier_name, count(*) filter (where s.status = 'exception') as problem_shipments, count(*) as shipments, round(avg((s.status = 'exception')::int), 4) as problem_rate from ops.shipments s join ops.carriers c on c.carrier_id = s.carrier_id group by c.carrier_name order by problem_shipments desc limit 12"
+        }
+      ]
+    },
+    {
+      "name": "sec_staff_without_mfa",
+      "category": "vague_holdout2",
+      "question": "Security review: I need every employee login that doesn't have two-factor turned on",
+      "needed_relations": [
+        "ops.app_users"
+      ],
+      "catalog_terms": [
+        "mfa",
+        "staff"
+      ],
+      "queries": [
+        {
+          "name": "sec_staff_without_mfa",
+          "sql": "select user_id, username, is_locked, last_login_at from ops.app_users where user_type = 'staff' and not mfa_enabled order by last_login_at desc nulls last limit 500"
+        }
+      ]
+    },
+    {
+      "name": "ops_slowest_api_endpoints",
+      "category": "vague_holdout2",
+      "question": "Which API endpoints are slowest?",
+      "needed_relations": [
+        "ops.api_request_log"
+      ],
+      "catalog_terms": [
+        "endpoint",
+        "latency"
+      ],
+      "queries": [
+        {
+          "name": "ops_slowest_api_endpoints",
+          "sql": "select endpoint, round(avg(latency_ms)) as avg_ms, percentile_cont(0.95) within group (order by latency_ms) as p95_ms, count(*) as calls from ops.api_request_log group by endpoint order by avg_ms desc limit 10"
+        }
+      ]
+    },
+    {
+      "name": "ops_mia_portal_clients",
+      "category": "vague_holdout2",
+      "question": "MIA clients - which customer companies have portal logins that nobody has signed into since before July 2026?",
+      "needed_relations": [
+        "ops.app_users",
+        "crm.accounts"
+      ],
+      "catalog_terms": [
+        "portal",
+        "last login"
+      ],
+      "queries": [
+        {
+          "name": "ops_mia_portal_clients",
+          "sql": "select a.account_name, u.username, u.last_login_at from ops.app_users u join crm.accounts a on a.account_id = u.account_id where u.user_type = 'customer' and u.last_login_at < '2026-07-01' order by u.last_login_at limit 200"
+        }
+      ]
+    },
+    {
+      "name": "ops_pos_received_per_warehouse",
+      "category": "vague_holdout2",
+      "question": "how many purchase orders have we recieved at each warehouse so far in 2026",
+      "needed_relations": [
+        "ops.orders",
+        "inventory.warehouses"
+      ],
+      "catalog_terms": [
+        "purchase order",
+        "received"
+      ],
+      "queries": [
+        {
+          "name": "ops_pos_received_per_warehouse",
+          "sql": "select w.warehouse_code, count(*) as received_pos from ops.orders o join inventory.warehouses w on w.warehouse_id = o.warehouse_id where o.received_dt between '2026-01-01' and '2026-10-10' group by w.warehouse_code order by 2 desc limit 30"
+        }
+      ]
+    },
+    {
+      "name": "ana_most_used_features",
+      "category": "vague_holdout2",
+      "question": "product manager here, what parts of the product do customers actually use the most?",
+      "needed_relations": [
+        "analytics.feature_usage"
+      ],
+      "catalog_terms": [
+        "feature",
+        "usage"
+      ],
+      "queries": [
+        {
+          "name": "ana_most_used_features",
+          "sql": "select feature_name, sum(event_count) as events, count(distinct account_id) as accounts from analytics.feature_usage group by feature_name order by events desc limit 10"
+        }
+      ]
+    },
+    {
+      "name": "ana_device_conversion",
+      "category": "vague_holdout2",
+      "question": "phone vs laptop vs tablet visitors on the website - who ends up buying more often?",
+      "needed_relations": [
+        "analytics.web_sessions"
+      ],
+      "catalog_terms": [
+        "device",
+        "converted"
+      ],
+      "queries": [
+        {
+          "name": "ana_device_conversion",
+          "sql": "select device_type, count(*) as sessions, round(avg(converted::int), 4) as conversion_rate from analytics.web_sessions group by device_type order by conversion_rate desc limit 5"
+        }
+      ]
+    },
+    {
+      "name": "ana_stickiest_pages",
+      "category": "vague_holdout2",
+      "question": "So I'm trying to figure out what content on our site actually holds people's attention, you know, where they hang around longest before clicking away - can you pull that together? only pages with a decent amount of traffic",
+      "needed_relations": [
+        "analytics.page_views"
+      ],
+      "catalog_terms": [
+        "page",
+        "duration"
+      ],
+      "queries": [
+        {
+          "name": "ana_stickiest_pages",
+          "sql": "select url_path, round(avg(duration_ms)) as avg_ms, count(*) as views from analytics.page_views group by url_path having count(*) >= 100 order by avg_ms desc limit 20"
+        }
+      ]
+    }
+  ]
+}

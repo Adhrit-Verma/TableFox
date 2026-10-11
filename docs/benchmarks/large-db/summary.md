@@ -2,6 +2,36 @@
 
 Run date: 2026-10-11. Every number below comes from the raw JSON files in this folder. No task was dropped.
 
+## Update: better retrieval for vague questions
+
+The first run below found vague business questions to be the weakest category (31% recall@6). The retrieval layer (`services/dbmap/src/dbmap/retrieval.py`) was then improved with:
+- a general business vocabulary ("owes" → invoices and balances, "complaining" → tickets, "leaving" → cancellations);
+- a boost for transaction tables on ranking and trend questions, and for the party table on "who" questions;
+- removal of word-matching noise (no fuzzy years, no lower-case two-letter acronyms, stricter typo matching);
+- foreign-key-first join paths, with connecting tables listed before speculative matches.
+
+| Measure (70-task corpus, `run-default.json` → `run-after-retrieval.json`) | Before | After |
+|---|---|---|
+| Vague business questions, mean recall@6 | 31% | **88%** |
+| Vague business questions with every needed table in the top 6 | 0 / 7 | **5 / 7** |
+| 4–5-table joins, mean recall@6 | 76% | 80% |
+| All tasks, recall@6 (129 needed relations) | 84.5% | **93.0%** |
+| Tasks with every needed table in the top 6 | 54 / 70 | **62 / 70** |
+| Row-level answer match | 64 / 64 executed | 64 / 64 executed (same 6 policy refusals) |
+| Warm median, both calls | 96 ms | 80 ms |
+| `task_context` median | 16.8 ms | 14.8 ms |
+| Mean context tokens | 873 | 960 (more of the right tables are listed) |
+
+**Held-out checks.** To avoid tuning to the 7 vague questions above, two further sets of 40 vague questions were written by separate agents that could not see the retrieval code (`scripts/bench/vague_holdout.json`, `vague_holdout2.json`). Recall@6 on 40 questions each:
+
+| Set | Before | After | Note |
+|---|---|---|---|
+| Holdout 1 | 60.9% (22/40 complete) | 75.0% (28/40) at its first check | Its misses were then studied for general patterns, so its later score (89.1%) is not independent |
+| **Holdout 2** | **70.7% (24/40)** | **81.0% (30/40)** | Scored once, after tuning stopped. This is the honest generalisation figure |
+| Original 38-table HR corpus (different schema, 14 tasks) | 70.8% (8/14) | 95.8% (13/14) | Regression check on another database |
+
+Reproduce retrieval scores with `scripts/bench/eval_retrieval.py` (no queries are run). The sections below describe the first run; everything else (latency, safety, the blind test) was measured before this change, and the blind test has not been re-run.
+
 ## Headline
 
 | Metric | TableFox | Conventional path |

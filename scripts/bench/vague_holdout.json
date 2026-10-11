@@ -1,0 +1,753 @@
+{
+  "description": "Held-out set of 40 vague, non-technical business questions against the bench database (data ends 2026-10-10). Written independently of the retrieval code and of large_tasks.json. needed_relations is the minimal set a competent analyst would read; each ground-truth query uses exactly those relations.",
+  "tasks": [
+    {
+      "name": "biggest_customers_2026",
+      "category": "vague_holdout",
+      "question": "Who were our 10 biggest customers in 2026 so far?",
+      "needed_relations": [
+        "sales.orders",
+        "sales.customers"
+      ],
+      "catalog_terms": [
+        "customer",
+        "revenue"
+      ],
+      "queries": [
+        {
+          "name": "top_customers_2026",
+          "sql": "select c.customer_name, round(sum(o.total_usd), 2) as revenue_usd from sales.orders o join sales.customers c on c.cust_id = o.cust_id where o.order_dt >= '2026-01-01' and o.order_dt < '2026-10-11' and o.status not in ('cancelled', 'draft') group by c.customer_name order by revenue_usd desc limit 10"
+        }
+      ]
+    },
+    {
+      "name": "sales_trend_monthly",
+      "category": "vague_holdout",
+      "question": "How have sales been trending month to month since October 2025?",
+      "needed_relations": [
+        "sales.orders"
+      ],
+      "catalog_terms": [
+        "orders",
+        "sales"
+      ],
+      "queries": [
+        {
+          "name": "monthly_sales",
+          "sql": "select date_trunc('month', order_dt)::date as month, count(*) as orders, round(sum(total_usd), 2) as revenue_usd from sales.orders where order_dt >= '2025-10-01' and order_dt < '2026-10-11' and status not in ('cancelled', 'draft') group by 1 order by 1 limit 13"
+        }
+      ]
+    },
+    {
+      "name": "flying_off_shelves",
+      "category": "vague_holdout",
+      "question": "What stuff is flying off the shelves the most?",
+      "needed_relations": [
+        "sales.order_items",
+        "inventory.products"
+      ],
+      "catalog_terms": [
+        "product",
+        "quantity sold"
+      ],
+      "queries": [
+        {
+          "name": "best_selling_products",
+          "sql": "select p.sku, p.product_name, sum(oi.qty) as units_sold from sales.order_items oi join inventory.products p on p.product_id = oi.product_id group by p.sku, p.product_name order by units_sold desc limit 10"
+        }
+      ]
+    },
+    {
+      "name": "reps_crushing_it",
+      "category": "vague_holdout",
+      "question": "Which of our sales reps are crushing it this year?",
+      "needed_relations": [
+        "sales.orders",
+        "hr.employees"
+      ],
+      "catalog_terms": [
+        "sales rep",
+        "employee"
+      ],
+      "queries": [
+        {
+          "name": "rep_leaderboard_2026",
+          "sql": "select e.employee_id, e.first_name, e.last_name, count(*) as orders, round(sum(o.total_usd), 2) as revenue_usd from sales.orders o join hr.employees e on e.employee_id = o.sales_rep_id where o.order_dt >= '2026-01-01' and o.order_dt < '2026-10-11' and o.status not in ('cancelled', 'draft') group by e.employee_id, e.first_name, e.last_name order by revenue_usd desc limit 10"
+        }
+      ]
+    },
+    {
+      "name": "why_things_come_back",
+      "category": "vague_holdout",
+      "question": "Why do people keep sending stuff back to us?",
+      "needed_relations": [
+        "sales.returns"
+      ],
+      "catalog_terms": [
+        "returns",
+        "reason"
+      ],
+      "queries": [
+        {
+          "name": "return_reasons",
+          "sql": "select reason, count(*) as returns, sum(qty) as units, round(sum(refund_amt), 2) as refunded from sales.returns group by reason order by returns desc limit 10"
+        }
+      ]
+    },
+    {
+      "name": "who_owes_us",
+      "category": "vague_holdout",
+      "question": "Who owes us money right now, and how much?",
+      "needed_relations": [
+        "finance.invoices",
+        "sales.customers"
+      ],
+      "catalog_terms": [
+        "invoice",
+        "outstanding"
+      ],
+      "queries": [
+        {
+          "name": "outstanding_by_customer",
+          "sql": "select c.customer_name, i.currency_code, count(*) as unpaid_invoices, round(sum(i.total_amt), 2) as amount_owed from finance.invoices i join sales.customers c on c.cust_id = i.cust_id where i.status in ('open', 'overdue') group by c.customer_name, i.currency_code order by amount_owed desc limit 20"
+        }
+      ]
+    },
+    {
+      "name": "overspent_budget_q2_2026",
+      "category": "vague_holdout",
+      "question": "Are we bleeding money anywhere? Which parts of the business blew past their budget in Q2 2026?",
+      "needed_relations": [
+        "finance.gl_entries",
+        "finance.budgets",
+        "finance.cost_centers",
+        "finance.chart_of_accounts"
+      ],
+      "catalog_terms": [
+        "budget",
+        "expense",
+        "cost center"
+      ],
+      "queries": [
+        {
+          "name": "q2_2026_actual_vs_budget",
+          "sql": "with actual as (select g.cost_center_id, sum(g.debit_amt - g.credit_amt) as actual_amt from finance.gl_entries g join finance.chart_of_accounts a on a.gl_account_id = g.gl_account_id where a.account_type = 'expense' and g.entry_dt >= '2026-04-01' and g.entry_dt < '2026-07-01' group by g.cost_center_id), plan as (select b.cost_center_id, sum(b.budget_amt) as budget_amt from finance.budgets b join finance.chart_of_accounts a on a.gl_account_id = b.gl_account_id where a.account_type = 'expense' and b.fiscal_month >= '2026-04-01' and b.fiscal_month < '2026-07-01' group by b.cost_center_id) select cc.cc_code, cc.cc_name, round(coalesce(ac.actual_amt, 0), 2) as actual_amt, round(coalesce(p.budget_amt, 0), 2) as budget_amt, round(coalesce(ac.actual_amt, 0) - coalesce(p.budget_amt, 0), 2) as over_budget from finance.cost_centers cc left join actual ac on ac.cost_center_id = cc.cost_center_id left join plan p on p.cost_center_id = cc.cost_center_id order by over_budget desc limit 15"
+        }
+      ]
+    },
+    {
+      "name": "recurring_revenue_by_plan",
+      "category": "vague_holdout",
+      "question": "How's our monthly recurring revenue split across the different plans?",
+      "needed_relations": [
+        "finance.subscriptions",
+        "finance.plans"
+      ],
+      "catalog_terms": [
+        "mrr",
+        "subscription",
+        "plan"
+      ],
+      "queries": [
+        {
+          "name": "mrr_by_plan",
+          "sql": "select p.plan_name, count(*) as subscriptions, round(sum(s.mrr_amt), 2) as mrr_usd from finance.subscriptions s join finance.plans p on p.plan_id = s.plan_id where s.status in ('active', 'past_due') group by p.plan_name order by mrr_usd desc limit 10"
+        }
+      ]
+    },
+    {
+      "name": "why_subscribers_cancel",
+      "category": "vague_holdout",
+      "question": "Why are customers cancelling their subscriptions?",
+      "needed_relations": [
+        "finance.subscriptions"
+      ],
+      "catalog_terms": [
+        "churn",
+        "cancel reason"
+      ],
+      "queries": [
+        {
+          "name": "cancel_reasons",
+          "sql": "select cancel_reason, count(*) as cancellations, round(sum(mrr_amt), 2) as lost_mrr_usd from finance.subscriptions where status = 'cancelled' group by cancel_reason order by cancellations desc limit 10"
+        }
+      ]
+    },
+    {
+      "name": "failed_payments_sep_2026",
+      "category": "vague_holdout",
+      "question": "How many customer payments bounced in September 2026, and how were they trying to pay?",
+      "needed_relations": [
+        "finance.payments"
+      ],
+      "catalog_terms": [
+        "payment",
+        "failed"
+      ],
+      "queries": [
+        {
+          "name": "failed_payments_by_method",
+          "sql": "select method, count(*) as failed_payments, round(sum(amt), 2) as amount from finance.payments where status = 'failed' and paid_dt >= '2026-09-01' and paid_dt < '2026-10-01' group by method order by failed_payments desc limit 10"
+        }
+      ]
+    },
+    {
+      "name": "pipeline_worth",
+      "category": "vague_holdout",
+      "question": "What's our sales pipeline worth right now?",
+      "needed_relations": [
+        "crm.opportunities"
+      ],
+      "catalog_terms": [
+        "opportunity",
+        "pipeline"
+      ],
+      "queries": [
+        {
+          "name": "open_pipeline_by_stage",
+          "sql": "select stage, count(*) as deals, round(sum(amt), 2) as amount_usd, round(sum(amt * probability_pct / 100.0), 2) as weighted_usd from crm.opportunities where stage not in ('closed_won', 'closed_lost') group by stage order by amount_usd desc limit 10"
+        }
+      ]
+    },
+    {
+      "name": "why_we_lose_deals",
+      "category": "vague_holdout",
+      "question": "Why do we keep losing deals?",
+      "needed_relations": [
+        "crm.opportunities"
+      ],
+      "catalog_terms": [
+        "opportunity",
+        "lost reason"
+      ],
+      "queries": [
+        {
+          "name": "lost_reasons",
+          "sql": "select lost_reason, count(*) as lost_deals, round(sum(amt), 2) as lost_amount_usd from crm.opportunities where stage = 'closed_lost' group by lost_reason order by lost_deals desc limit 10"
+        }
+      ]
+    },
+    {
+      "name": "lead_sources_that_convert",
+      "category": "vague_holdout",
+      "question": "Where do our best leads come from - which ones actually end up as customers?",
+      "needed_relations": [
+        "crm.leads"
+      ],
+      "catalog_terms": [
+        "lead",
+        "conversion"
+      ],
+      "queries": [
+        {
+          "name": "conversion_by_lead_source",
+          "sql": "select lead_source, count(*) as leads, count(converted_account_id) as converted, round(100.0 * count(converted_account_id) / count(*), 2) as conversion_pct from crm.leads group by lead_source order by conversion_pct desc limit 10"
+        }
+      ]
+    },
+    {
+      "name": "strategic_clients_gone_quiet",
+      "category": "vague_holdout",
+      "question": "Which of our big strategic clients have gone quiet on us - nobody's talked to them in ages?",
+      "needed_relations": [
+        "crm.accounts",
+        "crm.activities"
+      ],
+      "catalog_terms": [
+        "account",
+        "activity"
+      ],
+      "queries": [
+        {
+          "name": "stale_strategic_accounts",
+          "sql": "select a.account_id, a.account_name, max(act.activity_dt) as last_touch from crm.accounts a left join crm.activities act on act.account_id = a.account_id where a.tier = 'strategic' and a.is_active group by a.account_id, a.account_name order by last_touch asc nulls first limit 20"
+        }
+      ]
+    },
+    {
+      "name": "least_likely_to_recommend",
+      "category": "vague_holdout",
+      "question": "Which clients would be least likely to recommend us to a friend?",
+      "needed_relations": [
+        "crm.accounts"
+      ],
+      "catalog_terms": [
+        "nps",
+        "account"
+      ],
+      "queries": [
+        {
+          "name": "lowest_nps_accounts",
+          "sql": "select account_id, account_name, tier, nps_score, health_score from crm.accounts where nps_score is not null order by nps_score asc, health_score asc limit 20"
+        }
+      ]
+    },
+    {
+      "name": "tickets_sitting_open",
+      "category": "vague_holdout",
+      "question": "Which support tickets have been sitting there unresolved the longest?",
+      "needed_relations": [
+        "support.tickets"
+      ],
+      "catalog_terms": [
+        "ticket",
+        "open"
+      ],
+      "queries": [
+        {
+          "name": "oldest_unresolved_tickets",
+          "sql": "select ticket_ref, account_id, priority, status, opened_at from support.tickets where resolved_at is null and status not in ('resolved', 'closed') order by opened_at asc limit 20"
+        }
+      ]
+    },
+    {
+      "name": "missed_support_promises",
+      "category": "vague_holdout",
+      "question": "How often are we missing our support response promises, broken down by support plan?",
+      "needed_relations": [
+        "support.tickets",
+        "support.sla_breaches",
+        "support.tiers"
+      ],
+      "catalog_terms": [
+        "sla",
+        "breach",
+        "support tier"
+      ],
+      "queries": [
+        {
+          "name": "breach_rate_by_tier",
+          "sql": "select tr.tier_name, count(distinct t.ticket_id) as tickets, count(distinct b.ticket_id) as breached_tickets, round(100.0 * count(distinct b.ticket_id) / count(distinct t.ticket_id), 2) as breach_pct from support.tickets t join support.tiers tr on tr.tier_id = t.tier_id left join support.sla_breaches b on b.ticket_id = t.ticket_id group by tr.tier_name order by breach_pct desc limit 10"
+        }
+      ]
+    },
+    {
+      "name": "fastest_support_people",
+      "category": "vague_holdout",
+      "question": "Who on the support team sorts out problems the fastest?",
+      "needed_relations": [
+        "support.tickets",
+        "support.agents",
+        "hr.employees"
+      ],
+      "catalog_terms": [
+        "support agent",
+        "resolution time"
+      ],
+      "queries": [
+        {
+          "name": "fastest_agents",
+          "sql": "select ag.agent_id, e.first_name, e.last_name, count(*) as resolved_tickets, round(avg(extract(epoch from (t.resolved_at - t.opened_at)) / 3600)::numeric, 1) as avg_hours from support.tickets t join support.agents ag on ag.agent_id = t.assigned_agent_id join hr.employees e on e.employee_id = ag.employee_id where t.resolved_at is not null group by ag.agent_id, e.first_name, e.last_name having count(*) >= 50 order by avg_hours asc limit 10"
+        }
+      ]
+    },
+    {
+      "name": "what_people_complain_about",
+      "category": "vague_holdout",
+      "question": "What are customers complaining about the most?",
+      "needed_relations": [
+        "support.tickets"
+      ],
+      "catalog_terms": [
+        "ticket",
+        "category"
+      ],
+      "queries": [
+        {
+          "name": "top_ticket_categories",
+          "sql": "select category, subcategory, count(*) as tickets from support.tickets group by category, subcategory order by tickets desc limit 15"
+        }
+      ]
+    },
+    {
+      "name": "support_satisfaction_trend",
+      "category": "vague_holdout",
+      "question": "Are people getting happier or grumpier with our support over time?",
+      "needed_relations": [
+        "support.tickets"
+      ],
+      "catalog_terms": [
+        "csat",
+        "satisfaction"
+      ],
+      "queries": [
+        {
+          "name": "csat_by_month",
+          "sql": "select date_trunc('month', opened_at)::date as month, count(csat_score) as rated, round(avg(csat_score), 2) as avg_csat from support.tickets where csat_score is not null group by 1 order by 1 limit 40"
+        }
+      ]
+    },
+    {
+      "name": "leavers_2026",
+      "category": "vague_holdout",
+      "question": "How many people left the company in 2026, and why did they go?",
+      "needed_relations": [
+        "hr.employees"
+      ],
+      "catalog_terms": [
+        "termination",
+        "employee"
+      ],
+      "queries": [
+        {
+          "name": "leavers_by_reason_2026",
+          "sql": "select coalesce(termination_reason, '(none)') as reason, count(*) as leavers from hr.employees where term_dt >= '2026-01-01' and term_dt < '2026-10-11' group by 1 order by leavers desc limit 10"
+        }
+      ]
+    },
+    {
+      "name": "biggest_teams_by_manager",
+      "category": "vague_holdout",
+      "question": "Which managers have the most people reporting to them?",
+      "needed_relations": [
+        "hr.employees"
+      ],
+      "catalog_terms": [
+        "manager",
+        "direct reports"
+      ],
+      "queries": [
+        {
+          "name": "direct_report_counts",
+          "sql": "select m.employee_id, m.first_name, m.last_name, m.job_title, count(*) as direct_reports from hr.employees e join hr.employees m on m.employee_id = e.manager_id where e.is_active group by m.employee_id, m.first_name, m.last_name, m.job_title order by direct_reports desc limit 10"
+        }
+      ]
+    },
+    {
+      "name": "hoarding_vacation",
+      "category": "vague_holdout",
+      "question": "Who's sitting on a mountain of unused vacation days?",
+      "needed_relations": [
+        "hr.employees"
+      ],
+      "catalog_terms": [
+        "pto",
+        "leave balance"
+      ],
+      "queries": [
+        {
+          "name": "largest_pto_balances",
+          "sql": "select employee_id, first_name, last_name, job_title, pto_balance_days from hr.employees where is_active and pto_balance_days is not null order by pto_balance_days desc limit 20"
+        }
+      ]
+    },
+    {
+      "name": "top_performers_latest_review",
+      "category": "vague_holdout",
+      "question": "Who were our standout performers in the most recent review round?",
+      "needed_relations": [
+        "hr.performance_reviews",
+        "hr.employees"
+      ],
+      "catalog_terms": [
+        "performance review",
+        "rating"
+      ],
+      "queries": [
+        {
+          "name": "top_rated_2026_h1",
+          "sql": "select e.employee_id, e.first_name, e.last_name, e.job_title, r.rating from hr.performance_reviews r join hr.employees e on e.employee_id = r.employee_id where r.review_period = '2026-H1' and r.rating is not null order by r.rating desc, e.employee_id limit 25"
+        }
+      ]
+    },
+    {
+      "name": "pending_time_off",
+      "category": "vague_holdout",
+      "question": "Whose time-off requests are still waiting on a yes or no?",
+      "needed_relations": [
+        "hr.time_off",
+        "hr.employees"
+      ],
+      "catalog_terms": [
+        "time off",
+        "leave request"
+      ],
+      "queries": [
+        {
+          "name": "pending_leave_requests",
+          "sql": "select t.request_id, e.first_name, e.last_name, t.leave_type, t.start_dt, t.end_dt, t.days, t.requested_at from hr.time_off t join hr.employees e on e.employee_id = t.employee_id where t.status = 'requested' order by t.requested_at asc limit 25"
+        }
+      ]
+    },
+    {
+      "name": "about_to_run_out",
+      "category": "vague_holdout",
+      "question": "What are we about to run out of?",
+      "needed_relations": [
+        "inventory.stock_levels",
+        "inventory.products"
+      ],
+      "catalog_terms": [
+        "stock",
+        "reorder"
+      ],
+      "queries": [
+        {
+          "name": "below_reorder_point",
+          "sql": "select p.sku, p.product_name, s.warehouse_id, s.qty_on_hand - s.qty_reserved as available, s.reorder_point from inventory.stock_levels s join inventory.products p on p.product_id = s.product_id where s.qty_on_hand - s.qty_reserved < s.reorder_point order by (s.qty_on_hand - s.qty_reserved) - s.reorder_point asc limit 25"
+        }
+      ]
+    },
+    {
+      "name": "late_suppliers",
+      "category": "vague_holdout",
+      "question": "Which of our suppliers are always late getting stuff to us?",
+      "needed_relations": [
+        "ops.orders",
+        "inventory.suppliers"
+      ],
+      "catalog_terms": [
+        "purchase order",
+        "supplier"
+      ],
+      "queries": [
+        {
+          "name": "late_po_rate_by_supplier",
+          "sql": "select s.supplier_name, count(*) as received_pos, count(*) filter (where o.received_dt > o.expected_dt) as late_pos, round(100.0 * count(*) filter (where o.received_dt > o.expected_dt) / count(*), 1) as late_pct from ops.orders o join inventory.suppliers s on s.supplier_id = o.supplier_id where o.received_dt is not null group by s.supplier_name having count(*) >= 20 order by late_pct desc limit 15"
+        }
+      ]
+    },
+    {
+      "name": "slowest_shipping_company",
+      "category": "vague_holdout",
+      "question": "Which shipping company takes the longest to get orders to people?",
+      "needed_relations": [
+        "ops.shipments",
+        "ops.carriers"
+      ],
+      "catalog_terms": [
+        "carrier",
+        "delivery time"
+      ],
+      "queries": [
+        {
+          "name": "avg_delivery_days_by_carrier",
+          "sql": "select c.carrier_name, count(*) as deliveries, round(avg(extract(epoch from (s.delivered_at - s.shipped_at)) / 86400)::numeric, 2) as avg_days from ops.shipments s join ops.carriers c on c.carrier_id = s.carrier_id where s.delivered_at is not null group by c.carrier_name order by avg_days desc limit 12"
+        }
+      ]
+    },
+    {
+      "name": "stock_of_dead_products",
+      "category": "vague_holdout",
+      "question": "Are we sitting on stock for things we don't even sell anymore?",
+      "needed_relations": [
+        "inventory.products",
+        "inventory.stock_levels"
+      ],
+      "catalog_terms": [
+        "discontinued",
+        "stock"
+      ],
+      "queries": [
+        {
+          "name": "stock_of_discontinued",
+          "sql": "select p.sku, p.product_name, p.discontinued_at, sum(s.qty_on_hand) as units_on_hand, round(sum(s.qty_on_hand * p.unit_cost), 2) as value_usd from inventory.products p join inventory.stock_levels s on s.product_id = p.product_id where (p.discontinued_at is not null or not p.is_active) and s.qty_on_hand > 0 group by p.sku, p.product_name, p.discontinued_at order by value_usd desc limit 20"
+        }
+      ]
+    },
+    {
+      "name": "deliveries_gone_sideways_oct_2026",
+      "category": "vague_holdout",
+      "question": "How many deliveries went sideways in October 2026?",
+      "needed_relations": [
+        "ops.shipments"
+      ],
+      "catalog_terms": [
+        "shipment",
+        "exception"
+      ],
+      "queries": [
+        {
+          "name": "shipment_exceptions_oct_2026",
+          "sql": "select shipped_at::date as ship_day, count(*) as problem_shipments from ops.shipments where status = 'exception' and shipped_at >= '2026-10-01' and shipped_at < '2026-11-01' group by 1 order by 1 limit 31"
+        }
+      ]
+    },
+    {
+      "name": "campaign_bang_for_buck",
+      "category": "vague_holdout",
+      "question": "Which marketing campaigns gave us the most bang for our buck?",
+      "needed_relations": [
+        "marketing.campaigns",
+        "crm.leads"
+      ],
+      "catalog_terms": [
+        "campaign",
+        "spend",
+        "lead"
+      ],
+      "queries": [
+        {
+          "name": "cost_per_converted_lead",
+          "sql": "select c.campaign_name, c.channel, c.actual_spend_amt, count(l.lead_id) as leads, count(l.converted_account_id) as converted, round(c.actual_spend_amt / nullif(count(l.converted_account_id), 0), 2) as cost_per_conversion from marketing.campaigns c left join crm.leads l on l.campaign_id = c.campaign_id group by c.campaign_id, c.campaign_name, c.channel, c.actual_spend_amt having count(l.converted_account_id) > 0 order by cost_per_conversion asc limit 15"
+        }
+      ]
+    },
+    {
+      "name": "anyone_opening_emails",
+      "category": "vague_holdout",
+      "question": "Is anybody actually opening the marketing emails we send out?",
+      "needed_relations": [
+        "marketing.email_events"
+      ],
+      "catalog_terms": [
+        "email",
+        "open rate"
+      ],
+      "queries": [
+        {
+          "name": "open_rate_by_campaign",
+          "sql": "select campaign_id, count(*) filter (where event_type = 'delivered') as delivered, count(*) filter (where event_type = 'open') as opens, round(100.0 * count(*) filter (where event_type = 'open') / nullif(count(*) filter (where event_type = 'delivered'), 0), 2) as open_pct from marketing.email_events group by campaign_id order by open_pct desc nulls last limit 20"
+        }
+      ]
+    },
+    {
+      "name": "web_traffic_sources",
+      "category": "vague_holdout",
+      "question": "Where is our website traffic coming from, and does any of it actually buy?",
+      "needed_relations": [
+        "analytics.web_sessions"
+      ],
+      "catalog_terms": [
+        "web session",
+        "utm source"
+      ],
+      "queries": [
+        {
+          "name": "sessions_by_source",
+          "sql": "select coalesce(utm_source, '(direct)') as source, count(*) as sessions, count(*) filter (where converted) as conversions, round(100.0 * count(*) filter (where converted) / count(*), 2) as conversion_pct from analytics.web_sessions group by 1 order by sessions desc limit 15"
+        }
+      ]
+    },
+    {
+      "name": "features_customers_use",
+      "category": "vague_holdout",
+      "question": "Which parts of our product are customers actually using?",
+      "needed_relations": [
+        "analytics.feature_usage"
+      ],
+      "catalog_terms": [
+        "feature usage"
+      ],
+      "queries": [
+        {
+          "name": "usage_by_feature",
+          "sql": "select feature_name, count(distinct account_id) as accounts, sum(event_count) as events from analytics.feature_usage group by feature_name order by events desc limit 20"
+        }
+      ]
+    },
+    {
+      "name": "fishy_logins_since_sep_2026",
+      "category": "vague_holdout",
+      "question": "Anything fishy going on with people trying to log in since September 2026?",
+      "needed_relations": [
+        "ops.login_events"
+      ],
+      "catalog_terms": [
+        "login",
+        "failed"
+      ],
+      "queries": [
+        {
+          "name": "failed_logins_by_user",
+          "sql": "select user_id, count(*) filter (where not success) as failed_attempts, count(*) as attempts, count(distinct ip_address) filter (where not success) as distinct_ips from ops.login_events where event_ts >= '2026-09-01' and event_ts < '2026-10-11' group by user_id order by failed_attempts desc limit 20"
+        }
+      ]
+    },
+    {
+      "name": "who_exports_or_deletes",
+      "category": "vague_holdout",
+      "question": "Who's been pulling data out of the system or deleting things?",
+      "needed_relations": [
+        "public.audit_log",
+        "ops.app_users"
+      ],
+      "catalog_terms": [
+        "audit",
+        "export",
+        "delete"
+      ],
+      "queries": [
+        {
+          "name": "exporters_and_deleters",
+          "sql": "select u.username, u.user_type, a.action, count(*) as events from public.audit_log a join ops.app_users u on u.user_id = a.actor_user_id where a.action in ('export', 'delete') group by u.username, u.user_type, a.action order by events desc limit 20"
+        }
+      ]
+    },
+    {
+      "name": "customer_integrations_erroring",
+      "category": "vague_holdout",
+      "question": "Which customers' integrations with us keep erroring out?",
+      "needed_relations": [
+        "ops.api_request_log",
+        "ops.api_keys",
+        "crm.accounts"
+      ],
+      "catalog_terms": [
+        "api",
+        "errors"
+      ],
+      "queries": [
+        {
+          "name": "api_failures_by_account",
+          "sql": "select ac.account_name, count(*) as requests, count(*) filter (where r.status_code >= 400) as failed, round(100.0 * count(*) filter (where r.status_code >= 400) / count(*), 2) as fail_pct from ops.api_request_log r join ops.api_keys k on k.api_key_id = r.api_key_id join crm.accounts ac on ac.account_id = k.account_id group by ac.account_name order by failed desc limit 15"
+        }
+      ]
+    },
+    {
+      "name": "salary_changes_2026",
+      "category": "vague_holdout",
+      "question": "Who's been changing people's pay in 2026?",
+      "needed_relations": [
+        "public.change_history"
+      ],
+      "catalog_terms": [
+        "change history",
+        "salary"
+      ],
+      "queries": [
+        {
+          "name": "salary_edits_2026",
+          "sql": "select changed_by, change_source, count(*) as salary_changes, min(changed_at) as first_change, max(changed_at) as last_change from public.change_history where table_name = 'hr.employees' and column_name = 'salary_amt' and changed_at >= '2026-01-01' and changed_at < '2026-10-11' group by changed_by, change_source order by salary_changes desc limit 20"
+        }
+      ]
+    },
+    {
+      "name": "staff_without_2fa",
+      "category": "vague_holdout",
+      "question": "Do we have any staff logging in without two-factor turned on?",
+      "needed_relations": [
+        "ops.app_users"
+      ],
+      "catalog_terms": [
+        "mfa",
+        "user"
+      ],
+      "queries": [
+        {
+          "name": "staff_no_mfa",
+          "sql": "select user_id, username, last_login_at, is_locked from ops.app_users where user_type = 'staff' and not mfa_enabled order by last_login_at desc nulls last limit 25"
+        }
+      ]
+    },
+    {
+      "name": "dead_keys_still_used",
+      "category": "vague_holdout",
+      "question": "Are any API keys we already shut off still being used?",
+      "needed_relations": [
+        "ops.api_keys",
+        "ops.api_request_log"
+      ],
+      "catalog_terms": [
+        "api key",
+        "revoked"
+      ],
+      "queries": [
+        {
+          "name": "calls_after_revocation",
+          "sql": "select k.api_key_id, k.key_name, k.revoked_at, count(*) as calls_after_revoke, max(r.requested_at) as last_call from ops.api_keys k join ops.api_request_log r on r.api_key_id = k.api_key_id where k.revoked_at is not null and r.requested_at > k.revoked_at group by k.api_key_id, k.key_name, k.revoked_at order by calls_after_revoke desc limit 20"
+        }
+      ]
+    }
+  ]
+}

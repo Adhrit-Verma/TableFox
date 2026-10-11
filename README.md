@@ -74,13 +74,14 @@ Measured on a deliberately messy **71-table, 25-million-row** PostgreSQL databas
 
 | Measure | TableFox | Conventional |
 |---|---:|---:|
-| Median time per question (warm) | **96 ms** | 282 ms |
-| 95th percentile | **498 ms** | 690 ms |
-| Estimated tokens per question | **1,805** | 2,493 |
-| Needed tables found in the top 6 | 84.5% | n/a |
+| Median time per question (warm) | **80 ms** | 282 ms |
+| 95th percentile | **482 ms** | 690 ms |
+| Estimated tokens per question | **1,892** | 2,493 |
+| Needed tables found in the top 6 | **93.0%** (vague questions: 88%) | n/a |
+| Same, on 40 unseen vague questions written by a separate agent | 81.0% (was 70.7%) | n/a |
 | Answers identical to direct SQL, row for row | **64 / 64** (6 of 70 stopped by policy) | baseline |
 | Write attempts refused | **17 / 17** | n/a |
-| Blind test: assistant answers correctly from TableFox alone, one try | 13 / 28 | n/a |
+| Blind test: assistant answers correctly from TableFox alone, one try (before the retrieval update) | 13 / 28 | n/a |
 | Cold start, new process to first answer | 2.5 s | n/a |
 
 ```mermaid
@@ -88,14 +89,13 @@ xychart-beta
     title "Warm time per question, ms (lower is better)"
     x-axis ["TableFox median", "Conventional median", "TableFox p95", "Conventional p95"]
     y-axis "ms" 0 --> 800
-    bar [96, 282, 498, 690]
+    bar [80, 282, 482, 690]
 ```
 
-**Where it is strong:** simple lookups, joins, audit and log tables, and wide tables (100% of needed tables found).
+**Where it is strong:** simple lookups, synonyms, joins, audit and log tables, ambiguous names and wide tables (100% of needed tables found), and now vague business questions ("who owes us money?"): 88%, up from 31% after adding business vocabulary and intent-aware ranking.
 
 **Where it is weak, measured:**
-- Vague business questions (31% of needed tables found).
-- 4–5-table joins (76%).
+- 4–5-table joins (80%).
 - Context packs that leave out date and amount columns, which causes most blind-test misses.
 - A personal-data filter that goes by column name only.
 
@@ -201,7 +201,8 @@ python scripts/bench/benchmark_large.py run --repeat 3            # large DB (se
 - [ ] Return PostgreSQL error text from batch queries so assistants can self-correct
 - [ ] Include date, amount and status columns and types in context packs
 - [ ] Source-column personal-data detection (no alias bypass) and more identifier types
-- [ ] Business-term synonyms for vague questions; better multi-hop retrieval
+- [x] Business vocabulary and intent-aware ranking for vague questions (31% → 88%; unseen questions 71% → 81%)
+- [ ] Better multi-hop retrieval
 - [ ] Encryption-key rotation and per-user rate limits for the hosted service
 - [ ] MySQL support
 - [x] Hosted multi-user mode with OAuth

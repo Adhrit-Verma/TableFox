@@ -32,14 +32,17 @@
 <section id="summary">
   <h2>At a glance</h2>
   <div class="tiles" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:1rem">
-    <div class="tile"><span class="lbl">Median time per question</span><span class="big">96<small>ms</small></span><p style="margin:0;font-size:.875rem">vs 282 ms the usual way (2.9× faster)</p></div>
-    <div class="tile"><span class="lbl">Tokens per question</span><span class="big">~1,805</span><p style="margin:0;font-size:.875rem">vs ~2,493 the usual way (28% smaller)</p></div>
-    <div class="tile"><span class="lbl">Right tables found (top 6)</span><span class="big">84.5<small>%</small></span><p style="margin:0;font-size:.875rem">of 129 tables the 70 answers needed</p></div>
+    <div class="tile"><span class="lbl">Median time per question</span><span class="big">80<small>ms</small></span><p style="margin:0;font-size:.875rem">vs 282 ms the usual way (3.5× faster)</p></div>
+    <div class="tile"><span class="lbl">Tokens per question</span><span class="big">~1,892</span><p style="margin:0;font-size:.875rem">vs ~2,493 the usual way (24% smaller)</p></div>
+    <div class="tile"><span class="lbl">Right tables found (top 6)</span><span class="big">93<small>%</small></span><p style="margin:0;font-size:.875rem">of 129 tables the 70 answers needed (was 84.5%)</p></div>
     <div class="tile"><span class="lbl">Identical answers</span><span class="big">64/64</span><p style="margin:0;font-size:.875rem">queries returned exactly the same rows as direct SQL</p></div>
     <div class="tile"><span class="lbl">Write attempts refused</span><span class="big">17/17</span><p style="margin:0;font-size:.875rem">database unchanged afterwards</p></div>
-    <div class="tile"><span class="lbl">Blind test</span><span class="big">13/28</span><p style="margin:0;font-size:.875rem">questions answered fully correctly on the first try</p></div>
+    <div class="tile"><span class="lbl">Vague questions</span><span class="big">88<small>%</small></span><p style="margin:0;font-size:.875rem">of needed tables found, up from 31%</p></div>
   </div>
   <div class="callout"><p>These numbers come from one database on one laptop. Your results will vary with your data, your network and your assistant.</p></div>
+  <h3>Update: vague questions, 31% → 88%</h3>
+  <p>The first run showed vague business questions were TableFox's weakest spot. We taught it everyday business vocabulary ("owes" means invoices, "complaining" means support tickets, "leaving" means cancellations), to look for the transactions table on "best" and "top" questions, and to stop misreading words like "us" and years. Vague questions went from <strong>31% to 88%</strong> of needed tables found.</p>
+  <p>To check this works beyond the questions we studied, a separate AI agent that never saw the changes wrote <strong>40 new vague questions</strong>. On those, TableFox went from <strong>71% to 81%</strong>, scored once after we stopped tuning. That is the fairer number to expect on your own questions. On a completely different HR database it went from 71% to 96%.</p>
 </section>
 
 <section id="database">
@@ -53,8 +56,8 @@
   <h2>Speed</h2>
   <p>Time from asking to having the answer rows, with TableFox already running:</p>
   <table class="dtable"><thead><tr><th></th><th>Median</th><th>95% of questions under</th></tr></thead><tbody>
-    <tr><td><strong>TableFox</strong> (both calls)</td><td><strong>96 ms</strong></td><td>498 ms</td></tr>
-    <tr><td>Finding the tables alone</td><td>17 ms</td><td>25 ms</td></tr>
+    <tr><td><strong>TableFox</strong> (both calls)</td><td><strong>80 ms</strong></td><td>482 ms</td></tr>
+    <tr><td>Finding the tables alone</td><td>15 ms</td><td>21 ms</td></tr>
     <tr><td>The usual way (search the catalog, then run SQL)</td><td>282 ms</td><td>690 ms</td></tr>
   </tbody></table>
   <p>The slowest questions are slow because they read millions of rows, not because of TableFox. Starting TableFox from nothing takes about 2.5 seconds, most of it starting Python.</p>
@@ -62,21 +65,20 @@
 
 <section id="size">
   <h2>Size</h2>
-  <p>Assistants pay for every word they read. TableFox sends a small "context pack" describing just the relevant tables, about <strong>873 tokens</strong> on average, plus the results. In total that's <strong>about 1,805 tokens per question</strong>, against about 2,493 the usual way. Turning on the optional context memory saved a further 10% of the context.</p>
+  <p>Assistants pay for every word they read. TableFox sends a small "context pack" describing just the relevant tables, about <strong>960 tokens</strong> on average, plus the results. In total that's <strong>about 1,892 tokens per question</strong>, against about 2,493 the usual way. Turning on the optional context memory saved a further 10% of the context.</p>
 </section>
 
 <section id="retrieval">
   <h2>Finding the right tables</h2>
   <p>For each question we listed the tables a correct answer needs, then checked whether TableFox put them in its top six.</p>
   <table class="dtable"><thead><tr><th>Kind of question</th><th>Tables found</th></tr></thead><tbody>
-    <tr><td>Simple lookups, two-table joins, audit logs, legacy and wide tables</td><td><strong>100%</strong></td></tr>
-    <tr><td>Synonyms and abbreviations; totals over time</td><td>93%</td></tr>
-    <tr><td>Ambiguous names (two tables called orders)</td><td>88%</td></tr>
-    <tr><td>Four- and five-table joins</td><td>76%</td></tr>
-    <tr><td>Vague business questions</td><td><strong>31%</strong></td></tr>
-    <tr><td><strong>All 70 questions</strong></td><td><strong>84.5%</strong></td></tr>
+    <tr><td>Simple lookups, synonyms, two-table joins, audit logs, ambiguous names, legacy and wide tables</td><td><strong>100%</strong></td></tr>
+    <tr><td>Totals over time</td><td>96%</td></tr>
+    <tr><td>Vague business questions</td><td><strong>88%</strong> (was 31%)</td></tr>
+    <tr><td>Four- and five-table joins</td><td>80% (was 76%)</td></tr>
+    <tr><td><strong>All 70 questions</strong></td><td><strong>93%</strong> of needed tables (was 84.5%)</td></tr>
   </tbody></table>
-  <p>Audit and log tables, a weak spot in earlier testing, now score perfectly. Vague questions are the clear weakness: TableFox matches words, so <em>"who owes us money?"</em> doesn't lead it to the invoices table.</p>
+  <p>Audit and log tables, a weak spot in earlier testing, score perfectly. The remaining weak spot is long chains of joins, where a connecting table in the middle is sometimes ranked too low.</p>
 </section>
 
 <section id="accuracy">
@@ -90,7 +92,7 @@
 
 <section id="blind">
   <h2>Blind test: can an assistant answer from TableFox alone?</h2>
-  <p>The toughest test. For 28 questions, an AI assistant saw only what TableFox returned, wrote its own SQL, and got one try with no corrections.</p>
+  <p>Measured before the vague-question update; we will re-run it after the next round of fixes. The toughest test. For 28 questions, an AI assistant saw only what TableFox returned, wrote its own SQL, and got one try with no corrections.</p>
   <table class="dtable"><thead><tr><th>Result</th><th>Questions</th></tr></thead><tbody>
     <tr><td>Fully correct</td><td><strong>13</strong></td></tr>
     <tr><td>Partly correct</td><td>2</td></tr>
@@ -112,8 +114,7 @@
   <ol>
     <li><strong>Clearer errors</strong> so assistants can correct a wrong column name.</li>
     <li><strong>Richer context packs</strong> with date, amount and status columns and their types.</li>
-    <li><strong>Better word matching</strong>: years and short words like "us" are sometimes misread.</li>
-    <li><strong>Vague business questions</strong>, via built-in business synonyms (owe, churn, complaints).</li>
+    <li><strong>Long chains of joins</strong>: keep the tables in the middle of a chain higher in the list.</li>
     <li><strong>A stronger personal-data filter</strong> that checks where each value comes from, not just its name.</li>
     <li><strong>Smarter limits</strong> for monthly totals that PostgreSQL overestimates.</li>
   </ol>

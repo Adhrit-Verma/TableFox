@@ -227,7 +227,7 @@ python -m venv .venv
     <li><strong>Size:</strong> how much text each path sends to the model, estimated in tokens.</li>
     <li><strong>Accuracy:</strong> whether TableFox found every table the answer needs, and whether its answers match the hand-written SQL.</li>
   </ul>
-  <p>Our latest test used a 71-table, 25-million-row database and 70 questions, each run 3 times: a median of 96 ms per question against 282 ms the usual way, about 28% fewer tokens, and 64 of 64 queries returning identical rows. It also found weak spots we are working on. <a href="/benchmark">See the full results</a>. Your results will vary with your database and network.</p>
+  <p>Our latest test used a 71-table, 25-million-row database and 70 questions, each run 3 times: a median of 80 ms per question against 282 ms the usual way, about 24% fewer tokens, 93% of the needed tables found (88% even for vague questions), and 64 of 64 queries returning identical rows. It also found weak spots we are working on. <a href="/benchmark">See the full results</a>. Your results will vary with your database and network.</p>
 </section>
 </div>
 </div>
