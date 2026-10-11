@@ -74,7 +74,7 @@ Good questions are specific:
 - *How many orders were cancelled per country this year?*
 - *Which customers signed up but never ordered?*
 
-TableFox will **refuse** anything that changes data (*"delete…"*, *"update…"*, *"create table…"*). It also leaves out columns named like emails, phone numbers and passwords, but that filter goes by column name. To keep sensitive data truly out of reach, grant the read-only user only the tables or columns it needs (for example `grant select (id, name, country) on customers to tablefox_reader;`).
+TableFox will **refuse** anything that changes data (*"delete…"*, *"update…"*, *"create table…"*). It also refuses to return personal data such as emails, phone numbers, ID numbers, bank details, salaries and passwords, even when a query renames or transforms the column. It recognises those columns by their names, though, so data kept in a generically named column is not caught. To keep sensitive data truly out of reach, grant the read-only user only the tables or columns it needs (for example `grant select (id, name, country) on customers to tablefox_reader;`).
 
 ## 4. Several databases
 

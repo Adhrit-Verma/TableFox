@@ -76,12 +76,12 @@ Measured on a deliberately messy **71-table, 25-million-row** PostgreSQL databas
 |---|---:|---:|
 | Median time per question (warm) | **80 ms** | 282 ms |
 | 95th percentile | **482 ms** | 690 ms |
-| Estimated tokens per question | **1,892** | 2,493 |
-| Needed tables found in the top 6 | **93.0%** (vague questions: 88%) | n/a |
+| Estimated tokens per question | **2,395** (packs now carry types, dates, amounts and status values; was 1,892) | 2,493 |
+| Needed tables found in the top 6 | **96.9%** (4–5-table joins: 96%; vague questions: 88%) | n/a |
 | Same, on 40 unseen vague questions written by a separate agent | 81.0% (was 70.7%) | n/a |
-| Answers identical to direct SQL, row for row | **64 / 64** (6 of 70 stopped by policy) | baseline |
+| Answers identical to direct SQL, row for row | **67 / 67** (3 of 70 stopped by policy) | baseline |
 | Write attempts refused | **17 / 17** | n/a |
-| Blind test: assistant answers correctly from TableFox alone, one try (before the retrieval update) | 13 / 28 | n/a |
+| Blind test: assistant answers correctly from TableFox alone, one try | **21 / 28** (was 13 / 28) | n/a |
 | Cold start, new process to first answer | 2.5 s | n/a |
 
 ```mermaid
@@ -94,10 +94,13 @@ xychart-beta
 
 **Where it is strong:** simple lookups, synonyms, joins, audit and log tables, ambiguous names and wide tables (100% of needed tables found), and now vague business questions ("who owes us money?"): 88%, up from 31% after adding business vocabulary and intent-aware ranking.
 
-**Where it is weak, measured:**
-- 4–5-table joins (80%).
-- Context packs that leave out date and amount columns, which causes most blind-test misses.
-- A personal-data filter that goes by column name only.
+**Since the first run** (same database, before → after; [details](docs/benchmarks/large-db/summary.md#after-the-fixes)):
+- 4–5-table joins: 80% → 97% of needed tables in the top 6 (tables between the named ends of a foreign-key chain are kept).
+- Blind test (an assistant writing SQL from the packs alone): 13 → 21 of 28 correct. Packs now list date, amount and status columns with types and allowed values.
+- Personal data: aliases, expressions, `UNION`s, CTEs and whole-row JSON no longer get past the filter; IBANs, national and tax IDs, card digits, salaries and key prefixes are recognised.
+- Query errors come back as PostgreSQL's message ("column x does not exist", with its hint).
+
+**Still weak:** the personal-data check recognises columns by name, so values kept in generically named columns (an audit table's `old_value`) are not detected; and vague questions written by others reach 81%.
 
 Full write-up, raw data and reproduction commands: [docs/benchmarks/large-db/summary.md](docs/benchmarks/large-db/summary.md). An earlier benchmark on a 38-table remote database (14 tasks) measured 1,200 ms against 2,396 ms with 14/14 matching answers. Results come from one machine; yours will vary.
 
@@ -110,9 +113,9 @@ TableFox assumes the database is production. A request must pass every layer:
 | Database user | Hosted mode only accepts users that cannot write, change the schema or administer; it checks this before saving |
 | Statement validation | `SELECT` / `WITH` only; writes, DDL, multi-statement SQL, row locks and privileged functions are rejected before connecting |
 | Transaction | Read-only, with statement and lock timeouts |
-| Plan check | `EXPLAIN` runs first; cost and estimated-row ceilings apply |
+| Plan check | `EXPLAIN` runs first; cost and estimated-row ceilings apply (a row estimate above the ceiling is allowed when TableFox's own `LIMIT` bounds the result) |
 | Joins | Multi-table queries must be connected by declared foreign keys or catalog dependencies |
-| Personal data | Result columns named like emails, phones, passwords or keys are hidden. **This is name-based**: aliases and expressions bypass it, and IBANs, national and tax IDs, card digits and salaries are not recognised yet. Keep such columns out of the read-only user's grants |
+| Personal data | Every result value is traced, through `EXPLAIN (VERBOSE)`, to the table column it is read from, so `email AS contact`, `lower(email)`, `UNION`s, CTEs and `to_jsonb(row)` are refused like `email` itself. Covers emails, phones, addresses, dates of birth, national, tax and passport IDs, IBANs and card numbers, salaries and payroll amounts, passwords, tokens and API keys. Columns are still recognised **by name**: a value stored in a generically named column is not detected, so keep such tables out of the read-only user's grants. IP addresses are opt-in (`DBMAP_BLOCK_IP_ADDRESSES`) |
 | Credentials (hosted) | Entered on a private page, encrypted at rest, never shown to the assistant or logged; SSL and public addresses only |
 | Audit | Actor, action and a SQL **hash**; never SQL text or rows |
 
@@ -198,12 +201,13 @@ python scripts/bench/benchmark_large.py run --repeat 3            # large DB (se
 
 ## Roadmap
 
-- [ ] Return PostgreSQL error text from batch queries so assistants can self-correct
-- [ ] Include date, amount and status columns and types in context packs
-- [ ] Source-column personal-data detection (no alias bypass) and more identifier types
+- [x] Return PostgreSQL error text from batch queries so assistants can self-correct
+- [x] Include date, amount and status columns, types and allowed values in context packs
+- [x] Source-column personal-data detection (no alias bypass) and more identifier types
 - [x] Business vocabulary and intent-aware ranking for vague questions (31% → 88%; unseen questions 71% → 81%)
-- [ ] Better multi-hop retrieval
-- [ ] Encryption-key rotation and per-user rate limits for the hosted service
+- [x] Better multi-hop retrieval (80% → 97%)
+- [x] Encryption-key rotation for the hosted service
+- [ ] Per-user rate limits for the hosted service
 - [ ] MySQL support
 - [x] Hosted multi-user mode with OAuth
 - [x] Large-database benchmark (71 tables, 25M rows)

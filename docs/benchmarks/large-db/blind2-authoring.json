@@ -1,0 +1,239 @@
+{
+ "summary": {
+  "tasks": 28,
+  "verdicts": {
+   "correct": 21,
+   "partially_correct": 3,
+   "wrong": 2,
+   "policy_refusal": 2
+  },
+  "first_attempt_query_errors": 0,
+  "method": "Packs were generated with the changed code for the same 28 questions as the first blind test (blind2-contexts.json). A separate agent that could read only the questions and packs (no repository, schema SQL, ground truth, database or earlier attempts) wrote one SQL statement per task (blind2-attempts.json). Each ran once through database_readonly_batch (blind2-raw.json) and was judged against the ground truth: rows compared after mapping columns by value, then each non-identical result reviewed by hand. Extra columns, different labels and returning more rows than an arbitrary ground-truth LIMIT count as correct."
+ },
+ "attempts": [
+  {
+   "task": "st_kb_articles",
+   "category": "single_table_exact",
+   "question": "Show the 20 most viewed knowledge base articles",
+   "verdict": "correct",
+   "note": "Same 20 rows plus a category column.",
+   "sql": "SELECT article_id, title, category, view_count FROM support.kb_articles ORDER BY view_count DESC NULLS LAST LIMIT 20"
+  },
+  {
+   "task": "st_promo_codes",
+   "category": "single_table_exact",
+   "question": "Which promo codes give the biggest discount?",
+   "verdict": "correct",
+   "note": "Top 20 all at the 40% maximum; tie order differs from the ground truth.",
+   "sql": "SELECT promo_code, description, discount_pct, is_active, valid_from, valid_to FROM sales.promo_codes ORDER BY discount_pct DESC NULLS LAST LIMIT 20"
+  },
+  {
+   "task": "syn_clients_region",
+   "category": "synonym_abbreviation",
+   "question": "How many clients do we have in each region?",
+   "verdict": "correct",
+   "note": "Same counts, labelled by region name instead of code.",
+   "sql": "SELECT r.region_name, COUNT(a.account_id) AS clients FROM crm.accounts a JOIN public.regions r ON r.region_id = a.region_id GROUP BY r.region_name ORDER BY clients DESC"
+  },
+  {
+   "task": "syn_staff_per_dept",
+   "category": "synonym_abbreviation",
+   "question": "How many staff are in each department?",
+   "verdict": "correct",
+   "note": "Identical rows.",
+   "sql": "SELECT d.dept_name, COUNT(e.employee_id) AS staff FROM hr.employees e JOIN hr.departments d ON d.department_id = e.department_id WHERE e.is_active GROUP BY d.dept_name ORDER BY staff DESC"
+  },
+  {
+   "task": "syn_qty_sold",
+   "category": "synonym_abbreviation",
+   "question": "Which SKUs have the highest total qty ordered?",
+   "verdict": "correct",
+   "note": "Same rows plus product name.",
+   "sql": "SELECT p.sku, p.product_name, SUM(oi.qty) AS total_qty FROM sales.order_items oi JOIN inventory.products p ON p.product_id = oi.product_id GROUP BY p.sku, p.product_name ORDER BY total_qty DESC LIMIT 20"
+  },
+  {
+   "task": "syn_opp_amt",
+   "category": "synonym_abbreviation",
+   "question": "What is the total opp amt by stage?",
+   "verdict": "correct",
+   "note": "Identical rows.",
+   "sql": "SELECT stage, SUM(amt) AS total_amt, COUNT(*) AS opps FROM crm.opportunities GROUP BY stage ORDER BY total_amt DESC"
+  },
+  {
+   "task": "j2_tickets_by_tier",
+   "category": "join_2hop",
+   "question": "Average ticket resolution time in hours by support tier",
+   "verdict": "correct",
+   "note": "Same averages plus a ticket count.",
+   "sql": "SELECT t.tier_name, ROUND(AVG(EXTRACT(EPOCH FROM (k.resolved_at - k.opened_at)) / 3600)::numeric, 2) AS avg_resolution_hours, COUNT(*) AS resolved_tickets FROM support.tickets k JOIN support.tiers t ON t.tier_id = k.tier_id WHERE k.resolved_at IS NOT NULL GROUP BY t.tier_name ORDER BY avg_resolution_hours"
+  },
+  {
+   "task": "j2_mrr_by_plan",
+   "category": "join_2hop",
+   "question": "Total MRR of active subscriptions by plan",
+   "verdict": "partially_correct",
+   "note": "Counted status 'active' only; the ground truth also counts 'past_due' as active. Interpretation.",
+   "sql": "SELECT p.plan_name, COUNT(*) AS active_subscriptions, SUM(s.mrr_amt) AS total_mrr FROM finance.subscriptions s JOIN finance.plans p ON p.plan_id = s.plan_id WHERE s.status = 'active' GROUP BY p.plan_name ORDER BY total_mrr DESC"
+  },
+  {
+   "task": "j2_campaign_leads",
+   "category": "join_2hop",
+   "question": "Leads per marketing campaign and how many of them converted",
+   "verdict": "correct",
+   "note": "Same rows; returned all campaigns instead of the ground truth's arbitrary top 50.",
+   "sql": "SELECT c.campaign_id, c.campaign_name, COUNT(l.lead_id) AS leads, COUNT(l.lead_id) FILTER (WHERE l.status = 'converted') AS converted FROM marketing.campaigns c LEFT JOIN crm.leads l ON l.campaign_id = c.campaign_id GROUP BY c.campaign_id, c.campaign_name ORDER BY leads DESC LIMIT 200"
+  },
+  {
+   "task": "mh_invoice_region",
+   "category": "join_multihop",
+   "question": "Total invoiced amount by sales region for invoices issued in 2026-Q3",
+   "verdict": "wrong",
+   "note": "Used the order's sales territory region; the ground truth uses the customer account's region. The pack did not include crm.accounts (retrieval miss), so the author took the territory path it offered.",
+   "sql": "SELECT r.region_name, SUM(i.total_amt) AS invoiced_amt, COUNT(*) AS invoices FROM finance.invoices i JOIN sales.orders o ON o.order_id = i.order_id JOIN sales.sales_territories t ON t.territory_id = o.territory_id JOIN public.regions r ON r.region_id = t.region_id WHERE i.issued_dt >= DATE '2026-07-01' AND i.issued_dt < DATE '2026-10-01' GROUP BY r.region_name ORDER BY invoiced_amt DESC"
+  },
+  {
+   "task": "mh_return_rate_category",
+   "category": "join_multihop",
+   "question": "Return rate by top-level product category",
+   "verdict": "policy_refusal",
+   "note": "Refused by the unchanged EXPLAIN cost limit (cost 369,788 > 100,000).",
+   "sql": "WITH RECURSIVE cat AS (SELECT category_id, category_id AS top_id, category_name AS top_name FROM inventory.product_categories WHERE parent_id IS NULL UNION ALL SELECT c.category_id, cat.top_id, cat.top_name FROM inventory.product_categories c JOIN cat ON c.parent_id = cat.category_id), sold AS (SELECT oi.order_item_id, oi.qty, p.category_id FROM sales.order_items oi JOIN inventory.products p ON p.product_id = oi.product_id), ret AS (SELECT order_item_id, SUM(qty) AS rqty FROM sales.returns GROUP BY order_item_id) SELECT cat.top_name AS top_category, SUM(s.qty) AS qty_sold, COALESCE(SUM(r.rqty),0) AS qty_returned, ROUND(COALESCE(SUM(r.rqty),0)::numeric / NULLIF(SUM(s.qty),0), 4) AS return_rate FROM sold s JOIN cat ON cat.category_id = s.category_id LEFT JOIN ret r ON r.order_item_id = s.order_item_id GROUP BY cat.top_name ORDER BY return_rate DESC"
+  },
+  {
+   "task": "mh_api_failures_region",
+   "category": "join_multihop",
+   "question": "Failed API requests on 2026-10-10 broken down by the customer account's region",
+   "verdict": "correct",
+   "note": "Same counts, labelled by region name.",
+   "sql": "SELECT r.region_name, COUNT(*) AS failed_requests FROM ops.api_request_log l JOIN ops.api_keys k ON k.api_key_id = l.api_key_id JOIN crm.accounts a ON a.account_id = k.account_id JOIN public.regions r ON r.region_id = a.region_id WHERE l.requested_at >= TIMESTAMPTZ '2026-10-10 00:00:00+00' AND l.requested_at < TIMESTAMPTZ '2026-10-11 00:00:00+00' AND l.status_code >= 400 GROUP BY r.region_name ORDER BY failed_requests DESC"
+  },
+  {
+   "task": "mh_payments_tier",
+   "category": "join_multihop",
+   "question": "Total settled payments received in September 2026 per account tier",
+   "verdict": "correct",
+   "note": "Same totals plus a payment count.",
+   "sql": "SELECT a.tier, SUM(p.amt) AS settled_amt, COUNT(*) AS payments FROM finance.payments p JOIN finance.invoices i ON i.invoice_id = p.invoice_id JOIN sales.customers c ON c.cust_id = i.cust_id JOIN crm.accounts a ON a.account_id = c.account_id WHERE p.status = 'settled' AND p.paid_dt >= TIMESTAMPTZ '2026-09-01 00:00:00+00' AND p.paid_dt < TIMESTAMPTZ '2026-10-01 00:00:00+00' GROUP BY a.tier ORDER BY settled_amt DESC"
+  },
+  {
+   "task": "agg_top_customers_q3_emea",
+   "category": "aggregate_time",
+   "question": "Top 10 customers by revenue in USD in 2026-Q3 in the EMEA region",
+   "verdict": "correct",
+   "note": "Identical rows.",
+   "sql": "SELECT c.cust_id, c.customer_name, SUM(o.total_usd) AS revenue_usd FROM sales.orders o JOIN sales.customers c ON c.cust_id = o.cust_id JOIN crm.accounts a ON a.account_id = c.account_id JOIN public.regions r ON r.region_id = a.region_id WHERE r.region_code = 'EMEA' AND o.order_dt >= TIMESTAMPTZ '2026-07-01 00:00:00+00' AND o.order_dt < TIMESTAMPTZ '2026-10-01 00:00:00+00' AND o.status NOT IN ('cancelled','draft') GROUP BY c.cust_id, c.customer_name ORDER BY revenue_usd DESC LIMIT 10"
+  },
+  {
+   "task": "agg_monthly_orders",
+   "category": "aggregate_time",
+   "question": "Monthly order count and USD revenue for 2025",
+   "verdict": "wrong",
+   "note": "Used analytics.mv_monthly_revenue, which excludes some orders; the pack did not show the view's filter.",
+   "sql": "SELECT month, SUM(orders) AS order_count, SUM(revenue_usd) AS revenue_usd FROM analytics.mv_monthly_revenue WHERE month >= DATE '2025-01-01' AND month < DATE '2026-01-01' GROUP BY month ORDER BY month"
+  },
+  {
+   "task": "agg_gl_q2",
+   "category": "aggregate_time",
+   "question": "GL expense by cost center versus budget for 2026-Q2",
+   "verdict": "correct",
+   "note": "Same actual and budget figures plus a variance column.",
+   "sql": "WITH spend AS (SELECT g.cost_center_id, SUM(g.debit_amt - g.credit_amt) AS expense_amt FROM finance.gl_entries g JOIN finance.chart_of_accounts ca ON ca.gl_account_id = g.gl_account_id WHERE ca.account_type = 'expense' AND g.entry_dt >= DATE '2026-04-01' AND g.entry_dt < DATE '2026-07-01' GROUP BY g.cost_center_id), bud AS (SELECT b.cost_center_id, SUM(b.budget_amt) AS budget_amt FROM finance.budgets b JOIN finance.chart_of_accounts ca ON ca.gl_account_id = b.gl_account_id WHERE ca.account_type = 'expense' AND b.fiscal_month >= DATE '2026-04-01' AND b.fiscal_month < DATE '2026-07-01' GROUP BY b.cost_center_id) SELECT cc.cc_code, cc.cc_name, COALESCE(s.expense_amt,0) AS expense_amt, COALESCE(bu.budget_amt,0) AS budget_amt, COALESCE(s.expense_amt,0) - COALESCE(bu.budget_amt,0) AS variance FROM finance.cost_centers cc LEFT JOIN spend s ON s.cost_center_id = cc.cost_center_id LEFT JOIN bud bu ON bu.cost_center_id = cc.cost_center_id WHERE s.expense_amt IS NOT NULL OR bu.budget_amt IS NOT NULL ORDER BY variance DESC"
+  },
+  {
+   "task": "au_deletes_exports",
+   "category": "audit_log",
+   "question": "Who deleted or exported data according to the audit log between 2026-10-04 and 2026-10-10?",
+   "verdict": "correct",
+   "note": "Contains every ground-truth row; returned all instead of the top 50.",
+   "sql": "SELECT u.user_id, u.username, u.user_type, l.action, COUNT(*) AS events, MIN(l.occurred_at) AS first_at, MAX(l.occurred_at) AS last_at FROM public.audit_log l JOIN ops.app_users u ON u.user_id = l.actor_user_id WHERE l.occurred_at >= TIMESTAMPTZ '2026-10-04 00:00:00+00' AND l.occurred_at < TIMESTAMPTZ '2026-10-11 00:00:00+00' AND (l.action ILIKE '%delete%' OR l.action ILIKE '%export%') GROUP BY u.user_id, u.username, u.user_type, l.action ORDER BY events DESC LIMIT 200"
+  },
+  {
+   "task": "au_salary_changes",
+   "category": "audit_log",
+   "question": "Changes to the employees salary field in the change history since 2026-07-12",
+   "verdict": "correct",
+   "note": "Contains every ground-truth row. Note: salary values in a generic change-history column are not caught by the sensitive-data check.",
+   "sql": "SELECT change_id, changed_at, changed_by, record_pk, old_value, new_value, change_source FROM public.change_history WHERE table_name IN ('employees','hr.employees') AND column_name = 'salary_amt' AND changed_at >= TIMESTAMPTZ '2026-07-12 00:00:00+00' ORDER BY changed_at DESC LIMIT 200"
+  },
+  {
+   "task": "au_failed_logins",
+   "category": "audit_log",
+   "question": "Users with the most failed logins between 2026-09-11 and 2026-10-10",
+   "verdict": "correct",
+   "note": "Same top users and counts; tie order at the cut-off differs.",
+   "sql": "SELECT u.user_id, u.username, u.user_type, COUNT(*) AS failed_logins FROM ops.login_events e JOIN ops.app_users u ON u.user_id = e.user_id WHERE NOT e.success AND e.event_ts >= TIMESTAMPTZ '2026-09-11 00:00:00+00' AND e.event_ts < TIMESTAMPTZ '2026-10-11 00:00:00+00' GROUP BY u.user_id, u.username, u.user_type ORDER BY failed_logins DESC LIMIT 20"
+  },
+  {
+   "task": "amb_purchase_orders_late",
+   "category": "cross_schema_ambiguity",
+   "question": "Purchase orders received later than expected, per supplier",
+   "verdict": "correct",
+   "note": "Same late counts per supplier; omits the ground truth's extra 'received' total.",
+   "sql": "SELECT s.supplier_id, s.supplier_name, COUNT(*) AS late_pos, ROUND(AVG(o.received_dt - o.expected_dt), 1) AS avg_days_late FROM ops.orders o JOIN inventory.suppliers s ON s.supplier_id = o.supplier_id WHERE o.received_dt > o.expected_dt GROUP BY s.supplier_id, s.supplier_name ORDER BY late_pos DESC LIMIT 200"
+  },
+  {
+   "task": "amb_order_shipments",
+   "category": "cross_schema_ambiguity",
+   "question": "Average days from sales order date to delivery for orders placed in 2026",
+   "verdict": "correct",
+   "note": "Same average.",
+   "sql": "SELECT ROUND(AVG(EXTRACT(EPOCH FROM (o.delivered_dt - o.order_dt)) / 86400)::numeric, 2) AS avg_days_to_delivery, COUNT(*) AS delivered_orders FROM sales.orders o WHERE o.order_dt >= TIMESTAMPTZ '2026-01-01 00:00:00+00' AND o.order_dt < TIMESTAMPTZ '2027-01-01 00:00:00+00' AND o.delivered_dt IS NOT NULL"
+  },
+  {
+   "task": "amb_support_tier",
+   "category": "cross_schema_ambiguity",
+   "question": "How many client accounts are on each support tier?",
+   "verdict": "correct",
+   "note": "Identical rows.",
+   "sql": "SELECT t.tier_name, COUNT(a.account_id) AS accounts FROM crm.accounts a JOIN support.tiers t ON t.tier_id = a.support_tier_id GROUP BY t.tier_name ORDER BY accounts DESC"
+  },
+  {
+   "task": "lg_archive_2019_region",
+   "category": "legacy_no_fk",
+   "question": "Total net revenue in the 2019 order archive per region",
+   "verdict": "correct",
+   "note": "Same rows plus an order count.",
+   "sql": "SELECT region_txt AS region, SUM(net) AS net_revenue, COUNT(*) AS orders FROM sales.orders_archive_2019 GROUP BY region_txt ORDER BY net_revenue DESC"
+  },
+  {
+   "task": "wd_employees_hires_2026",
+   "category": "wide_table",
+   "question": "Employees hired in 2026 with their job title and department name",
+   "verdict": "partially_correct",
+   "note": "Right employees, titles and departments, but no first/last name: the pack listed employee_number, not the name columns.",
+   "sql": "SELECT e.employee_id, e.employee_number, e.job_title, d.dept_name, e.hire_dt FROM hr.employees e LEFT JOIN hr.departments d ON d.department_id = e.department_id WHERE e.hire_dt >= DATE '2026-01-01' AND e.hire_dt < DATE '2027-01-01' ORDER BY e.hire_dt LIMIT 200"
+  },
+  {
+   "task": "wd_products_margin",
+   "category": "wide_table",
+   "question": "Which products have the highest margin between list price and unit cost?",
+   "verdict": "correct",
+   "note": "Same rows plus a margin percentage.",
+   "sql": "SELECT product_id, sku, product_name, list_price, unit_cost, list_price - unit_cost AS margin_amt, ROUND((list_price - unit_cost) / NULLIF(list_price,0) * 100, 2) AS margin_pct FROM inventory.products WHERE list_price IS NOT NULL AND unit_cost IS NOT NULL ORDER BY margin_amt DESC LIMIT 20"
+  },
+  {
+   "task": "vg_whats_low_stock",
+   "category": "vague_business",
+   "question": "What are we running low on?",
+   "verdict": "partially_correct",
+   "note": "Compared on-hand (not on-hand minus reserved) with the reorder point and showed ids instead of product names and warehouse codes.",
+   "sql": "SELECT p.sku, s.product_id, s.warehouse_id, s.qty_on_hand, s.qty_reserved, s.qty_on_order, s.reorder_point FROM inventory.stock_levels s JOIN inventory.products p ON p.product_id = s.product_id WHERE s.qty_on_hand <= s.reorder_point ORDER BY (s.qty_on_hand - s.reorder_point) ASC LIMIT 200"
+  },
+  {
+   "task": "vg_who_owes",
+   "category": "vague_business",
+   "question": "Who owes us money?",
+   "verdict": "policy_refusal",
+   "note": "Refused by the unchanged EXPLAIN cost limit (cost 103,579 > 100,000). It also nets off settled payments, unlike the ground truth.",
+   "sql": "WITH paid AS (SELECT invoice_id, SUM(amt) AS paid_amt FROM finance.payments WHERE status = 'settled' GROUP BY invoice_id) SELECT c.cust_id, c.customer_code, i.currency_code, COUNT(*) AS open_invoices, SUM(i.total_amt - COALESCE(p.paid_amt,0)) AS outstanding_amt, MIN(i.due_dt) AS oldest_due FROM finance.invoices i JOIN sales.customers c ON c.cust_id = i.cust_id LEFT JOIN paid p ON p.invoice_id = i.invoice_id WHERE i.status IN ('open','overdue') GROUP BY c.cust_id, c.customer_code, i.currency_code ORDER BY outstanding_amt DESC LIMIT 50"
+  },
+  {
+   "task": "vg_churn",
+   "category": "vague_business",
+   "question": "Why are customers leaving?",
+   "verdict": "correct",
+   "note": "Same counts plus lost MRR.",
+   "sql": "SELECT COALESCE(cancel_reason,'(none)') AS cancel_reason, COUNT(*) AS cancelled_subscriptions, SUM(mrr_amt) AS lost_mrr FROM finance.subscriptions WHERE status = 'cancelled' OR cancelled_at IS NOT NULL GROUP BY 1 ORDER BY cancelled_subscriptions DESC"
+  }
+ ]
+}

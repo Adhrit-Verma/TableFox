@@ -1,0 +1,161 @@
+{
+ "written_before_ground_truth": true,
+ "rule": "SQL written from the task_context pack only; one attempt; no schema dump, no ground truth, no database access",
+ "attempts": {
+  "st_kb_articles": {
+   "guessed": [],
+   "sql": "SELECT article_id, title, category, view_count FROM support.kb_articles ORDER BY view_count DESC NULLS LAST LIMIT 20",
+   "note": ""
+  },
+  "st_promo_codes": {
+   "guessed": [],
+   "sql": "SELECT promo_code, description, discount_pct, is_active, valid_from, valid_to FROM sales.promo_codes ORDER BY discount_pct DESC NULLS LAST LIMIT 20",
+   "note": ""
+  },
+  "syn_clients_region": {
+   "guessed": [],
+   "sql": "SELECT r.region_name, COUNT(a.account_id) AS clients FROM crm.accounts a JOIN public.regions r ON r.region_id = a.region_id GROUP BY r.region_name ORDER BY clients DESC",
+   "note": "clients = crm.accounts"
+  },
+  "syn_staff_per_dept": {
+   "guessed": [
+    "join hr.employees.department_id -> hr.departments.department_id (not declared in pack)"
+   ],
+   "sql": "SELECT d.dept_name, COUNT(e.employee_id) AS staff FROM hr.employees e JOIN hr.departments d ON d.department_id = e.department_id WHERE e.is_active GROUP BY d.dept_name ORDER BY staff DESC",
+   "note": "pack only declares departments.head_employee_id FK; active employees only"
+  },
+  "syn_qty_sold": {
+   "guessed": [],
+   "sql": "SELECT p.sku, p.product_name, SUM(oi.qty) AS total_qty FROM sales.order_items oi JOIN inventory.products p ON p.product_id = oi.product_id GROUP BY p.sku, p.product_name ORDER BY total_qty DESC LIMIT 20",
+   "note": ""
+  },
+  "syn_opp_amt": {
+   "guessed": [],
+   "sql": "SELECT stage, SUM(amt) AS total_amt, COUNT(*) AS opps FROM crm.opportunities GROUP BY stage ORDER BY total_amt DESC",
+   "note": ""
+  },
+  "j2_tickets_by_tier": {
+   "guessed": [],
+   "sql": "SELECT t.tier_name, ROUND(AVG(EXTRACT(EPOCH FROM (k.resolved_at - k.opened_at)) / 3600)::numeric, 2) AS avg_resolution_hours, COUNT(*) AS resolved_tickets FROM support.tickets k JOIN support.tiers t ON t.tier_id = k.tier_id WHERE k.resolved_at IS NOT NULL GROUP BY t.tier_name ORDER BY avg_resolution_hours",
+   "note": ""
+  },
+  "j2_mrr_by_plan": {
+   "guessed": [],
+   "sql": "SELECT p.plan_name, COUNT(*) AS active_subscriptions, SUM(s.mrr_amt) AS total_mrr FROM finance.subscriptions s JOIN finance.plans p ON p.plan_id = s.plan_id WHERE s.status = 'active' GROUP BY p.plan_name ORDER BY total_mrr DESC",
+   "note": "mrr_amt summed across currencies; v_mrr_by_plan offers mrr_usd alternative"
+  },
+  "j2_campaign_leads": {
+   "guessed": [],
+   "sql": "SELECT c.campaign_id, c.campaign_name, COUNT(l.lead_id) AS leads, COUNT(l.lead_id) FILTER (WHERE l.status = 'converted') AS converted FROM marketing.campaigns c LEFT JOIN crm.leads l ON l.campaign_id = c.campaign_id GROUP BY c.campaign_id, c.campaign_name ORDER BY leads DESC LIMIT 200",
+   "note": ""
+  },
+  "mh_invoice_region": {
+   "guessed": [
+    "join sales.orders.territory_id -> sales.sales_territories.territory_id (not declared in pack)"
+   ],
+   "sql": "SELECT r.region_name, SUM(i.total_amt) AS invoiced_amt, COUNT(*) AS invoices FROM finance.invoices i JOIN sales.orders o ON o.order_id = i.order_id JOIN sales.sales_territories t ON t.territory_id = o.territory_id JOIN public.regions r ON r.region_id = t.region_id WHERE i.issued_dt >= DATE '2026-07-01' AND i.issued_dt < DATE '2026-10-01' GROUP BY r.region_name ORDER BY invoiced_amt DESC",
+   "note": "no declared path from invoices to territories/regions; sales region via order territory; void invoices not excluded; mixed currencies"
+  },
+  "mh_return_rate_category": {
+   "guessed": [],
+   "sql": "WITH RECURSIVE cat AS (SELECT category_id, category_id AS top_id, category_name AS top_name FROM inventory.product_categories WHERE parent_id IS NULL UNION ALL SELECT c.category_id, cat.top_id, cat.top_name FROM inventory.product_categories c JOIN cat ON c.parent_id = cat.category_id), sold AS (SELECT oi.order_item_id, oi.qty, p.category_id FROM sales.order_items oi JOIN inventory.products p ON p.product_id = oi.product_id), ret AS (SELECT order_item_id, SUM(qty) AS rqty FROM sales.returns GROUP BY order_item_id) SELECT cat.top_name AS top_category, SUM(s.qty) AS qty_sold, COALESCE(SUM(r.rqty),0) AS qty_returned, ROUND(COALESCE(SUM(r.rqty),0)::numeric / NULLIF(SUM(s.qty),0), 4) AS return_rate FROM sold s JOIN cat ON cat.category_id = s.category_id LEFT JOIN ret r ON r.order_item_id = s.order_item_id GROUP BY cat.top_name ORDER BY return_rate DESC",
+   "note": "return rate by quantity; top-level = parent_id IS NULL, walked recursively"
+  },
+  "mh_api_failures_region": {
+   "guessed": [],
+   "sql": "SELECT r.region_name, COUNT(*) AS failed_requests FROM ops.api_request_log l JOIN ops.api_keys k ON k.api_key_id = l.api_key_id JOIN crm.accounts a ON a.account_id = k.account_id JOIN public.regions r ON r.region_id = a.region_id WHERE l.requested_at >= TIMESTAMPTZ '2026-10-10 00:00:00+00' AND l.requested_at < TIMESTAMPTZ '2026-10-11 00:00:00+00' AND l.status_code >= 400 GROUP BY r.region_name ORDER BY failed_requests DESC",
+   "note": "failed = status_code >= 400"
+  },
+  "mh_payments_tier": {
+   "guessed": [],
+   "sql": "SELECT a.tier, SUM(p.amt) AS settled_amt, COUNT(*) AS payments FROM finance.payments p JOIN finance.invoices i ON i.invoice_id = p.invoice_id JOIN sales.customers c ON c.cust_id = i.cust_id JOIN crm.accounts a ON a.account_id = c.account_id WHERE p.status = 'settled' AND p.paid_dt >= TIMESTAMPTZ '2026-09-01 00:00:00+00' AND p.paid_dt < TIMESTAMPTZ '2026-10-01 00:00:00+00' GROUP BY a.tier ORDER BY settled_amt DESC",
+   "note": "account tier = crm.accounts.tier; mixed currencies"
+  },
+  "agg_top_customers_q3_emea": {
+   "guessed": [
+    "region_code value 'EMEA'"
+   ],
+   "sql": "SELECT c.cust_id, c.customer_name, SUM(o.total_usd) AS revenue_usd FROM sales.orders o JOIN sales.customers c ON c.cust_id = o.cust_id JOIN crm.accounts a ON a.account_id = c.account_id JOIN public.regions r ON r.region_id = a.region_id WHERE r.region_code = 'EMEA' AND o.order_dt >= TIMESTAMPTZ '2026-07-01 00:00:00+00' AND o.order_dt < TIMESTAMPTZ '2026-10-01 00:00:00+00' AND o.status NOT IN ('cancelled','draft') GROUP BY c.cust_id, c.customer_name ORDER BY revenue_usd DESC LIMIT 10",
+   "note": "excludes cancelled and draft orders"
+  },
+  "agg_monthly_orders": {
+   "guessed": [],
+   "sql": "SELECT month, SUM(orders) AS order_count, SUM(revenue_usd) AS revenue_usd FROM analytics.mv_monthly_revenue WHERE month >= DATE '2025-01-01' AND month < DATE '2026-01-01' GROUP BY month ORDER BY month",
+   "note": "uses materialized view; its status filter definition unknown"
+  },
+  "agg_gl_q2": {
+   "guessed": [
+    "join finance.gl_entries.cost_center_id -> finance.cost_centers (not declared in this pack, used directly as key)"
+   ],
+   "sql": "WITH spend AS (SELECT g.cost_center_id, SUM(g.debit_amt - g.credit_amt) AS expense_amt FROM finance.gl_entries g JOIN finance.chart_of_accounts ca ON ca.gl_account_id = g.gl_account_id WHERE ca.account_type = 'expense' AND g.entry_dt >= DATE '2026-04-01' AND g.entry_dt < DATE '2026-07-01' GROUP BY g.cost_center_id), bud AS (SELECT b.cost_center_id, SUM(b.budget_amt) AS budget_amt FROM finance.budgets b JOIN finance.chart_of_accounts ca ON ca.gl_account_id = b.gl_account_id WHERE ca.account_type = 'expense' AND b.fiscal_month >= DATE '2026-04-01' AND b.fiscal_month < DATE '2026-07-01' GROUP BY b.cost_center_id) SELECT cc.cc_code, cc.cc_name, COALESCE(s.expense_amt,0) AS expense_amt, COALESCE(bu.budget_amt,0) AS budget_amt, COALESCE(s.expense_amt,0) - COALESCE(bu.budget_amt,0) AS variance FROM finance.cost_centers cc LEFT JOIN spend s ON s.cost_center_id = cc.cost_center_id LEFT JOIN bud bu ON bu.cost_center_id = cc.cost_center_id WHERE s.expense_amt IS NOT NULL OR bu.budget_amt IS NOT NULL ORDER BY variance DESC",
+   "note": "gl_entries->cost_centers FK not in this pack (it was in another pack); expense = debit - credit on expense accounts"
+  },
+  "au_deletes_exports": {
+   "guessed": [
+    "audit_log.action values (assumed to contain 'delete'/'export')"
+   ],
+   "sql": "SELECT u.user_id, u.username, u.user_type, l.action, COUNT(*) AS events, MIN(l.occurred_at) AS first_at, MAX(l.occurred_at) AS last_at FROM public.audit_log l JOIN ops.app_users u ON u.user_id = l.actor_user_id WHERE l.occurred_at >= TIMESTAMPTZ '2026-10-04 00:00:00+00' AND l.occurred_at < TIMESTAMPTZ '2026-10-11 00:00:00+00' AND (l.action ILIKE '%delete%' OR l.action ILIKE '%export%') GROUP BY u.user_id, u.username, u.user_type, l.action ORDER BY events DESC LIMIT 200",
+   "note": ""
+  },
+  "au_salary_changes": {
+   "guessed": [
+    "change_history.table_name value ('employees' or 'hr.employees')",
+    "column_name value 'salary_amt'"
+   ],
+   "sql": "SELECT change_id, changed_at, changed_by, record_pk, old_value, new_value, change_source FROM public.change_history WHERE table_name IN ('employees','hr.employees') AND column_name = 'salary_amt' AND changed_at >= TIMESTAMPTZ '2026-07-12 00:00:00+00' ORDER BY changed_at DESC LIMIT 200",
+   "note": "returns old/new salary values since the question explicitly asks for salary changes; may be refused by policy"
+  },
+  "au_failed_logins": {
+   "guessed": [],
+   "sql": "SELECT u.user_id, u.username, u.user_type, COUNT(*) AS failed_logins FROM ops.login_events e JOIN ops.app_users u ON u.user_id = e.user_id WHERE NOT e.success AND e.event_ts >= TIMESTAMPTZ '2026-09-11 00:00:00+00' AND e.event_ts < TIMESTAMPTZ '2026-10-11 00:00:00+00' GROUP BY u.user_id, u.username, u.user_type ORDER BY failed_logins DESC LIMIT 20",
+   "note": ""
+  },
+  "amb_purchase_orders_late": {
+   "guessed": [],
+   "sql": "SELECT s.supplier_id, s.supplier_name, COUNT(*) AS late_pos, ROUND(AVG(o.received_dt - o.expected_dt), 1) AS avg_days_late FROM ops.orders o JOIN inventory.suppliers s ON s.supplier_id = o.supplier_id WHERE o.received_dt > o.expected_dt GROUP BY s.supplier_id, s.supplier_name ORDER BY late_pos DESC LIMIT 200",
+   "note": "purchase orders = ops.orders"
+  },
+  "amb_order_shipments": {
+   "guessed": [],
+   "sql": "SELECT ROUND(AVG(EXTRACT(EPOCH FROM (o.delivered_dt - o.order_dt)) / 86400)::numeric, 2) AS avg_days_to_delivery, COUNT(*) AS delivered_orders FROM sales.orders o WHERE o.order_dt >= TIMESTAMPTZ '2026-01-01 00:00:00+00' AND o.order_dt < TIMESTAMPTZ '2027-01-01 00:00:00+00' AND o.delivered_dt IS NOT NULL",
+   "note": "uses sales.orders.delivered_dt rather than ops.shipments.delivered_at"
+  },
+  "amb_support_tier": {
+   "guessed": [],
+   "sql": "SELECT t.tier_name, COUNT(a.account_id) AS accounts FROM crm.accounts a JOIN support.tiers t ON t.tier_id = a.support_tier_id GROUP BY t.tier_name ORDER BY accounts DESC",
+   "note": "support tier = support.tiers via support_tier_id, not accounts.tier"
+  },
+  "lg_archive_2019_region": {
+   "guessed": [],
+   "sql": "SELECT region_txt AS region, SUM(net) AS net_revenue, COUNT(*) AS orders FROM sales.orders_archive_2019 GROUP BY region_txt ORDER BY net_revenue DESC",
+   "note": "mixed currencies (ccy) summed; no status filter"
+  },
+  "wd_employees_hires_2026": {
+   "guessed": [
+    "join hr.employees.department_id -> hr.departments.department_id (not declared in pack)"
+   ],
+   "sql": "SELECT e.employee_id, e.employee_number, e.job_title, d.dept_name, e.hire_dt FROM hr.employees e LEFT JOIN hr.departments d ON d.department_id = e.department_id WHERE e.hire_dt >= DATE '2026-01-01' AND e.hire_dt < DATE '2027-01-01' ORDER BY e.hire_dt LIMIT 200",
+   "note": ""
+  },
+  "wd_products_margin": {
+   "guessed": [],
+   "sql": "SELECT product_id, sku, product_name, list_price, unit_cost, list_price - unit_cost AS margin_amt, ROUND((list_price - unit_cost) / NULLIF(list_price,0) * 100, 2) AS margin_pct FROM inventory.products WHERE list_price IS NOT NULL AND unit_cost IS NOT NULL ORDER BY margin_amt DESC LIMIT 20",
+   "note": ""
+  },
+  "vg_whats_low_stock": {
+   "guessed": [],
+   "sql": "SELECT p.sku, s.product_id, s.warehouse_id, s.qty_on_hand, s.qty_reserved, s.qty_on_order, s.reorder_point FROM inventory.stock_levels s JOIN inventory.products p ON p.product_id = s.product_id WHERE s.qty_on_hand <= s.reorder_point ORDER BY (s.qty_on_hand - s.reorder_point) ASC LIMIT 200",
+   "note": "low = on hand at or below reorder point"
+  },
+  "vg_who_owes": {
+   "guessed": [],
+   "sql": "WITH paid AS (SELECT invoice_id, SUM(amt) AS paid_amt FROM finance.payments WHERE status = 'settled' GROUP BY invoice_id) SELECT c.cust_id, c.customer_code, i.currency_code, COUNT(*) AS open_invoices, SUM(i.total_amt - COALESCE(p.paid_amt,0)) AS outstanding_amt, MIN(i.due_dt) AS oldest_due FROM finance.invoices i JOIN sales.customers c ON c.cust_id = i.cust_id LEFT JOIN paid p ON p.invoice_id = i.invoice_id WHERE i.status IN ('open','overdue') GROUP BY c.cust_id, c.customer_code, i.currency_code ORDER BY outstanding_amt DESC LIMIT 50",
+   "note": "customer_name not in this pack, used customer_code"
+  },
+  "vg_churn": {
+   "guessed": [],
+   "sql": "SELECT COALESCE(cancel_reason,'(none)') AS cancel_reason, COUNT(*) AS cancelled_subscriptions, SUM(mrr_amt) AS lost_mrr FROM finance.subscriptions WHERE status = 'cancelled' OR cancelled_at IS NOT NULL GROUP BY 1 ORDER BY cancelled_subscriptions DESC",
+   "note": "churn reasons from subscriptions.cancel_reason"
+  }
+ }
+}

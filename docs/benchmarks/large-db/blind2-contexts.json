@@ -1,0 +1,4586 @@
+{
+ "st_kb_articles": {
+  "question": "Show the 20 most viewed knowledge base articles",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:support.kb_articles",
+     "columns": [
+      "article_id int",
+      "author_employee_id int",
+      "is_published bool",
+      "published_at timestamptz",
+      "body_md text",
+      "category text",
+      "helpful_votes int",
+      "title text",
+      "view_count int"
+     ]
+    },
+    {
+     "id": "table:analytics.page_views",
+     "columns": [
+      "viewed_at timestamptz",
+      "session_id bigint",
+      "view_id bigint",
+      "duration_ms int",
+      "referrer text",
+      "url_path text"
+     ]
+    },
+    {
+     "id": "table:hr.employees",
+     "columns": [
+      "cost_center_id int",
+      "department_id int",
+      "employee_id int",
+      "manager_id int",
+      "employee_number text",
+      "employment_type text: full_time|part_time|contractor|intern",
+      "job_level smallint",
+      "location_country char",
+      "salary_currency char",
+      "work_mode text: remote|hybrid|onsite",
+      "is_active bool",
+      "created_at timestamptz",
+      "date_of_birth date",
+      "hire_dt date",
+      "term_dt date",
+      "updated_at timestamptz",
+      "pto_balance_days numeric",
+      "salary_amt numeric"
+     ]
+    },
+    {
+     "id": "table:analytics.web_sessions",
+     "columns": [
+      "cust_id int",
+      "session_id bigint",
+      "country_code char"
+     ]
+    },
+    {
+     "id": "table:crm.accounts",
+     "columns": [
+      "account_id int",
+      "owner_employee_id int",
+      "parent_account_id int",
+      "region_id smallint",
+      "support_tier_id smallint",
+      "account_number text",
+      "country_code char",
+      "preferred_currency char",
+      "account_name text"
+     ]
+    },
+    {
+     "id": "table:sales.customers",
+     "columns": [
+      "account_id int",
+      "cust_id int",
+      "price_list_id int",
+      "territory_id int",
+      "billing_country char",
+      "customer_code text",
+      "default_currency char",
+      "shipping_country char",
+      "is_active bool",
+      "created_at timestamptz",
+      "first_order_dt date"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:analytics.page_views",
+     [
+      "session_id"
+     ],
+     "table:analytics.web_sessions",
+     [
+      "session_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:analytics.web_sessions",
+     [
+      "cust_id"
+     ],
+     "table:sales.customers",
+     [
+      "cust_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:crm.accounts",
+     [
+      "owner_employee_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.customers",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:support.kb_articles",
+     [
+      "author_employee_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 2015
+  }
+ },
+ "st_promo_codes": {
+  "question": "Which promo codes give the biggest discount?",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:sales.promo_codes",
+     "columns": [
+      "promo_code text",
+      "campaign_id int",
+      "discount_pct numeric",
+      "is_active bool",
+      "valid_from date",
+      "valid_to date",
+      "description text",
+      "max_uses int"
+     ]
+    },
+    {
+     "id": "table:sales.orders",
+     "columns": [
+      "promo_code text",
+      "discount_amt numeric",
+      "currency_code char",
+      "cust_id int",
+      "order_id bigint",
+      "quote_id int",
+      "sales_rep_id int",
+      "territory_id int",
+      "warehouse_id int",
+      "bill_to_country char",
+      "channel text: web|sales_rep|partner|marketplace|edi",
+      "order_no text",
+      "is_gift bool",
+      "status enum: draft|pending|confirmed|shipped|delivered|completed|cancelled|returned",
+      "cancelled_dt timestamptz",
+      "created_at timestamptz",
+      "delivered_dt timestamptz",
+      "order_dt timestamptz",
+      "promised_dt date",
+      "requested_ship_dt date"
+     ]
+    },
+    {
+     "id": "table:marketing.campaigns",
+     "columns": [
+      "campaign_id int",
+      "campaign_name text",
+      "owner_employee_id int",
+      "region_id smallint",
+      "status text",
+      "created_at timestamptz",
+      "end_dt date",
+      "start_dt date",
+      "actual_spend_amt numeric",
+      "budget_amt numeric"
+     ]
+    },
+    {
+     "id": "table:crm.leads",
+     "columns": [
+      "campaign_id int",
+      "lead_id int",
+      "country_code char",
+      "email text",
+      "lead_source text",
+      "converted_account_id int",
+      "owner_employee_id int",
+      "status text: new|working|nurture|qualified|disqualified|converted",
+      "converted_at timestamptz",
+      "created_at timestamptz"
+     ]
+    },
+    {
+     "id": "table:hr.employees",
+     "columns": [
+      "postal_code text",
+      "tax_code text",
+      "email text",
+      "personal_email text",
+      "cost_center_id int",
+      "department_id int",
+      "employee_id int",
+      "manager_id int",
+      "employee_number text",
+      "employment_type text: full_time|part_time|contractor|intern",
+      "job_level smallint",
+      "location_country char",
+      "is_active bool",
+      "created_at timestamptz",
+      "date_of_birth date",
+      "hire_dt date",
+      "term_dt date",
+      "updated_at timestamptz",
+      "pto_balance_days numeric",
+      "salary_amt numeric"
+     ]
+    },
+    {
+     "id": "table:marketing.campaign_members",
+     "columns": [
+      "campaign_id int",
+      "lead_id int",
+      "member_status text",
+      "added_at timestamptz",
+      "responded bool"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:crm.leads",
+     [
+      "owner_employee_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:crm.leads",
+     [
+      "campaign_id"
+     ],
+     "table:marketing.campaigns",
+     [
+      "campaign_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:marketing.campaign_members",
+     [
+      "lead_id"
+     ],
+     "table:crm.leads",
+     [
+      "lead_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.orders",
+     [
+      "sales_rep_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.promo_codes",
+     [
+      "campaign_id"
+     ],
+     "table:marketing.campaigns",
+     [
+      "campaign_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 2436
+  }
+ },
+ "syn_clients_region": {
+  "question": "How many clients do we have in each region?",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:crm.accounts",
+     "columns": [
+      "account_id int",
+      "parent_account_id int",
+      "region_id smallint",
+      "country_code char",
+      "custom_fields jsonb",
+      "owner_employee_id int",
+      "support_tier_id smallint",
+      "preferred_currency char",
+      "is_active bool",
+      "lifecycle_stage text",
+      "state_province text",
+      "tier enum: strategic|enterprise|mid_market|smb",
+      "churned_at timestamptz",
+      "created_at timestamptz",
+      "last_activity_at timestamptz",
+      "updated_at timestamptz"
+     ]
+    },
+    {
+     "id": "table:sales.customers",
+     "columns": [
+      "account_id int",
+      "territory_id int",
+      "billing_country char",
+      "shipping_country char",
+      "customer_code text",
+      "customer_name text",
+      "cust_id int",
+      "price_list_id int",
+      "default_currency char",
+      "is_active bool",
+      "created_at timestamptz",
+      "first_order_dt date"
+     ]
+    },
+    {
+     "id": "table:public.regions",
+     "columns": [
+      "region_id smallint",
+      "region_code text",
+      "created_at timestamptz",
+      "hq_city text",
+      "region_name text"
+     ]
+    },
+    {
+     "id": "table:sales.sales_territories",
+     "columns": [
+      "region_id smallint",
+      "territory_id int",
+      "territory_name text",
+      "manager_employee_id int",
+      "quota_amt numeric"
+     ]
+    },
+    {
+     "id": "table:support.tickets",
+     "columns": [
+      "account_id int",
+      "assigned_agent_id int",
+      "contact_id int",
+      "cust_id int",
+      "product_id int",
+      "ticket_id bigint",
+      "tier_id smallint",
+      "csat_score smallint",
+      "status text: new|open|pending_customer|escalated|resolved|closed",
+      "ticket_ref text",
+      "escalated bool",
+      "priority enum: p1|p2|p3|p4",
+      "closed_at timestamptz",
+      "first_response_at timestamptz",
+      "opened_at timestamptz",
+      "resolved_at timestamptz",
+      "sla_due_at timestamptz"
+     ]
+    },
+    {
+     "id": "table:crm.contacts",
+     "columns": [
+      "account_id int",
+      "contact_id int",
+      "is_primary bool",
+      "status text",
+      "created_at timestamptz",
+      "date_of_birth date",
+      "last_contacted_at timestamptz"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:crm.accounts",
+     [
+      "region_id"
+     ],
+     "table:public.regions",
+     [
+      "region_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:crm.contacts",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.customers",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.sales_territories",
+     [
+      "region_id"
+     ],
+     "table:public.regions",
+     [
+      "region_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:support.tickets",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 2182
+  }
+ },
+ "syn_staff_per_dept": {
+  "question": "How many staff are in each department?",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:hr.departments",
+     "columns": [
+      "department_id int",
+      "parent_department_id int",
+      "head_employee_id int",
+      "dept_code text",
+      "location_country char",
+      "is_active bool",
+      "created_at timestamptz",
+      "cost_center_code text",
+      "dept_name text"
+     ]
+    },
+    {
+     "id": "table:hr.employees",
+     "columns": [
+      "department_id int",
+      "employee_id int",
+      "employee_number text",
+      "hire_dt date",
+      "cost_center_id int",
+      "manager_id int",
+      "employment_type text: full_time|part_time|contractor|intern",
+      "job_level smallint",
+      "location_country char",
+      "salary_currency char",
+      "work_mode text: remote|hybrid|onsite",
+      "is_active bool",
+      "created_at timestamptz",
+      "date_of_birth date",
+      "term_dt date",
+      "updated_at timestamptz",
+      "pto_balance_days numeric",
+      "salary_amt numeric"
+     ]
+    },
+    {
+     "id": "table:hr.teams",
+     "columns": [
+      "department_id int",
+      "lead_employee_id int",
+      "team_id int",
+      "team_name text",
+      "created_at timestamptz"
+     ]
+    },
+    {
+     "id": "table:finance.cost_centers",
+     "columns": [
+      "department_id int",
+      "cost_center_id int",
+      "cc_code text",
+      "is_active bool",
+      "opened_dt date",
+      "cc_name text"
+     ]
+    },
+    {
+     "id": "table:finance.gl_entries",
+     "columns": [
+      "cost_center_id int",
+      "entry_id bigint",
+      "gl_account_id int",
+      "currency_code char",
+      "entry_dt date",
+      "posted_at timestamptz",
+      "credit_amt numeric",
+      "debit_amt numeric"
+     ]
+    },
+    {
+     "id": "table:hr.team_members",
+     "columns": [
+      "employee_id int",
+      "team_id int",
+      "role_in_team text",
+      "joined_dt date",
+      "left_dt date"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:finance.cost_centers",
+     [
+      "department_id"
+     ],
+     "table:hr.departments",
+     [
+      "department_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.gl_entries",
+     [
+      "cost_center_id"
+     ],
+     "table:finance.cost_centers",
+     [
+      "cost_center_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:hr.departments",
+     [
+      "head_employee_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:hr.team_members",
+     [
+      "employee_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:hr.teams",
+     [
+      "department_id"
+     ],
+     "table:hr.departments",
+     [
+      "department_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 1887
+  }
+ },
+ "syn_qty_sold": {
+  "question": "Which SKUs have the highest total qty ordered?",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:inventory.products",
+     "columns": [
+      "product_id int",
+      "min_order_qty int",
+      "product_name text",
+      "sku text",
+      "category_id int",
+      "supplier_id int",
+      "country_of_origin char",
+      "currency_code char",
+      "is_active bool",
+      "is_hazmat bool",
+      "is_serialized bool",
+      "created_at timestamptz",
+      "discontinued_at timestamptz",
+      "launched_dt date",
+      "updated_at timestamptz",
+      "list_price numeric"
+     ]
+    },
+    {
+     "id": "table:sales.order_items",
+     "columns": [
+      "order_item_id bigint",
+      "product_id int",
+      "qty int",
+      "order_id bigint",
+      "line_status text",
+      "line_amt numeric",
+      "tax_amt numeric",
+      "unit_price numeric",
+      "discount_pct numeric",
+      "line_no smallint"
+     ]
+    },
+    {
+     "id": "table:sales.price_list_items",
+     "columns": [
+      "product_id int",
+      "min_qty int",
+      "price_list_id int",
+      "price numeric"
+     ]
+    },
+    {
+     "id": "table:ops.order_lines",
+     "columns": [
+      "qty_ordered int",
+      "product_id int",
+      "qty_received int",
+      "order_id int",
+      "order_line_id int",
+      "unit_cost numeric"
+     ]
+    },
+    {
+     "id": "table:ops.orders",
+     "columns": [
+      "total_amt numeric",
+      "ordered_dt date",
+      "buyer_id int",
+      "order_id int",
+      "supplier_id int",
+      "warehouse_id int",
+      "currency_code char",
+      "po_number text",
+      "status text: draft|sent|partial|received|cancelled",
+      "expected_dt date",
+      "received_dt date"
+     ]
+    },
+    {
+     "id": "table:sales.returns",
+     "columns": [
+      "order_item_id bigint",
+      "qty int",
+      "item_condition text",
+      "return_id int",
+      "return_dt date",
+      "refund_amt numeric",
+      "reason text",
+      "restocked bool"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:ops.order_lines",
+     [
+      "product_id"
+     ],
+     "table:inventory.products",
+     [
+      "product_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.order_lines",
+     [
+      "order_id"
+     ],
+     "table:ops.orders",
+     [
+      "order_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.order_items",
+     [
+      "product_id"
+     ],
+     "table:inventory.products",
+     [
+      "product_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.price_list_items",
+     [
+      "product_id"
+     ],
+     "table:inventory.products",
+     [
+      "product_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.returns",
+     [
+      "order_item_id"
+     ],
+     "table:sales.order_items",
+     [
+      "order_item_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 1869
+  }
+ },
+ "syn_opp_amt": {
+  "question": "What is the total opp amt by stage?",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:sales.quotes",
+     "columns": [
+      "total_amt numeric",
+      "opp_id int",
+      "cust_id int",
+      "quote_id int",
+      "created_by int",
+      "status text: draft|sent|accepted|rejected|expired",
+      "quote_dt date",
+      "valid_until date"
+     ]
+    },
+    {
+     "id": "table:crm.opportunities",
+     "columns": [
+      "amt numeric",
+      "opp_id int",
+      "opp_name text",
+      "stage text: prospecting|qualification|proposal|negotiation|closed_won|closed_lost",
+      "account_id int",
+      "lead_id int",
+      "owner_employee_id int",
+      "is_won bool",
+      "closed_dt date",
+      "created_at timestamptz",
+      "expected_close_dt date"
+     ]
+    },
+    {
+     "id": "table:sales.orders",
+     "columns": [
+      "total_amt numeric",
+      "discount_amt numeric",
+      "shipping_amt numeric",
+      "total_usd numeric",
+      "cust_id int",
+      "order_id bigint",
+      "quote_id int",
+      "sales_rep_id int",
+      "territory_id int",
+      "warehouse_id int",
+      "bill_to_country char",
+      "channel text: web|sales_rep|partner|marketplace|edi",
+      "is_gift bool",
+      "status enum: draft|pending|confirmed|shipped|delivered|completed|cancelled|returned",
+      "cancelled_dt timestamptz",
+      "created_at timestamptz",
+      "delivered_dt timestamptz",
+      "order_dt timestamptz",
+      "promised_dt date",
+      "requested_ship_dt date"
+     ]
+    },
+    {
+     "id": "table:hr.employees",
+     "columns": [
+      "salary_amt numeric",
+      "cost_center_id int",
+      "department_id int",
+      "employee_id int",
+      "manager_id int",
+      "employee_number text",
+      "employment_type text: full_time|part_time|contractor|intern",
+      "job_level smallint",
+      "location_country char",
+      "salary_currency char",
+      "work_mode text: remote|hybrid|onsite",
+      "is_active bool",
+      "created_at timestamptz",
+      "date_of_birth date",
+      "hire_dt date",
+      "term_dt date",
+      "updated_at timestamptz",
+      "pto_balance_days numeric"
+     ]
+    },
+    {
+     "id": "table:crm.accounts",
+     "columns": [
+      "annual_revenue_amt numeric",
+      "credit_limit_amt numeric",
+      "lifecycle_stage text",
+      "account_id int",
+      "owner_employee_id int",
+      "parent_account_id int",
+      "region_id smallint",
+      "support_tier_id smallint",
+      "account_number text",
+      "country_code char",
+      "preferred_currency char",
+      "is_active bool",
+      "state_province text",
+      "tier enum: strategic|enterprise|mid_market|smb",
+      "churned_at timestamptz",
+      "created_at timestamptz",
+      "last_activity_at timestamptz",
+      "updated_at timestamptz"
+     ]
+    },
+    {
+     "id": "table:sales.customers",
+     "columns": [
+      "account_id int",
+      "cust_id int",
+      "price_list_id int",
+      "territory_id int",
+      "billing_country char",
+      "customer_code text",
+      "default_currency char",
+      "shipping_country char",
+      "is_active bool",
+      "created_at timestamptz",
+      "first_order_dt date"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:crm.opportunities",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:crm.opportunities",
+     [
+      "owner_employee_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.customers",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.orders",
+     [
+      "sales_rep_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.quotes",
+     [
+      "opp_id"
+     ],
+     "table:crm.opportunities",
+     [
+      "opp_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 2825
+  }
+ },
+ "j2_tickets_by_tier": {
+  "question": "Average ticket resolution time in hours by support tier",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:support.tickets",
+     "columns": [
+      "ticket_id bigint",
+      "tier_id smallint",
+      "ticket_ref text",
+      "account_id int",
+      "assigned_agent_id int",
+      "contact_id int",
+      "cust_id int",
+      "product_id int",
+      "csat_score smallint",
+      "status text: new|open|pending_customer|escalated|resolved|closed",
+      "escalated bool",
+      "priority enum: p1|p2|p3|p4",
+      "closed_at timestamptz",
+      "first_response_at timestamptz",
+      "opened_at timestamptz",
+      "resolved_at timestamptz",
+      "sla_due_at timestamptz"
+     ]
+    },
+    {
+     "id": "table:support.tiers",
+     "columns": [
+      "resolution_sla_h int",
+      "tier_id smallint",
+      "has_phone_support bool",
+      "tier_name text",
+      "price_per_seat_amt numeric",
+      "first_response_sla_h int"
+     ]
+    },
+    {
+     "id": "table:crm.accounts",
+     "columns": [
+      "support_tier_id smallint",
+      "tier enum: strategic|enterprise|mid_market|smb",
+      "account_id int",
+      "owner_employee_id int",
+      "parent_account_id int",
+      "region_id smallint",
+      "account_number text",
+      "country_code char",
+      "preferred_currency char",
+      "is_active bool",
+      "lifecycle_stage text",
+      "state_province text",
+      "churned_at timestamptz",
+      "created_at timestamptz",
+      "last_activity_at timestamptz",
+      "updated_at timestamptz",
+      "annual_revenue_amt numeric"
+     ]
+    },
+    {
+     "id": "table:support.agents",
+     "columns": [
+      "tier_id smallint",
+      "joined_support_dt date",
+      "agent_id int",
+      "employee_id int",
+      "is_active bool",
+      "languages array",
+      "max_concurrent smallint",
+      "skills jsonb",
+      "team_name text"
+     ]
+    },
+    {
+     "id": "table:support.ticket_messages",
+     "columns": [
+      "ticket_id bigint",
+      "author_agent_id int",
+      "author_contact_id int",
+      "message_id bigint",
+      "author_type text: customer|agent|system",
+      "is_internal bool",
+      "sent_at timestamptz",
+      "attachment_count smallint",
+      "body text"
+     ]
+    },
+    {
+     "id": "view:support.v_open_tickets",
+     "columns": [
+      "ticket_id bigint",
+      "ticket_ref text",
+      "tier_name text",
+      "priority enum: p1|p2|p3|p4",
+      "status text",
+      "opened_at timestamptz",
+      "sla_due_at timestamptz",
+      "account_id int",
+      "assigned_agent_id int",
+      "sla_breached bool"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "view:support.v_open_tickets",
+     [],
+     "table:support.tickets",
+     [],
+     "depends_on"
+    ],
+    [
+     "table:support.ticket_messages",
+     [
+      "author_agent_id"
+     ],
+     "table:support.agents",
+     [
+      "agent_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:support.tickets",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:support.tickets",
+     [
+      "assigned_agent_id"
+     ],
+     "table:support.agents",
+     [
+      "agent_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:support.tickets",
+     [
+      "tier_id"
+     ],
+     "table:support.tiers",
+     [
+      "tier_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 2342
+  }
+ },
+ "j2_mrr_by_plan": {
+  "question": "Total MRR of active subscriptions by plan",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:finance.subscriptions",
+     "columns": [
+      "mrr_amt numeric",
+      "plan_id int",
+      "subscription_id int",
+      "account_id int",
+      "sales_rep_id int",
+      "billing_period text: monthly|annual",
+      "currency_code char",
+      "status text: trialing|active|past_due|cancelled|paused",
+      "cancelled_at timestamptz",
+      "created_at timestamptz",
+      "current_period_end timestamptz",
+      "started_at timestamptz"
+     ]
+    },
+    {
+     "id": "table:finance.subscription_events",
+     "columns": [
+      "event_id int",
+      "new_mrr numeric",
+      "old_mrr numeric",
+      "new_plan_id int",
+      "old_plan_id int",
+      "subscription_id int",
+      "event_dt timestamptz",
+      "event_type text: created|upgrade|downgrade|seat_change|renewal|cancel|reactivate"
+     ]
+    },
+    {
+     "id": "view:finance.v_mrr_by_plan",
+     "columns": [
+      "active_subscriptions bigint",
+      "mrr_usd numeric",
+      "plan_code text",
+      "plan_name text"
+     ]
+    },
+    {
+     "id": "table:finance.plans",
+     "columns": [
+      "plan_id int",
+      "plan_code text",
+      "is_legacy bool",
+      "annual_price numeric",
+      "monthly_price numeric",
+      "max_seats int",
+      "plan_name text",
+      "tier text"
+     ]
+    },
+    {
+     "id": "table:crm.accounts",
+     "columns": [
+      "is_active bool",
+      "account_id int",
+      "owner_employee_id int",
+      "parent_account_id int",
+      "region_id smallint",
+      "support_tier_id smallint",
+      "account_number text",
+      "country_code char",
+      "preferred_currency char",
+      "lifecycle_stage text",
+      "state_province text",
+      "tier enum: strategic|enterprise|mid_market|smb",
+      "churned_at timestamptz",
+      "created_at timestamptz",
+      "last_activity_at timestamptz",
+      "updated_at timestamptz",
+      "annual_revenue_amt numeric"
+     ]
+    },
+    {
+     "id": "table:analytics.feature_usage",
+     "columns": [
+      "active_users int",
+      "event_count int",
+      "usage_id bigint",
+      "feature_name text",
+      "usage_dt date",
+      "account_id int"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "view:finance.v_mrr_by_plan",
+     [],
+     "table:finance.subscriptions",
+     [],
+     "depends_on"
+    ],
+    [
+     "table:analytics.feature_usage",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.subscription_events",
+     [
+      "old_plan_id"
+     ],
+     "table:finance.plans",
+     [
+      "plan_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.subscriptions",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.subscriptions",
+     [
+      "plan_id"
+     ],
+     "table:finance.plans",
+     [
+      "plan_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 2101
+  }
+ },
+ "j2_campaign_leads": {
+  "question": "Leads per marketing campaign and how many of them converted",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:crm.leads",
+     "columns": [
+      "campaign_id int",
+      "converted_account_id int",
+      "lead_id int",
+      "converted_at timestamptz",
+      "email text",
+      "lead_source text",
+      "owner_employee_id int",
+      "country_code char",
+      "status text: new|working|nurture|qualified|disqualified|converted",
+      "created_at timestamptz"
+     ]
+    },
+    {
+     "id": "table:marketing.campaigns",
+     "columns": [
+      "campaign_id int",
+      "campaign_name text",
+      "owner_employee_id int",
+      "region_id smallint",
+      "status text",
+      "created_at timestamptz",
+      "end_dt date",
+      "start_dt date",
+      "actual_spend_amt numeric",
+      "budget_amt numeric"
+     ]
+    },
+    {
+     "id": "table:marketing.campaign_members",
+     "columns": [
+      "campaign_id int",
+      "lead_id int",
+      "member_status text",
+      "added_at timestamptz",
+      "responded bool"
+     ]
+    },
+    {
+     "id": "table:marketing.email_events",
+     "columns": [
+      "campaign_id int",
+      "email text",
+      "contact_id int",
+      "event_id bigint",
+      "event_type text: sent|delivered|open|click|bounce|unsubscribe|spam_report",
+      "event_ts timestamptz",
+      "link_url text",
+      "message_id uuid",
+      "user_agent text"
+     ]
+    },
+    {
+     "id": "table:hr.employees",
+     "columns": [
+      "email text",
+      "personal_email text",
+      "cost_center_id int",
+      "department_id int",
+      "employee_id int",
+      "manager_id int",
+      "employee_number text",
+      "employment_type text: full_time|part_time|contractor|intern",
+      "job_level smallint",
+      "location_country char",
+      "salary_currency char",
+      "work_mode text: remote|hybrid|onsite",
+      "is_active bool",
+      "created_at timestamptz",
+      "date_of_birth date",
+      "hire_dt date",
+      "term_dt date",
+      "updated_at timestamptz",
+      "pto_balance_days numeric",
+      "salary_amt numeric"
+     ]
+    },
+    {
+     "id": "table:crm.opportunities",
+     "columns": [
+      "lead_id int",
+      "account_id int",
+      "opp_id int",
+      "owner_employee_id int",
+      "opp_type text: new_business|renewal|upsell|cross_sell",
+      "stage text: prospecting|qualification|proposal|negotiation|closed_won|closed_lost",
+      "is_won bool",
+      "closed_dt date",
+      "created_at timestamptz",
+      "expected_close_dt date",
+      "amt numeric"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:crm.leads",
+     [
+      "owner_employee_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:crm.leads",
+     [
+      "campaign_id"
+     ],
+     "table:marketing.campaigns",
+     [
+      "campaign_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:crm.opportunities",
+     [
+      "lead_id"
+     ],
+     "table:crm.leads",
+     [
+      "lead_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:marketing.campaign_members",
+     [
+      "lead_id"
+     ],
+     "table:crm.leads",
+     [
+      "lead_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:marketing.email_events",
+     [
+      "campaign_id"
+     ],
+     "table:marketing.campaigns",
+     [
+      "campaign_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 2341
+  }
+ },
+ "mh_invoice_region": {
+  "question": "Total invoiced amount by sales region for invoices issued in 2026-Q3",
+  "context": {
+   "interpreted": [
+    "invoiced~invoice"
+   ],
+   "relations": [
+    {
+     "id": "table:finance.invoices",
+     "columns": [
+      "invoice_id bigint",
+      "order_id bigint",
+      "total_amt numeric",
+      "invoice_no text",
+      "issued_dt date",
+      "cust_id int",
+      "currency_code char",
+      "status text: draft|open|paid|overdue|void",
+      "created_at timestamptz",
+      "due_dt date",
+      "paid_at timestamptz",
+      "subtotal_amt numeric",
+      "tax_amt numeric"
+     ]
+    },
+    {
+     "id": "table:public.regions",
+     "columns": [
+      "region_id smallint",
+      "region_code text",
+      "created_at timestamptz",
+      "hq_city text",
+      "region_name text"
+     ]
+    },
+    {
+     "id": "table:sales.orders",
+     "columns": [
+      "order_id bigint",
+      "sales_rep_id int",
+      "territory_id int",
+      "total_amt numeric",
+      "total_usd numeric",
+      "bill_to_country char",
+      "ship_to_country char",
+      "order_dt timestamptz",
+      "cust_id int",
+      "quote_id int",
+      "warehouse_id int",
+      "channel text: web|sales_rep|partner|marketplace|edi",
+      "is_gift bool",
+      "status enum: draft|pending|confirmed|shipped|delivered|completed|cancelled|returned",
+      "cancelled_dt timestamptz",
+      "created_at timestamptz",
+      "delivered_dt timestamptz",
+      "promised_dt date",
+      "requested_ship_dt date",
+      "shipped_dt timestamptz"
+     ]
+    },
+    {
+     "id": "table:sales.sales_territories",
+     "columns": [
+      "region_id smallint",
+      "territory_id int",
+      "territory_name text",
+      "manager_employee_id int",
+      "quota_amt numeric"
+     ]
+    },
+    {
+     "id": "table:sales.customers",
+     "columns": [
+      "price_list_id int",
+      "territory_id int",
+      "billing_country char",
+      "shipping_country char",
+      "first_order_dt date",
+      "account_id int",
+      "cust_id int",
+      "customer_code text",
+      "default_currency char",
+      "is_active bool",
+      "created_at timestamptz"
+     ]
+    },
+    {
+     "id": "view:sales.v_order_summary",
+     "columns": [
+      "order_id bigint",
+      "total_amt numeric",
+      "total_usd numeric",
+      "order_dt timestamptz",
+      "region_code text",
+      "status enum: draft|pending|confirmed|shipped|delivered|completed|cancelled|returned",
+      "tier enum: strategic|enterprise|mid_market|smb"
+     ]
+    },
+    {
+     "id": "table:finance.invoice_lines",
+     "columns": [
+      "invoice_id bigint",
+      "invoice_line_id bigint",
+      "order_item_id bigint",
+      "unit_price numeric",
+      "line_amt numeric",
+      "qty int",
+      "tax_amt numeric",
+      "line_no smallint"
+     ]
+    },
+    {
+     "id": "table:finance.payments",
+     "columns": [
+      "invoice_id bigint",
+      "payment_id bigint",
+      "currency_code char",
+      "method text: card|wire|ach|paypal|check",
+      "status text: settled|pending|failed|refunded",
+      "paid_dt timestamptz",
+      "amt numeric",
+      "fee_amt numeric"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "view:sales.v_order_summary",
+     [],
+     "table:public.regions",
+     [],
+     "depends_on"
+    ],
+    [
+     "view:sales.v_order_summary",
+     [],
+     "table:sales.customers",
+     [],
+     "depends_on"
+    ],
+    [
+     "table:finance.invoice_lines",
+     [
+      "invoice_id"
+     ],
+     "table:finance.invoices",
+     [
+      "invoice_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.invoices",
+     [
+      "cust_id"
+     ],
+     "table:sales.customers",
+     [
+      "cust_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.invoices",
+     [
+      "order_id"
+     ],
+     "table:sales.orders",
+     [
+      "order_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.payments",
+     [
+      "invoice_id"
+     ],
+     "table:finance.invoices",
+     [
+      "invoice_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.sales_territories",
+     [
+      "region_id"
+     ],
+     "table:public.regions",
+     [
+      "region_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 2875
+  }
+ },
+ "mh_return_rate_category": {
+  "question": "Return rate by top-level product category",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:sales.returns",
+     "columns": [
+      "order_item_id bigint",
+      "refund_amt numeric",
+      "return_id int",
+      "item_condition text",
+      "reason text",
+      "return_dt date",
+      "qty int",
+      "restocked bool"
+     ]
+    },
+    {
+     "id": "table:inventory.products",
+     "columns": [
+      "category_id int",
+      "product_id int",
+      "product_name text",
+      "sku text",
+      "supplier_id int",
+      "country_of_origin char",
+      "currency_code char",
+      "is_active bool",
+      "is_hazmat bool",
+      "is_serialized bool",
+      "created_at timestamptz",
+      "discontinued_at timestamptz",
+      "launched_dt date",
+      "updated_at timestamptz",
+      "list_price numeric"
+     ]
+    },
+    {
+     "id": "table:inventory.product_categories",
+     "columns": [
+      "category_id int",
+      "category_name text",
+      "parent_id int",
+      "depth smallint",
+      "path text"
+     ]
+    },
+    {
+     "id": "table:sales.order_items",
+     "columns": [
+      "order_item_id bigint",
+      "product_id int",
+      "order_id bigint",
+      "qty int",
+      "line_status text",
+      "line_amt numeric",
+      "tax_amt numeric",
+      "unit_price numeric",
+      "discount_pct numeric",
+      "line_no smallint"
+     ]
+    },
+    {
+     "id": "table:public.currencies",
+     "columns": [
+      "currency_code char",
+      "currency_name text"
+     ]
+    },
+    {
+     "id": "table:public.fx_rates",
+     "columns": [
+      "usd_rate numeric",
+      "rate_dt date",
+      "currency_code char",
+      "source text"
+     ]
+    },
+    {
+     "id": "table:inventory.stock_levels",
+     "columns": [
+      "product_id int",
+      "warehouse_id int",
+      "last_counted_at timestamptz",
+      "updated_at timestamptz",
+      "qty_on_hand int",
+      "qty_on_order int",
+      "qty_reserved int",
+      "reorder_qty int",
+      "bin_location text",
+      "reorder_point int"
+     ]
+    },
+    {
+     "id": "table:inventory.item_aliases",
+     "columns": [
+      "product_id int",
+      "item_code text",
+      "alias_id int",
+      "is_primary bool",
+      "created_at timestamptz",
+      "external_system text"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:inventory.item_aliases",
+     [
+      "product_id"
+     ],
+     "table:inventory.products",
+     [
+      "product_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:inventory.products",
+     [
+      "category_id"
+     ],
+     "table:inventory.product_categories",
+     [
+      "category_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:inventory.products",
+     [
+      "currency_code"
+     ],
+     "table:public.currencies",
+     [
+      "currency_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:inventory.stock_levels",
+     [
+      "product_id"
+     ],
+     "table:inventory.products",
+     [
+      "product_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:public.fx_rates",
+     [
+      "currency_code"
+     ],
+     "table:public.currencies",
+     [
+      "currency_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.order_items",
+     [
+      "product_id"
+     ],
+     "table:inventory.products",
+     [
+      "product_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.returns",
+     [
+      "order_item_id"
+     ],
+     "table:sales.order_items",
+     [
+      "order_item_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 2308
+  }
+ },
+ "mh_api_failures_region": {
+  "question": "Failed API requests on 2026-10-10 broken down by the customer account's region",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:ops.api_request_log",
+     "columns": [
+      "api_key_id int",
+      "request_id bigint",
+      "status_code smallint",
+      "client_ip inet",
+      "error_code text",
+      "requested_at timestamptz",
+      "bytes_out int",
+      "endpoint text",
+      "http_method text",
+      "latency_ms int"
+     ]
+    },
+    {
+     "id": "table:crm.accounts",
+     "columns": [
+      "account_id int",
+      "parent_account_id int",
+      "region_id smallint",
+      "country_code char",
+      "custom_fields jsonb",
+      "owner_employee_id int",
+      "support_tier_id smallint",
+      "preferred_currency char",
+      "is_active bool",
+      "lifecycle_stage text",
+      "state_province text",
+      "tier enum: strategic|enterprise|mid_market|smb",
+      "churned_at timestamptz",
+      "created_at timestamptz",
+      "last_activity_at timestamptz",
+      "updated_at timestamptz"
+     ]
+    },
+    {
+     "id": "table:sales.customers",
+     "columns": [
+      "account_id int",
+      "territory_id int",
+      "billing_country char",
+      "shipping_country char",
+      "customer_code text",
+      "customer_name text",
+      "cust_id int",
+      "price_list_id int",
+      "default_currency char",
+      "is_active bool",
+      "created_at timestamptz",
+      "first_order_dt date"
+     ]
+    },
+    {
+     "id": "table:public.regions",
+     "columns": [
+      "region_id smallint",
+      "region_code text",
+      "created_at timestamptz",
+      "hq_city text",
+      "region_name text"
+     ]
+    },
+    {
+     "id": "table:ops.api_keys",
+     "columns": [
+      "account_id int",
+      "api_key_id int",
+      "api_key text",
+      "created_by int",
+      "created_at timestamptz",
+      "last_used_at timestamptz",
+      "revoked_at timestamptz"
+     ]
+    },
+    {
+     "id": "table:finance.gl_entries",
+     "columns": [
+      "gl_account_id int",
+      "cost_center_id int",
+      "entry_id bigint",
+      "currency_code char"
+     ]
+    },
+    {
+     "id": "table:public.currencies",
+     "columns": [
+      "currency_code char",
+      "currency_name text"
+     ]
+    },
+    {
+     "id": "table:finance.chart_of_accounts",
+     "columns": [
+      "gl_account_id int",
+      "parent_gl_account_id int",
+      "is_active bool",
+      "account_code text",
+      "account_name text",
+      "account_type text: asset|liability|equity|revenue|expense"
+     ]
+    },
+    {
+     "id": "view:sales.v_order_summary",
+     "columns": [
+      "account_id int",
+      "account_name text",
+      "customer_name text",
+      "region_code text",
+      "status enum: draft|pending|confirmed|shipped|delivered|completed|cancelled|returned",
+      "tier enum: strategic|enterprise|mid_market|smb",
+      "order_dt timestamptz",
+      "total_amt numeric",
+      "total_usd numeric"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "view:sales.v_order_summary",
+     [],
+     "table:crm.accounts",
+     [],
+     "depends_on"
+    ],
+    [
+     "table:crm.accounts",
+     [
+      "preferred_currency"
+     ],
+     "table:public.currencies",
+     [
+      "currency_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:crm.accounts",
+     [
+      "region_id"
+     ],
+     "table:public.regions",
+     [
+      "region_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.gl_entries",
+     [
+      "gl_account_id"
+     ],
+     "table:finance.chart_of_accounts",
+     [
+      "gl_account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.gl_entries",
+     [
+      "currency_code"
+     ],
+     "table:public.currencies",
+     [
+      "currency_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.api_keys",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.api_request_log",
+     [
+      "api_key_id"
+     ],
+     "table:ops.api_keys",
+     [
+      "api_key_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.customers",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 2856
+  }
+ },
+ "mh_payments_tier": {
+  "question": "Total settled payments received in September 2026 per account tier",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:finance.payments",
+     "columns": [
+      "invoice_id bigint",
+      "payment_id bigint",
+      "paid_dt timestamptz",
+      "currency_code char",
+      "method text: card|wire|ach|paypal|check",
+      "status text: settled|pending|failed|refunded",
+      "amt numeric",
+      "fee_amt numeric"
+     ]
+    },
+    {
+     "id": "table:crm.accounts",
+     "columns": [
+      "account_id int",
+      "parent_account_id int",
+      "payment_terms_days smallint",
+      "support_tier_id smallint",
+      "tier enum: strategic|enterprise|mid_market|smb",
+      "owner_employee_id int",
+      "region_id smallint",
+      "country_code char",
+      "preferred_currency char",
+      "is_active bool",
+      "lifecycle_stage text",
+      "state_province text",
+      "churned_at timestamptz",
+      "created_at timestamptz",
+      "last_activity_at timestamptz",
+      "updated_at timestamptz",
+      "annual_revenue_amt numeric"
+     ]
+    },
+    {
+     "id": "table:support.tiers",
+     "columns": [
+      "price_per_seat_amt numeric",
+      "tier_id smallint",
+      "tier_name text",
+      "has_phone_support bool",
+      "first_response_sla_h int",
+      "resolution_sla_h int"
+     ]
+    },
+    {
+     "id": "table:finance.invoices",
+     "columns": [
+      "invoice_id bigint",
+      "total_amt numeric",
+      "invoice_no text",
+      "paid_at timestamptz",
+      "cust_id int",
+      "order_id bigint",
+      "currency_code char",
+      "status text: draft|open|paid|overdue|void",
+      "created_at timestamptz",
+      "due_dt date",
+      "issued_dt date",
+      "subtotal_amt numeric",
+      "tax_amt numeric"
+     ]
+    },
+    {
+     "id": "table:sales.customers",
+     "columns": [
+      "account_id int",
+      "cust_id int",
+      "price_list_id int",
+      "territory_id int",
+      "billing_country char",
+      "customer_code text",
+      "default_currency char",
+      "shipping_country char",
+      "is_active bool",
+      "created_at timestamptz",
+      "first_order_dt date"
+     ]
+    },
+    {
+     "id": "table:support.tickets",
+     "columns": [
+      "account_id int",
+      "tier_id smallint",
+      "assigned_agent_id int",
+      "contact_id int",
+      "cust_id int",
+      "product_id int",
+      "ticket_id bigint",
+      "csat_score smallint",
+      "status text: new|open|pending_customer|escalated|resolved|closed",
+      "ticket_ref text",
+      "escalated bool",
+      "priority enum: p1|p2|p3|p4",
+      "closed_at timestamptz",
+      "first_response_at timestamptz",
+      "opened_at timestamptz",
+      "resolved_at timestamptz",
+      "sla_due_at timestamptz"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:crm.accounts",
+     [
+      "support_tier_id"
+     ],
+     "table:support.tiers",
+     [
+      "tier_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.invoices",
+     [
+      "cust_id"
+     ],
+     "table:sales.customers",
+     [
+      "cust_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.payments",
+     [
+      "invoice_id"
+     ],
+     "table:finance.invoices",
+     [
+      "invoice_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.customers",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:support.tickets",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 2462
+  }
+ },
+ "agg_top_customers_q3_emea": {
+  "question": "Top 10 customers by revenue in USD in 2026-Q3 in the EMEA region",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:crm.accounts",
+     "columns": [
+      "account_id int",
+      "parent_account_id int",
+      "region_id smallint",
+      "annual_revenue_amt numeric",
+      "country_code char",
+      "custom_fields jsonb",
+      "owner_employee_id int",
+      "support_tier_id smallint",
+      "preferred_currency char",
+      "is_active bool",
+      "lifecycle_stage text",
+      "state_province text",
+      "tier enum: strategic|enterprise|mid_market|smb",
+      "churned_at timestamptz",
+      "created_at timestamptz",
+      "last_activity_at timestamptz",
+      "updated_at timestamptz"
+     ]
+    },
+    {
+     "id": "table:sales.customers",
+     "columns": [
+      "account_id int",
+      "price_list_id int",
+      "territory_id int",
+      "billing_country char",
+      "shipping_country char",
+      "customer_code text",
+      "customer_name text",
+      "first_order_dt date",
+      "cust_id int",
+      "default_currency char",
+      "is_active bool",
+      "created_at timestamptz"
+     ]
+    },
+    {
+     "id": "table:sales.orders",
+     "columns": [
+      "total_usd numeric",
+      "order_id bigint",
+      "territory_id int",
+      "total_amt numeric",
+      "fx_rate_to_usd numeric",
+      "bill_to_country char",
+      "ship_to_country char",
+      "order_dt timestamptz",
+      "cust_id int",
+      "quote_id int",
+      "sales_rep_id int",
+      "warehouse_id int",
+      "is_gift bool",
+      "status enum: draft|pending|confirmed|shipped|delivered|completed|cancelled|returned",
+      "cancelled_dt timestamptz",
+      "created_at timestamptz",
+      "delivered_dt timestamptz",
+      "promised_dt date",
+      "requested_ship_dt date",
+      "shipped_dt timestamptz"
+     ]
+    },
+    {
+     "id": "table:finance.invoices",
+     "columns": [
+      "invoice_id bigint",
+      "order_id bigint",
+      "total_amt numeric",
+      "invoice_no text",
+      "cust_id int",
+      "currency_code char",
+      "status text: draft|open|paid|overdue|void",
+      "created_at timestamptz",
+      "due_dt date",
+      "issued_dt date",
+      "paid_at timestamptz",
+      "subtotal_amt numeric",
+      "tax_amt numeric"
+     ]
+    },
+    {
+     "id": "table:public.regions",
+     "columns": [
+      "region_id smallint",
+      "region_code text",
+      "created_at timestamptz",
+      "hq_city text",
+      "region_name text"
+     ]
+    },
+    {
+     "id": "materialized_view:analytics.mv_monthly_revenue",
+     "columns": [
+      "revenue_usd numeric",
+      "orders bigint",
+      "region_code text",
+      "tier enum: strategic|enterprise|mid_market|smb",
+      "month date"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "materialized_view:analytics.mv_monthly_revenue",
+     [],
+     "table:crm.accounts",
+     [],
+     "depends_on"
+    ],
+    [
+     "table:crm.accounts",
+     [
+      "region_id"
+     ],
+     "table:public.regions",
+     [
+      "region_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.invoices",
+     [
+      "cust_id"
+     ],
+     "table:sales.customers",
+     [
+      "cust_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.customers",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.orders",
+     [
+      "cust_id"
+     ],
+     "table:sales.customers",
+     [
+      "cust_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 2433
+  }
+ },
+ "agg_monthly_orders": {
+  "question": "Monthly order count and USD revenue for 2025",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "materialized_view:analytics.mv_monthly_revenue",
+     "columns": [
+      "revenue_usd numeric",
+      "orders bigint",
+      "tier enum: strategic|enterprise|mid_market|smb",
+      "month date",
+      "region_code text"
+     ]
+    },
+    {
+     "id": "table:sales.orders",
+     "columns": [
+      "total_usd numeric",
+      "item_count smallint",
+      "order_id bigint",
+      "total_amt numeric",
+      "fx_rate_to_usd numeric",
+      "order_dt timestamptz",
+      "cust_id int",
+      "quote_id int",
+      "sales_rep_id int",
+      "territory_id int",
+      "warehouse_id int",
+      "bill_to_country char",
+      "is_gift bool",
+      "status enum: draft|pending|confirmed|shipped|delivered|completed|cancelled|returned",
+      "cancelled_dt timestamptz",
+      "created_at timestamptz",
+      "delivered_dt timestamptz",
+      "promised_dt date",
+      "requested_ship_dt date",
+      "shipped_dt timestamptz"
+     ]
+    },
+    {
+     "id": "table:finance.invoices",
+     "columns": [
+      "invoice_id bigint",
+      "order_id bigint",
+      "total_amt numeric",
+      "invoice_no text",
+      "cust_id int",
+      "currency_code char",
+      "status text: draft|open|paid|overdue|void",
+      "created_at timestamptz",
+      "due_dt date",
+      "issued_dt date",
+      "paid_at timestamptz",
+      "subtotal_amt numeric",
+      "tax_amt numeric"
+     ]
+    },
+    {
+     "id": "table:crm.accounts",
+     "columns": [
+      "employee_count int",
+      "annual_revenue_amt numeric",
+      "account_id int",
+      "owner_employee_id int",
+      "parent_account_id int",
+      "region_id smallint",
+      "support_tier_id smallint",
+      "account_number text",
+      "country_code char",
+      "preferred_currency char",
+      "account_name text"
+     ]
+    },
+    {
+     "id": "view:sales.v_order_summary",
+     "columns": [
+      "total_usd numeric",
+      "order_id bigint",
+      "total_amt numeric",
+      "order_dt timestamptz",
+      "status enum: draft|pending|confirmed|shipped|delivered|completed|cancelled|returned",
+      "tier enum: strategic|enterprise|mid_market|smb"
+     ]
+    },
+    {
+     "id": "table:ops.shipments",
+     "columns": [
+      "package_count smallint",
+      "sales_order_id bigint",
+      "carrier_id int",
+      "shipment_id bigint",
+      "warehouse_id int",
+      "status text",
+      "delivered_at timestamptz",
+      "shipped_at timestamptz",
+      "freight_cost numeric"
+     ]
+    },
+    {
+     "id": "table:finance.subscriptions",
+     "columns": [
+      "account_id int",
+      "plan_id int",
+      "sales_rep_id int",
+      "subscription_id int",
+      "billing_period text: monthly|annual",
+      "currency_code char",
+      "status text: trialing|active|past_due|cancelled|paused",
+      "cancelled_at timestamptz",
+      "created_at timestamptz",
+      "current_period_end timestamptz",
+      "started_at timestamptz",
+      "mrr_amt numeric"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "materialized_view:analytics.mv_monthly_revenue",
+     [],
+     "table:crm.accounts",
+     [],
+     "depends_on"
+    ],
+    [
+     "materialized_view:analytics.mv_monthly_revenue",
+     [],
+     "table:sales.orders",
+     [],
+     "depends_on"
+    ],
+    [
+     "view:sales.v_order_summary",
+     [],
+     "table:sales.orders",
+     [],
+     "depends_on"
+    ],
+    [
+     "table:finance.invoices",
+     [
+      "order_id"
+     ],
+     "table:sales.orders",
+     [
+      "order_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.subscriptions",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.shipments",
+     [
+      "sales_order_id"
+     ],
+     "table:sales.orders",
+     [
+      "order_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 2775
+  }
+ },
+ "agg_gl_q2": {
+  "question": "GL expense by cost center versus budget for 2026-Q2",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:finance.gl_entries",
+     "columns": [
+      "cost_center_id int",
+      "debit_amt numeric",
+      "gl_account_id int",
+      "entry_id bigint",
+      "currency_code char",
+      "entry_dt date",
+      "posted_at timestamptz",
+      "credit_amt numeric"
+     ]
+    },
+    {
+     "id": "table:finance.budgets",
+     "columns": [
+      "cost_center_id int",
+      "budget_amt numeric",
+      "gl_account_id int",
+      "fiscal_month date"
+     ]
+    },
+    {
+     "id": "table:finance.cost_centers",
+     "columns": [
+      "cost_center_id int",
+      "department_id int",
+      "cc_code text",
+      "is_active bool",
+      "opened_dt date",
+      "cc_name text"
+     ]
+    },
+    {
+     "id": "table:hr.employees",
+     "columns": [
+      "cost_center_id int",
+      "department_id int",
+      "employee_id int",
+      "manager_id int",
+      "employee_number text",
+      "employment_type text: full_time|part_time|contractor|intern",
+      "job_level smallint",
+      "location_country char",
+      "salary_currency char",
+      "work_mode text: remote|hybrid|onsite"
+     ]
+    },
+    {
+     "id": "table:marketing.campaigns",
+     "columns": [
+      "budget_amt numeric",
+      "actual_spend_amt numeric",
+      "campaign_id int",
+      "owner_employee_id int",
+      "region_id smallint",
+      "status text",
+      "created_at timestamptz",
+      "end_dt date",
+      "start_dt date"
+     ]
+    },
+    {
+     "id": "table:hr.departments",
+     "columns": [
+      "cost_center_code text",
+      "department_id int",
+      "head_employee_id int",
+      "parent_department_id int",
+      "dept_code text",
+      "location_country char",
+      "is_active bool",
+      "created_at timestamptz",
+      "dept_name text"
+     ]
+    },
+    {
+     "id": "table:finance.chart_of_accounts",
+     "columns": [
+      "gl_account_id int",
+      "parent_gl_account_id int",
+      "account_code text",
+      "account_type text: asset|liability|equity|revenue|expense",
+      "is_active bool",
+      "account_name text"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:finance.budgets",
+     [
+      "gl_account_id"
+     ],
+     "table:finance.chart_of_accounts",
+     [
+      "gl_account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.budgets",
+     [
+      "cost_center_id"
+     ],
+     "table:finance.cost_centers",
+     [
+      "cost_center_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.cost_centers",
+     [
+      "department_id"
+     ],
+     "table:hr.departments",
+     [
+      "department_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.gl_entries",
+     [
+      "gl_account_id"
+     ],
+     "table:finance.chart_of_accounts",
+     [
+      "gl_account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:hr.employees",
+     [
+      "cost_center_id"
+     ],
+     "table:finance.cost_centers",
+     [
+      "cost_center_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:marketing.campaigns",
+     [
+      "owner_employee_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 2173
+  }
+ },
+ "au_deletes_exports": {
+  "question": "Who deleted or exported data according to the audit log between 2026-10-04 and 2026-10-10?",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:public.audit_log",
+     "columns": [
+      "audit_id bigint",
+      "action text",
+      "actor_user_id int",
+      "occurred_at timestamptz"
+     ]
+    },
+    {
+     "id": "table:ops.app_users",
+     "columns": [
+      "account_id int",
+      "employee_id int",
+      "user_id int",
+      "user_type text: staff|customer|service",
+      "username text",
+      "is_locked bool",
+      "mfa_enabled bool",
+      "created_at timestamptz",
+      "last_login_at timestamptz"
+     ]
+    },
+    {
+     "id": "table:public.change_history",
+     "columns": [
+      "changed_by int",
+      "changed_at timestamptz",
+      "change_id bigint",
+      "change_source text",
+      "column_name text",
+      "new_value text",
+      "old_value text",
+      "record_pk text",
+      "table_name text"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:public.audit_log",
+     [
+      "actor_user_id"
+     ],
+     "table:ops.app_users",
+     [
+      "user_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": false,
+   "bytes": 730
+  }
+ },
+ "au_salary_changes": {
+  "question": "Changes to the employees salary field in the change history since 2026-07-12",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:hr.employees",
+     "columns": [
+      "department_id int",
+      "employee_id int",
+      "salary_amt numeric",
+      "employee_number text",
+      "hire_dt date",
+      "salary_currency char",
+      "cost_center_id int",
+      "manager_id int",
+      "employment_type text: full_time|part_time|contractor|intern",
+      "job_level smallint",
+      "location_country char",
+      "work_mode text: remote|hybrid|onsite",
+      "is_active bool",
+      "created_at timestamptz",
+      "date_of_birth date",
+      "term_dt date",
+      "updated_at timestamptz",
+      "pto_balance_days numeric"
+     ]
+    },
+    {
+     "id": "table:public.change_history",
+     "columns": [
+      "changed_by int",
+      "changed_at timestamptz",
+      "change_id bigint",
+      "change_source text",
+      "column_name text",
+      "new_value text",
+      "old_value text",
+      "record_pk text",
+      "table_name text"
+     ]
+    },
+    {
+     "id": "table:hr.payroll",
+     "columns": [
+      "employee_id int",
+      "gross_amt numeric",
+      "net_amt numeric",
+      "payroll_id bigint",
+      "pay_period date",
+      "currency_code char",
+      "status text: scheduled|paid|reversed",
+      "paid_dt date",
+      "benefits_amt numeric",
+      "tax_amt numeric"
+     ]
+    },
+    {
+     "id": "table:ops.app_users",
+     "columns": [
+      "employee_id int",
+      "account_id int",
+      "user_id int",
+      "user_type text: staff|customer|service",
+      "username text"
+     ]
+    },
+    {
+     "id": "table:hr.teams",
+     "columns": [
+      "department_id int",
+      "lead_employee_id int",
+      "team_id int",
+      "team_name text",
+      "created_at timestamptz"
+     ]
+    },
+    {
+     "id": "table:public.audit_log",
+     "columns": [
+      "audit_id bigint",
+      "actor_user_id int",
+      "occurred_at timestamptz"
+     ]
+    },
+    {
+     "id": "table:hr.departments",
+     "columns": [
+      "department_id int",
+      "parent_department_id int",
+      "head_employee_id int",
+      "dept_code text",
+      "location_country char",
+      "is_active bool",
+      "created_at timestamptz",
+      "cost_center_code text",
+      "dept_name text"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:hr.departments",
+     [
+      "head_employee_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:hr.payroll",
+     [
+      "employee_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:hr.teams",
+     [
+      "lead_employee_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.app_users",
+     [
+      "employee_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:public.audit_log",
+     [
+      "actor_user_id"
+     ],
+     "table:ops.app_users",
+     [
+      "user_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": false,
+   "bytes": 2087
+  }
+ },
+ "au_failed_logins": {
+  "question": "Users with the most failed logins between 2026-09-11 and 2026-10-10",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:ops.login_events",
+     "columns": [
+      "user_id int",
+      "user_agent text",
+      "event_id bigint",
+      "success bool",
+      "event_ts timestamptz",
+      "failure_reason text",
+      "geo_country char",
+      "ip_address inet",
+      "mfa_used bool"
+     ]
+    },
+    {
+     "id": "table:ops.app_users",
+     "columns": [
+      "user_id int",
+      "last_login_at timestamptz",
+      "user_type text: staff|customer|service",
+      "account_id int",
+      "employee_id int",
+      "username text",
+      "is_locked bool",
+      "mfa_enabled bool",
+      "created_at timestamptz"
+     ]
+    },
+    {
+     "id": "table:ops.api_request_log",
+     "columns": [
+      "request_id bigint",
+      "status_code smallint",
+      "error_code text",
+      "requested_at timestamptz",
+      "api_key_id int",
+      "bytes_out int",
+      "client_ip inet",
+      "endpoint text",
+      "http_method text",
+      "latency_ms int"
+     ]
+    },
+    {
+     "id": "table:analytics.web_sessions",
+     "columns": [
+      "session_id bigint",
+      "cust_id int",
+      "country_code char"
+     ]
+    },
+    {
+     "id": "table:ops.api_keys",
+     "columns": [
+      "account_id int",
+      "api_key_id int",
+      "created_by int",
+      "key_name text"
+     ]
+    },
+    {
+     "id": "table:public.countries",
+     "columns": [
+      "region_id smallint",
+      "country_code char",
+      "currency_code char",
+      "country_name text"
+     ]
+    },
+    {
+     "id": "table:public.audit_log",
+     "columns": [
+      "actor_user_id int",
+      "request_id uuid",
+      "audit_id bigint",
+      "occurred_at timestamptz"
+     ]
+    },
+    {
+     "id": "table:analytics.page_views",
+     "columns": [
+      "session_id bigint",
+      "view_id bigint",
+      "viewed_at timestamptz",
+      "duration_ms int",
+      "referrer text",
+      "url_path text"
+     ]
+    },
+    {
+     "id": "table:crm.accounts",
+     "columns": [
+      "account_id int",
+      "owner_employee_id int",
+      "parent_account_id int",
+      "region_id smallint",
+      "support_tier_id smallint",
+      "account_number text",
+      "country_code char",
+      "preferred_currency char",
+      "is_active bool",
+      "lifecycle_stage text",
+      "state_province text",
+      "tier enum: strategic|enterprise|mid_market|smb",
+      "churned_at timestamptz",
+      "created_at timestamptz",
+      "last_activity_at timestamptz",
+      "updated_at timestamptz"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:analytics.page_views",
+     [
+      "session_id"
+     ],
+     "table:analytics.web_sessions",
+     [
+      "session_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:analytics.web_sessions",
+     [
+      "country_code"
+     ],
+     "table:public.countries",
+     [
+      "country_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:crm.accounts",
+     [
+      "country_code"
+     ],
+     "table:public.countries",
+     [
+      "country_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.api_keys",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.api_request_log",
+     [
+      "api_key_id"
+     ],
+     "table:ops.api_keys",
+     [
+      "api_key_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.app_users",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.login_events",
+     [
+      "user_id"
+     ],
+     "table:ops.app_users",
+     [
+      "user_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:public.audit_log",
+     [
+      "actor_user_id"
+     ],
+     "table:ops.app_users",
+     [
+      "user_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 2559
+  }
+ },
+ "amb_purchase_orders_late": {
+  "question": "Purchase orders received later than expected, per supplier",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:ops.orders",
+     "columns": [
+      "order_id int",
+      "supplier_id int",
+      "expected_dt date",
+      "po_number text",
+      "received_dt date",
+      "buyer_id int",
+      "warehouse_id int",
+      "currency_code char",
+      "status text: draft|sent|partial|received|cancelled",
+      "ordered_dt date",
+      "total_amt numeric"
+     ]
+    },
+    {
+     "id": "table:sales.orders",
+     "columns": [
+      "order_id bigint",
+      "order_dt timestamptz",
+      "cust_id int",
+      "quote_id int",
+      "sales_rep_id int",
+      "territory_id int",
+      "warehouse_id int",
+      "bill_to_country char",
+      "channel text: web|sales_rep|partner|marketplace|edi",
+      "currency_code char",
+      "promo_code text",
+      "ship_to_country char",
+      "is_gift bool",
+      "status enum: draft|pending|confirmed|shipped|delivered|completed|cancelled|returned",
+      "cancelled_dt timestamptz",
+      "created_at timestamptz",
+      "delivered_dt timestamptz",
+      "promised_dt date",
+      "requested_ship_dt date",
+      "shipped_dt timestamptz"
+     ]
+    },
+    {
+     "id": "table:inventory.suppliers",
+     "columns": [
+      "supplier_id int",
+      "supplier_name text",
+      "country_code char",
+      "is_preferred bool",
+      "created_at timestamptz"
+     ]
+    },
+    {
+     "id": "table:sales.order_items",
+     "columns": [
+      "order_id bigint",
+      "order_item_id bigint",
+      "product_id int",
+      "qty int",
+      "line_status text",
+      "line_amt numeric",
+      "tax_amt numeric",
+      "unit_price numeric",
+      "discount_pct numeric",
+      "line_no smallint"
+     ]
+    },
+    {
+     "id": "table:inventory.products",
+     "columns": [
+      "min_order_qty int",
+      "supplier_id int",
+      "category_id int",
+      "product_id int",
+      "country_of_origin char",
+      "currency_code char",
+      "sku text",
+      "is_active bool",
+      "is_hazmat bool",
+      "is_serialized bool",
+      "created_at timestamptz",
+      "discontinued_at timestamptz",
+      "launched_dt date",
+      "updated_at timestamptz",
+      "list_price numeric"
+     ]
+    },
+    {
+     "id": "table:inventory.product_suppliers",
+     "columns": [
+      "supplier_id int",
+      "supplier_sku text",
+      "product_id int",
+      "is_primary bool",
+      "cost_amt numeric",
+      "lead_time_days int"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:inventory.product_suppliers",
+     [
+      "product_id"
+     ],
+     "table:inventory.products",
+     [
+      "product_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:inventory.product_suppliers",
+     [
+      "supplier_id"
+     ],
+     "table:inventory.suppliers",
+     [
+      "supplier_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.orders",
+     [
+      "supplier_id"
+     ],
+     "table:inventory.suppliers",
+     [
+      "supplier_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.order_items",
+     [
+      "product_id"
+     ],
+     "table:inventory.products",
+     [
+      "product_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.order_items",
+     [
+      "order_id"
+     ],
+     "table:sales.orders",
+     [
+      "order_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 2292
+  }
+ },
+ "amb_order_shipments": {
+  "question": "Average days from sales order date to delivery for orders placed in 2026",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:sales.orders",
+     "columns": [
+      "order_id bigint",
+      "sales_rep_id int",
+      "shipping_amt numeric",
+      "total_amt numeric",
+      "total_usd numeric",
+      "delivered_dt timestamptz",
+      "order_dt timestamptz",
+      "shipped_dt timestamptz",
+      "cust_id int",
+      "quote_id int",
+      "territory_id int",
+      "warehouse_id int",
+      "is_gift bool",
+      "status enum: draft|pending|confirmed|shipped|delivered|completed|cancelled|returned",
+      "cancelled_dt timestamptz",
+      "created_at timestamptz",
+      "promised_dt date",
+      "requested_ship_dt date",
+      "updated_at timestamptz",
+      "discount_amt numeric"
+     ]
+    },
+    {
+     "id": "table:ops.shipments",
+     "columns": [
+      "sales_order_id bigint",
+      "carrier_id int",
+      "shipment_id bigint",
+      "delivered_at timestamptz",
+      "shipped_at timestamptz",
+      "tracking_no text",
+      "warehouse_id int",
+      "status text",
+      "freight_cost numeric"
+     ]
+    },
+    {
+     "id": "table:finance.invoices",
+     "columns": [
+      "invoice_id bigint",
+      "order_id bigint",
+      "total_amt numeric",
+      "invoice_no text",
+      "cust_id int",
+      "currency_code char",
+      "status text: draft|open|paid|overdue|void",
+      "created_at timestamptz",
+      "due_dt date",
+      "issued_dt date",
+      "paid_at timestamptz",
+      "subtotal_amt numeric",
+      "tax_amt numeric"
+     ]
+    },
+    {
+     "id": "table:hr.employees",
+     "columns": [
+      "pto_balance_days numeric",
+      "date_of_birth date",
+      "cost_center_id int",
+      "department_id int",
+      "employee_id int",
+      "manager_id int",
+      "employee_number text",
+      "employment_type text: full_time|part_time|contractor|intern",
+      "job_level smallint",
+      "location_country char",
+      "salary_currency char",
+      "work_mode text: remote|hybrid|onsite",
+      "is_active bool",
+      "created_at timestamptz",
+      "hire_dt date",
+      "term_dt date",
+      "updated_at timestamptz",
+      "salary_amt numeric"
+     ]
+    },
+    {
+     "id": "table:ops.orders",
+     "columns": [
+      "order_id int",
+      "total_amt numeric",
+      "buyer_id int",
+      "supplier_id int",
+      "warehouse_id int",
+      "currency_code char",
+      "po_number text",
+      "status text: draft|sent|partial|received|cancelled",
+      "expected_dt date",
+      "ordered_dt date",
+      "received_dt date"
+     ]
+    },
+    {
+     "id": "table:sales.customers",
+     "columns": [
+      "price_list_id int",
+      "first_order_dt date",
+      "shipping_country char",
+      "account_id int",
+      "cust_id int",
+      "territory_id int",
+      "billing_country char",
+      "customer_code text",
+      "default_currency char",
+      "is_active bool",
+      "created_at timestamptz"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:finance.invoices",
+     [
+      "cust_id"
+     ],
+     "table:sales.customers",
+     [
+      "cust_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.invoices",
+     [
+      "order_id"
+     ],
+     "table:sales.orders",
+     [
+      "order_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.orders",
+     [
+      "buyer_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.shipments",
+     [
+      "sales_order_id"
+     ],
+     "table:sales.orders",
+     [
+      "order_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.orders",
+     [
+      "sales_rep_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 2593
+  }
+ },
+ "amb_support_tier": {
+  "question": "How many client accounts are on each support tier?",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:crm.accounts",
+     "columns": [
+      "support_tier_id smallint",
+      "account_id int",
+      "parent_account_id int",
+      "custom_fields jsonb",
+      "tier enum: strategic|enterprise|mid_market|smb",
+      "owner_employee_id int",
+      "region_id smallint",
+      "country_code char",
+      "preferred_currency char",
+      "is_active bool",
+      "lifecycle_stage text",
+      "state_province text",
+      "churned_at timestamptz",
+      "created_at timestamptz",
+      "last_activity_at timestamptz",
+      "updated_at timestamptz",
+      "annual_revenue_amt numeric"
+     ]
+    },
+    {
+     "id": "table:support.tickets",
+     "columns": [
+      "account_id int",
+      "tier_id smallint",
+      "assigned_agent_id int",
+      "contact_id int",
+      "cust_id int",
+      "product_id int",
+      "ticket_id bigint",
+      "csat_score smallint",
+      "status text: new|open|pending_customer|escalated|resolved|closed",
+      "ticket_ref text",
+      "escalated bool",
+      "priority enum: p1|p2|p3|p4",
+      "closed_at timestamptz",
+      "first_response_at timestamptz",
+      "opened_at timestamptz",
+      "resolved_at timestamptz",
+      "sla_due_at timestamptz"
+     ]
+    },
+    {
+     "id": "table:sales.customers",
+     "columns": [
+      "account_id int",
+      "customer_code text",
+      "customer_name text",
+      "cust_id int",
+      "price_list_id int",
+      "territory_id int",
+      "billing_country char",
+      "default_currency char",
+      "shipping_country char",
+      "is_active bool",
+      "created_at timestamptz",
+      "first_order_dt date"
+     ]
+    },
+    {
+     "id": "table:support.tiers",
+     "columns": [
+      "tier_id smallint",
+      "has_phone_support bool",
+      "tier_name text",
+      "price_per_seat_amt numeric",
+      "first_response_sla_h int",
+      "resolution_sla_h int"
+     ]
+    },
+    {
+     "id": "table:crm.contacts",
+     "columns": [
+      "account_id int",
+      "contact_id int",
+      "is_primary bool",
+      "status text",
+      "created_at timestamptz",
+      "date_of_birth date",
+      "last_contacted_at timestamptz"
+     ]
+    },
+    {
+     "id": "table:crm.activities",
+     "columns": [
+      "account_id int",
+      "activity_id bigint",
+      "contact_id int",
+      "employee_id int",
+      "opp_id int",
+      "outcome text",
+      "activity_dt timestamptz",
+      "activity_type text",
+      "duration_min int",
+      "subject text"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:crm.accounts",
+     [
+      "support_tier_id"
+     ],
+     "table:support.tiers",
+     [
+      "tier_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:crm.activities",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:crm.contacts",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.customers",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:support.tickets",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 2310
+  }
+ },
+ "lg_archive_2019_region": {
+  "question": "Total net revenue in the 2019 order archive per region",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:sales.orders_archive_2019",
+     "columns": [
+      "net numeric",
+      "ord_date date",
+      "ord_no varchar",
+      "region_txt varchar",
+      "ord_status char",
+      "archived_at timestamp",
+      "gross numeric",
+      "ccy char",
+      "cust_ref varchar",
+      "rep_initials varchar"
+     ]
+    },
+    {
+     "id": "table:sales.orders",
+     "columns": [
+      "order_id bigint",
+      "territory_id int",
+      "total_amt numeric",
+      "total_usd numeric",
+      "bill_to_country char",
+      "ship_to_country char",
+      "order_dt timestamptz",
+      "cust_id int",
+      "quote_id int",
+      "sales_rep_id int",
+      "warehouse_id int",
+      "channel text: web|sales_rep|partner|marketplace|edi",
+      "is_gift bool",
+      "status enum: draft|pending|confirmed|shipped|delivered|completed|cancelled|returned",
+      "cancelled_dt timestamptz",
+      "created_at timestamptz",
+      "delivered_dt timestamptz",
+      "promised_dt date",
+      "requested_ship_dt date",
+      "shipped_dt timestamptz"
+     ]
+    },
+    {
+     "id": "materialized_view:analytics.mv_monthly_revenue",
+     "columns": [
+      "orders bigint",
+      "revenue_usd numeric",
+      "region_code text",
+      "tier enum: strategic|enterprise|mid_market|smb",
+      "month date"
+     ]
+    },
+    {
+     "id": "table:public.currencies",
+     "columns": [
+      "currency_code char",
+      "currency_name text"
+     ]
+    },
+    {
+     "id": "table:finance.invoices",
+     "columns": [
+      "invoice_id bigint",
+      "order_id bigint",
+      "total_amt numeric",
+      "invoice_no text",
+      "cust_id int",
+      "currency_code char",
+      "status text: draft|open|paid|overdue|void",
+      "created_at timestamptz",
+      "due_dt date",
+      "issued_dt date",
+      "paid_at timestamptz",
+      "subtotal_amt numeric",
+      "tax_amt numeric"
+     ]
+    },
+    {
+     "id": "view:sales.v_order_summary",
+     "columns": [
+      "order_id bigint",
+      "total_amt numeric",
+      "total_usd numeric",
+      "order_dt timestamptz",
+      "region_code text",
+      "status enum: draft|pending|confirmed|shipped|delivered|completed|cancelled|returned",
+      "tier enum: strategic|enterprise|mid_market|smb"
+     ]
+    },
+    {
+     "id": "table:ops.orders",
+     "columns": [
+      "order_id int",
+      "total_amt numeric",
+      "buyer_id int",
+      "supplier_id int",
+      "warehouse_id int",
+      "currency_code char",
+      "po_number text",
+      "status text: draft|sent|partial|received|cancelled",
+      "expected_dt date",
+      "ordered_dt date",
+      "received_dt date"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "materialized_view:analytics.mv_monthly_revenue",
+     [],
+     "table:sales.orders",
+     [],
+     "depends_on"
+    ],
+    [
+     "view:sales.v_order_summary",
+     [],
+     "table:sales.orders",
+     [],
+     "depends_on"
+    ],
+    [
+     "table:finance.invoices",
+     [
+      "currency_code"
+     ],
+     "table:public.currencies",
+     [
+      "currency_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.invoices",
+     [
+      "order_id"
+     ],
+     "table:sales.orders",
+     [
+      "order_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.orders",
+     [
+      "currency_code"
+     ],
+     "table:public.currencies",
+     [
+      "currency_code"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": false,
+   "bytes": 2445
+  }
+ },
+ "wd_employees_hires_2026": {
+  "question": "Employees hired in 2026 with their job title and department name",
+  "context": {
+   "interpreted": [
+    "hired~hire"
+   ],
+   "relations": [
+    {
+     "id": "table:hr.employees",
+     "columns": [
+      "job_title text",
+      "department_id int",
+      "employee_id int",
+      "job_level smallint",
+      "employee_number text",
+      "hire_dt date",
+      "emergency_contact_name text",
+      "first_name text",
+      "cost_center_id int",
+      "manager_id int",
+      "employment_type text: full_time|part_time|contractor|intern",
+      "location_country char",
+      "is_active bool",
+      "created_at timestamptz",
+      "date_of_birth date",
+      "term_dt date",
+      "updated_at timestamptz",
+      "pto_balance_days numeric",
+      "salary_amt numeric"
+     ]
+    },
+    {
+     "id": "table:hr.teams",
+     "columns": [
+      "team_name text",
+      "department_id int",
+      "lead_employee_id int",
+      "team_id int",
+      "created_at timestamptz"
+     ]
+    },
+    {
+     "id": "table:hr.departments",
+     "columns": [
+      "department_id int",
+      "parent_department_id int",
+      "head_employee_id int",
+      "dept_name text",
+      "dept_code text",
+      "location_country char",
+      "is_active bool",
+      "created_at timestamptz",
+      "cost_center_code text"
+     ]
+    },
+    {
+     "id": "table:crm.accounts",
+     "columns": [
+      "employee_count int",
+      "owner_employee_id int",
+      "account_name text",
+      "legal_name text",
+      "account_id int",
+      "parent_account_id int",
+      "region_id smallint",
+      "support_tier_id smallint",
+      "account_number text",
+      "country_code char",
+      "preferred_currency char"
+     ]
+    },
+    {
+     "id": "view:hr.v_employee_directory",
+     "columns": [
+      "job_title text",
+      "employee_id int",
+      "dept_name text",
+      "first_name text",
+      "is_active bool",
+      "last_name text",
+      "location_country char",
+      "manager_id int",
+      "manager_name text"
+     ]
+    },
+    {
+     "id": "table:crm.contacts",
+     "columns": [
+      "job_title text",
+      "department text",
+      "first_name text",
+      "last_name text",
+      "account_id int",
+      "contact_id int",
+      "is_primary bool",
+      "status text",
+      "created_at timestamptz",
+      "date_of_birth date",
+      "last_contacted_at timestamptz"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "view:hr.v_employee_directory",
+     [],
+     "table:hr.departments",
+     [],
+     "depends_on"
+    ],
+    [
+     "table:crm.accounts",
+     [
+      "owner_employee_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:crm.contacts",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:hr.departments",
+     [
+      "head_employee_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:hr.teams",
+     [
+      "lead_employee_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 2115
+  }
+ },
+ "wd_products_margin": {
+  "question": "Which products have the highest margin between list price and unit cost?",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:inventory.products",
+     "columns": [
+      "unit_cost numeric",
+      "list_price numeric",
+      "product_id int",
+      "product_name text",
+      "sku text",
+      "category_id int",
+      "supplier_id int",
+      "country_of_origin char",
+      "currency_code char",
+      "is_active bool",
+      "is_hazmat bool",
+      "is_serialized bool",
+      "created_at timestamptz",
+      "discontinued_at timestamptz",
+      "launched_dt date",
+      "updated_at timestamptz",
+      "min_order_qty int"
+     ]
+    },
+    {
+     "id": "table:sales.order_items",
+     "columns": [
+      "unit_price numeric",
+      "order_item_id bigint",
+      "product_id int",
+      "order_id bigint",
+      "qty int",
+      "line_status text",
+      "line_amt numeric",
+      "tax_amt numeric",
+      "discount_pct numeric",
+      "line_no smallint"
+     ]
+    },
+    {
+     "id": "table:sales.price_list_items",
+     "columns": [
+      "price numeric",
+      "price_list_id int",
+      "product_id int",
+      "min_qty int"
+     ]
+    },
+    {
+     "id": "table:ops.order_lines",
+     "columns": [
+      "unit_cost numeric",
+      "product_id int",
+      "order_id int",
+      "order_line_id int",
+      "qty_ordered int",
+      "qty_received int"
+     ]
+    },
+    {
+     "id": "table:inventory.product_suppliers",
+     "columns": [
+      "cost_amt numeric",
+      "product_id int",
+      "supplier_sku text",
+      "supplier_id int",
+      "is_primary bool",
+      "lead_time_days int"
+     ]
+    },
+    {
+     "id": "table:inventory.item_aliases",
+     "columns": [
+      "product_id int",
+      "item_code text",
+      "alias_id int",
+      "is_primary bool",
+      "created_at timestamptz",
+      "external_system text"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:inventory.item_aliases",
+     [
+      "product_id"
+     ],
+     "table:inventory.products",
+     [
+      "product_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:inventory.product_suppliers",
+     [
+      "product_id"
+     ],
+     "table:inventory.products",
+     [
+      "product_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.order_lines",
+     [
+      "product_id"
+     ],
+     "table:inventory.products",
+     [
+      "product_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.order_items",
+     [
+      "product_id"
+     ],
+     "table:inventory.products",
+     [
+      "product_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.price_list_items",
+     [
+      "product_id"
+     ],
+     "table:inventory.products",
+     [
+      "product_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 1797
+  }
+ },
+ "vg_whats_low_stock": {
+  "question": "What are we running low on?",
+  "context": {
+   "interpreted": [
+    "running~run"
+   ],
+   "relations": [
+    {
+     "id": "table:inventory.stock_levels",
+     "columns": [
+      "qty_on_hand int",
+      "reorder_point int",
+      "reorder_qty int",
+      "product_id int",
+      "warehouse_id int",
+      "last_counted_at timestamptz",
+      "updated_at timestamptz",
+      "qty_on_order int",
+      "qty_reserved int",
+      "bin_location text"
+     ]
+    },
+    {
+     "id": "table:inventory.stock_movements",
+     "columns": [
+      "employee_id int",
+      "movement_id bigint",
+      "product_id int",
+      "warehouse_id int",
+      "movement_type text: receipt|pick|adjustment|transfer_in|transfer_out|return",
+      "moved_at timestamptz",
+      "qty int",
+      "ref_id bigint",
+      "ref_type text"
+     ]
+    },
+    {
+     "id": "table:inventory.products",
+     "columns": [
+      "category_id int",
+      "product_id int",
+      "supplier_id int",
+      "country_of_origin char",
+      "currency_code char",
+      "sku text"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:inventory.stock_levels",
+     [
+      "product_id"
+     ],
+     "table:inventory.products",
+     [
+      "product_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:inventory.stock_movements",
+     [
+      "product_id"
+     ],
+     "table:inventory.products",
+     [
+      "product_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 965
+  }
+ },
+ "vg_who_owes": {
+  "question": "Who owes us money?",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:finance.invoices",
+     "columns": [
+      "invoice_id bigint",
+      "due_dt date",
+      "invoice_no text",
+      "cust_id int",
+      "order_id bigint",
+      "currency_code char",
+      "status text: draft|open|paid|overdue|void",
+      "created_at timestamptz",
+      "issued_dt date",
+      "paid_at timestamptz",
+      "subtotal_amt numeric",
+      "tax_amt numeric",
+      "total_amt numeric"
+     ]
+    },
+    {
+     "id": "table:finance.payments",
+     "columns": [
+      "invoice_id bigint",
+      "payment_id bigint",
+      "currency_code char",
+      "method text: card|wire|ach|paypal|check",
+      "status text: settled|pending|failed|refunded",
+      "paid_dt timestamptz",
+      "amt numeric",
+      "fee_amt numeric"
+     ]
+    },
+    {
+     "id": "table:sales.customers",
+     "columns": [
+      "account_id int",
+      "cust_id int",
+      "price_list_id int",
+      "territory_id int",
+      "billing_country char",
+      "customer_code text",
+      "default_currency char",
+      "shipping_country char",
+      "is_active bool",
+      "created_at timestamptz",
+      "first_order_dt date"
+     ]
+    },
+    {
+     "id": "table:public.currencies",
+     "columns": [
+      "currency_code char",
+      "currency_name text"
+     ]
+    },
+    {
+     "id": "table:finance.invoice_lines",
+     "columns": [
+      "invoice_id bigint",
+      "invoice_line_id bigint",
+      "order_item_id bigint",
+      "line_amt numeric",
+      "qty int",
+      "tax_amt numeric",
+      "unit_price numeric",
+      "line_no smallint"
+     ]
+    },
+    {
+     "id": "table:finance.gl_entries",
+     "columns": [
+      "cost_center_id int",
+      "entry_id bigint",
+      "gl_account_id int",
+      "currency_code char",
+      "entry_dt date",
+      "posted_at timestamptz",
+      "credit_amt numeric",
+      "debit_amt numeric"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:finance.gl_entries",
+     [
+      "currency_code"
+     ],
+     "table:public.currencies",
+     [
+      "currency_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.invoice_lines",
+     [
+      "invoice_id"
+     ],
+     "table:finance.invoices",
+     [
+      "invoice_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.invoices",
+     [
+      "currency_code"
+     ],
+     "table:public.currencies",
+     [
+      "currency_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.invoices",
+     [
+      "cust_id"
+     ],
+     "table:sales.customers",
+     [
+      "cust_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.payments",
+     [
+      "invoice_id"
+     ],
+     "table:finance.invoices",
+     [
+      "invoice_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 1886
+  }
+ },
+ "vg_churn": {
+  "question": "Why are customers leaving?",
+  "context": {
+   "interpreted": [
+    "leaving~leave"
+   ],
+   "relations": [
+    {
+     "id": "table:finance.subscriptions",
+     "columns": [
+      "cancel_reason text",
+      "account_id int",
+      "subscription_id int",
+      "cancelled_at timestamptz",
+      "current_period_end timestamptz",
+      "plan_id int",
+      "sales_rep_id int",
+      "billing_period text: monthly|annual",
+      "currency_code char",
+      "status text: trialing|active|past_due|cancelled|paused",
+      "created_at timestamptz",
+      "started_at timestamptz",
+      "mrr_amt numeric"
+     ]
+    },
+    {
+     "id": "table:sales.customers",
+     "columns": [
+      "account_id int",
+      "customer_code text",
+      "customer_name text",
+      "cust_id int",
+      "price_list_id int",
+      "territory_id int",
+      "billing_country char",
+      "default_currency char",
+      "shipping_country char",
+      "is_active bool",
+      "created_at timestamptz",
+      "first_order_dt date"
+     ]
+    },
+    {
+     "id": "table:crm.accounts",
+     "columns": [
+      "account_id int",
+      "parent_account_id int",
+      "churned_at timestamptz",
+      "custom_fields jsonb",
+      "owner_employee_id int",
+      "region_id smallint",
+      "support_tier_id smallint",
+      "country_code char",
+      "preferred_currency char",
+      "is_active bool",
+      "lifecycle_stage text",
+      "state_province text",
+      "tier enum: strategic|enterprise|mid_market|smb",
+      "created_at timestamptz",
+      "last_activity_at timestamptz",
+      "updated_at timestamptz",
+      "annual_revenue_amt numeric"
+     ]
+    },
+    {
+     "id": "table:finance.gl_entries",
+     "columns": [
+      "gl_account_id int",
+      "cost_center_id int",
+      "entry_id bigint",
+      "currency_code char"
+     ]
+    },
+    {
+     "id": "table:hr.employees",
+     "columns": [
+      "termination_reason text",
+      "cost_center_id int",
+      "department_id int",
+      "employee_id int",
+      "manager_id int",
+      "employee_number text",
+      "employment_type text: full_time|part_time|contractor|intern",
+      "job_level smallint",
+      "location_country char",
+      "salary_currency char",
+      "work_mode text: remote|hybrid|onsite"
+     ]
+    },
+    {
+     "id": "table:public.currencies",
+     "columns": [
+      "currency_code char",
+      "currency_name text"
+     ]
+    },
+    {
+     "id": "table:hr.time_off",
+     "columns": [
+      "end_dt date",
+      "leave_type text",
+      "approver_id int",
+      "employee_id int",
+      "request_id int",
+      "status text: requested|approved|rejected|cancelled",
+      "requested_at timestamptz",
+      "start_dt date",
+      "days numeric"
+     ]
+    },
+    {
+     "id": "table:sales.orders",
+     "columns": [
+      "cancel_reason text",
+      "cancelled_dt timestamptz",
+      "cust_id int",
+      "order_id bigint",
+      "quote_id int",
+      "sales_rep_id int",
+      "territory_id int",
+      "warehouse_id int",
+      "bill_to_country char",
+      "channel text: web|sales_rep|partner|marketplace|edi",
+      "currency_code char",
+      "order_no text",
+      "is_gift bool",
+      "status enum: draft|pending|confirmed|shipped|delivered|completed|cancelled|returned",
+      "created_at timestamptz",
+      "delivered_dt timestamptz",
+      "order_dt timestamptz",
+      "promised_dt date",
+      "requested_ship_dt date",
+      "shipped_dt timestamptz"
+     ]
+    },
+    {
+     "id": "table:finance.chart_of_accounts",
+     "columns": [
+      "gl_account_id int",
+      "parent_gl_account_id int",
+      "is_active bool",
+      "account_code text",
+      "account_name text",
+      "account_type text: asset|liability|equity|revenue|expense"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:crm.accounts",
+     [
+      "owner_employee_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:crm.accounts",
+     [
+      "preferred_currency"
+     ],
+     "table:public.currencies",
+     [
+      "currency_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.gl_entries",
+     [
+      "gl_account_id"
+     ],
+     "table:finance.chart_of_accounts",
+     [
+      "gl_account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.gl_entries",
+     [
+      "currency_code"
+     ],
+     "table:public.currencies",
+     [
+      "currency_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.subscriptions",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:hr.time_off",
+     [
+      "employee_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.customers",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.orders",
+     [
+      "cust_id"
+     ],
+     "table:sales.customers",
+     [
+      "cust_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 3547
+  }
+ }
+}

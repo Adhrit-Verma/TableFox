@@ -2,6 +2,73 @@
 
 Run date: 2026-10-11. Every number below comes from the raw JSON files in this folder. No task was dropped.
 
+## After the fixes
+
+The gaps measured below were then fixed in the backend. Each change has unit tests (pytest and ruff pass):
+
+| Gap (first run) | Change |
+|---|---|
+| Sensitive-column check read result names only; aliases and expressions bypassed it | Every output value is traced through the `EXPLAIN (VERBOSE)` output lists to its source table column (`query_policy.plan_source_columns`) and refused **before execution**. Plans with inputs EXPLAIN does not print (`VALUES`, recursive CTEs) are checked conservatively. New markers: national/tax/passport IDs, IBAN, card number and last 4, PAN, salary, wage, payroll amounts, key prefix and hash. Names that describe a secret rather than hold it (`api_key_id`, `password_changed_at`) are no longer flagged. IP addresses are opt-in (`DBMAP_BLOCK_IP_ADDRESSES`); extra markers via `DBMAP_SENSITIVE_MARKERS` |
+| Batch errors were a generic "Error executing tool" | Each statement runs in a savepoint; a failing one returns PostgreSQL's message and hint (`column "x" does not exist ... Hint: Perhaps you meant ...`) and the rest still run. Data errors (class 22, which can quote row values) return only their condition name; connection errors never echo connection details |
+| Packs lacked date, amount and status columns and types | Every ranked relation lists its status, date/timestamp and amount columns; tables of 10 columns or fewer are listed in full; each column carries a short type and, for enums and `CHECK (col IN (...))` lists, its allowed values (`status text: draft|open|paid|overdue|void`). Materialized-view columns are now introspected (`information_schema` omits them) |
+| Estimated-row policy refused `GROUP BY date_trunc(...)` | The row estimate is a warning, not a refusal, when TableFox's own `LIMIT` (at most `DBMAP_MAX_QUERY_ROWS`) bounds the result; the cost ceiling is unchanged |
+| Write guard refused `action = 'delete'`; `pg_sleep` ran until the timeout | Keywords inside plain string literals and comments are ignored; ambiguous literals (backslashes, `E''`, dollar quotes, unterminated) keep the strict check. `pg_sleep`, `pg_sleep_for` and `pg_sleep_until` are blocked, and quoted function names (`"pg_read_file"(...)`, which bypassed the function list) are caught |
+| 4–5-table joins at 80% recall@6 | Relations the question names in full (`invoices ... by region`) are joined through the shortest foreign-key chain that does not pass through a shared lookup table (`invoices -> currencies <- regions`), and those connecting tables are listed first. "issued" no longer expands to support issues |
+| Optional | `DBMAP_TENANT_KEY` accepts `new,old` (MultiFernet); saved connections are re-encrypted with the new key at start-up. `benchmark_corpus.py` compares schema-qualified names and actual rows |
+
+Security invariants are unchanged: read-only transactions, SELECT/WITH-only validation, the join policy and the read-only-role check.
+
+### Before and after, same machine
+
+Re-measured in a Linux container (4 vCPU, 15 GB RAM, PostgreSQL 16.15, Python 3.13) on the same database rebuilt from `scripts/bench/*.sql`. "Before" is commit `5b092e6` (after the retrieval update), "after" is this change. Latency here is not comparable with the Windows figures further down.
+
+| Measure (70 tasks, 3 repeats) | Before | After |
+|---|---|---|
+| Recall@6, all 129 needed relations | 93.0% | **96.9%** |
+| 4–5-table joins, recall@6 / tasks complete | 80.0% / 2 of 7 | **96.4% / 6 of 7** |
+| Tasks with every needed table in the top 6 | 62 / 70 | **66 / 70** |
+| Row-level answer match | 63 / 70 (7 refused by policy) | **67 / 70** (3 refused) |
+| Policy refusals | 3 row-estimate, 2 sensitive false positives, 2 join | 1 cost, 2 join (no declared FK) |
+| Warm median / p95 / p99, both calls | 48.9 / 248 / 603 ms | 51.5 / 237 / 533 ms |
+| `task_context` median / p95 | 11.1 / 16.2 ms | 10.8 / 15.7 ms |
+| Mean context tokens | 960 | **1,447** (median 1,560; largest pack 3.5 KB of the 6 KB budget, none trimmed) |
+| Mean tokens, both calls | 1,887 | 2,395 (conventional path: 2,493) |
+| Vague holdout 1 / holdout 2, recall@6 | 89.1% / 81.0% | 89.1% / 81.0% (no change) |
+
+The packs are the trade-off: about 490 more tokens per question buy the columns the blind test showed were missing. `benchmark_corpus.py` on this corpus now reports 67/70 recall (anywhere in the pack) and 67/70 matching answers, instead of 0/70 and 59/70.
+
+**Safety suite** (`safety.json`), extended with 8 more bypass shapes and 5 reads that must run:
+
+| | Before | After |
+|---|---|---|
+| Writes refused, database unchanged | 17 / 17 (`pg_sleep` only by the 15 s timeout) | 17 / 17 (`pg_sleep` refused by the guard) |
+| Sensitive reads refused (29 cases) | 10 (one of them only by the join policy) | **29** |
+| Alias, expression, concat, union, CTE, subquery, lateral `VALUES`, scalar subquery, `to_jsonb(row)` | 1 of 12 | **12 of 12** |
+| Reads that must run (`action = 'delete'`, `api_key_id`, counts and filters on email, a directory view) | 3 of 5 | **5 of 5** |
+| Returned by design | `ip_address` was blocked, `client_ip` returned | both returned; blocked with `DBMAP_BLOCK_IP_ADDRESSES=true` |
+
+**Blind authoring, re-authored** (`blind2-*.json`). Packs for the same 28 questions were generated with the new code. A separate agent that could read only the questions and packs (no repository, schema SQL, ground truth, database or earlier attempts) wrote one statement per task. Each ran once, and results were judged against the ground truth by mapping columns by value, then reviewing every non-identical result by hand. Extra columns, different labels and more rows than an arbitrary ground-truth `LIMIT` count as correct.
+
+| Verdict | First run | After |
+|---|---|---|
+| Correct | 13 | **21** |
+| Partially correct | 2 | 3 |
+| Wrong | 8 | 2 |
+| TableFox missing context | 4 | 0 (one wrong answer followed a table missing from the pack) |
+| Policy refusal | 1 | 2 (both over the unchanged cost limit) |
+| Query errors | 8 guessed column names | 0 |
+
+The first run's author had read the database hand-over note; this one had not. With no errors on the first try, the "retry after a useful error message" case could not be measured here; it is covered by unit and integration tests. Remaining misses: an interpretation of "active" subscriptions, a materialized view whose filter the pack does not show, a pack without employee names, and the territory-versus-account reading of "sales region".
+
+**Still open:**
+- Sensitive columns are still recognised **by name**. Values in generically named columns are not detected: the blind test returned salary changes from `public.change_history.old_value`. Database grants remain the guarantee.
+- Packs cost about 490 more tokens per question.
+- Party tables used as ranked relations do not list name columns (`first_name`, `last_name`).
+- When two tables are linked by several foreign keys, the pack shows only the one on the chosen path (`departments.head_employee_id`, not `employees.department_id`).
+- Aggregates over a sensitive column (`count(distinct email)`) are refused, conservatively.
+
+Files: `run-before-fixes.json` / `run-after-fixes.json`, `safety-before-fixes.json` / `safety.json`, `blind2-contexts.json` → `blind2-attempts.json` → `blind2-raw.json` → `blind2-authoring.json`. Reproduce with `eval_retrieval.py` as below, and `benchmark_large.py run --label after-fixes`, `safety` and `blind --prefix blind2`.
+
 ## Update: better retrieval for vague questions
 
 The first run below found vague business questions to be the weakest category (31% recall@6). The retrieval layer (`services/dbmap/src/dbmap/retrieval.py`) was then improved with:
@@ -30,7 +97,7 @@ The first run below found vague business questions to be the weakest category (3
 | **Holdout 2** | **70.7% (24/40)** | **81.0% (30/40)** | Scored once, after tuning stopped. This is the honest generalisation figure |
 | Original 38-table HR corpus (different schema, 14 tasks) | 70.8% (8/14) | 95.8% (13/14) | Regression check on another database |
 
-Reproduce retrieval scores with `scripts/bench/eval_retrieval.py` (no queries are run). The sections below describe the first run; everything else (latency, safety, the blind test) was measured before this change, and the blind test has not been re-run.
+Reproduce retrieval scores with `scripts/bench/eval_retrieval.py` (no queries are run). The sections below describe the first run; latency, safety and the blind test there were measured before this change. See [After the fixes](#after-the-fixes) for the re-run.
 
 ## Headline
 

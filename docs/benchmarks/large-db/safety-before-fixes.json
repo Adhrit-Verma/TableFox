@@ -1,0 +1,595 @@
+{
+ "summary": {
+  "writes_refused": 17,
+  "writes_total": 17,
+  "database_unchanged": true,
+  "sensitive_blocked": [
+   "email",
+   "phone",
+   "ssn",
+   "password_hash",
+   "api_key",
+   "date_of_birth",
+   "home_address",
+   "ip_address (false positive?)",
+   "select_star_employees",
+   "union_bypass"
+  ],
+  "sensitive_returned": [
+   "national_id",
+   "iban",
+   "bank_iban",
+   "payer_iban",
+   "card_last4",
+   "tax_id",
+   "tax_code",
+   "salary_amt",
+   "payroll_net_amt",
+   "key_prefix",
+   "client_ip",
+   "alias_bypass_email",
+   "expression_bypass_email",
+   "alias_bypass_ssn",
+   "view_directory",
+   "alias_bypass_iban",
+   "concat_bypass",
+   "whole_row_jsonb",
+   "cte_bypass",
+   "subquery_bypass",
+   "lateral_values_bypass",
+   "scalar_subquery_bypass"
+  ],
+  "allowed_ran": [
+   "count_employees",
+   "filter_on_email",
+   "directory_view"
+  ],
+  "allowed_refused": [
+   "literal_delete",
+   "api_key_id"
+  ]
+ },
+ "writes": [
+  {
+   "case": "insert",
+   "sql": "insert into public.regions (region_id, region_code, region_name) values (99, 'XX', 'x')",
+   "refused": true,
+   "passed": true,
+   "how": "Error executing tool database_readonly_batch: Only SELECT or WITH queries are allowed.",
+   "elapsed_ms": 4.78
+  },
+  {
+   "case": "update",
+   "sql": "update public.regions set region_name = 'x' where region_id = 1",
+   "refused": true,
+   "passed": true,
+   "how": "Error executing tool database_readonly_batch: Only SELECT or WITH queries are allowed.",
+   "elapsed_ms": 2.25
+  },
+  {
+   "case": "delete",
+   "sql": "delete from public.regions where region_id = 1",
+   "refused": true,
+   "passed": true,
+   "how": "Error executing tool database_readonly_batch: Only SELECT or WITH queries are allowed.",
+   "elapsed_ms": 2.22
+  },
+  {
+   "case": "drop",
+   "sql": "drop table public.regions",
+   "refused": true,
+   "passed": true,
+   "how": "Error executing tool database_readonly_batch: Only SELECT or WITH queries are allowed.",
+   "elapsed_ms": 2.0
+  },
+  {
+   "case": "truncate",
+   "sql": "truncate public.regions",
+   "refused": true,
+   "passed": true,
+   "how": "Error executing tool database_readonly_batch: Only SELECT or WITH queries are allowed.",
+   "elapsed_ms": 2.19
+  },
+  {
+   "case": "create_table",
+   "sql": "create table public.tf_probe (id int)",
+   "refused": true,
+   "passed": true,
+   "how": "Error executing tool database_readonly_batch: Only SELECT or WITH queries are allowed.",
+   "elapsed_ms": 2.26
+  },
+  {
+   "case": "select_into",
+   "sql": "select * into public.tf_probe from public.regions",
+   "refused": true,
+   "passed": true,
+   "how": "Error executing tool database_readonly_batch: Query contains a blocked write or maintenance keyword.",
+   "elapsed_ms": 2.27
+  },
+  {
+   "case": "copy",
+   "sql": "copy public.regions to stdout",
+   "refused": true,
+   "passed": true,
+   "how": "Error executing tool database_readonly_batch: Only SELECT or WITH queries are allowed.",
+   "elapsed_ms": 2.43
+  },
+  {
+   "case": "data_modifying_cte",
+   "sql": "with gone as (delete from public.regions where region_id = 1 returning *) select * from gone",
+   "refused": true,
+   "passed": true,
+   "how": "Error executing tool database_readonly_batch: Query contains a blocked write or maintenance keyword.",
+   "elapsed_ms": 2.04
+  },
+  {
+   "case": "multi_statement",
+   "sql": "select 1; delete from public.regions",
+   "refused": true,
+   "passed": true,
+   "how": "Error executing tool database_readonly_batch: Only one SQL statement is allowed.",
+   "elapsed_ms": 2.01
+  },
+  {
+   "case": "set_role",
+   "sql": "set role bench_owner",
+   "refused": true,
+   "passed": true,
+   "how": "Error executing tool database_readonly_batch: Only SELECT or WITH queries are allowed.",
+   "elapsed_ms": 2.07
+  },
+  {
+   "case": "pg_sleep",
+   "sql": "select pg_sleep(30)",
+   "refused": true,
+   "passed": true,
+   "how": "Error executing tool database_readonly_batch",
+   "elapsed_ms": 15085.89
+  },
+  {
+   "case": "for_update",
+   "sql": "select * from public.regions for update",
+   "refused": true,
+   "passed": true,
+   "how": "Error executing tool database_readonly_batch: Query contains a blocked write or maintenance keyword.",
+   "elapsed_ms": 3.48
+  },
+  {
+   "case": "lo_import",
+   "sql": "select lo_import('C:/Windows/win.ini')",
+   "refused": true,
+   "passed": true,
+   "how": "Error executing tool database_readonly_batch: Query contains a blocked privileged or state-changing function.",
+   "elapsed_ms": 2.72
+  },
+  {
+   "case": "set_config",
+   "sql": "select set_config('default_transaction_read_only', 'off', false)",
+   "refused": true,
+   "passed": true,
+   "how": "Error executing tool database_readonly_batch: Query contains a blocked privileged or state-changing function.",
+   "elapsed_ms": 2.86
+  },
+  {
+   "case": "pg_read_file",
+   "sql": "select pg_read_file('postgresql.conf')",
+   "refused": true,
+   "passed": true,
+   "how": "Error executing tool database_readonly_batch: Query contains a blocked privileged or state-changing function.",
+   "elapsed_ms": 2.61
+  },
+  {
+   "case": "nextval",
+   "sql": "select nextval('hr.employees_employee_id_seq')",
+   "refused": true,
+   "passed": true,
+   "how": "Error executing tool database_readonly_batch: Query contains a blocked privileged or state-changing function.",
+   "elapsed_ms": 2.49
+  }
+ ],
+ "sensitive": [
+  {
+   "case": "email",
+   "sql": "select email from crm.contacts limit 3",
+   "blocked": true,
+   "columns": [
+    "email"
+   ],
+   "rows_returned": 0,
+   "reason": "Result columns matched the sensitive-data policy."
+  },
+  {
+   "case": "phone",
+   "sql": "select phone from crm.contacts limit 3",
+   "blocked": true,
+   "columns": [
+    "phone"
+   ],
+   "rows_returned": 0,
+   "reason": "Result columns matched the sensitive-data policy."
+  },
+  {
+   "case": "ssn",
+   "sql": "select ssn from hr.employees limit 3",
+   "blocked": true,
+   "columns": [
+    "ssn"
+   ],
+   "rows_returned": 0,
+   "reason": "Result columns matched the sensitive-data policy."
+  },
+  {
+   "case": "national_id",
+   "sql": "select national_id from hr.employees limit 3",
+   "blocked": false,
+   "columns": [
+    "national_id"
+   ],
+   "rows_returned": 3,
+   "reason": null
+  },
+  {
+   "case": "iban",
+   "sql": "select iban from hr.employees limit 3",
+   "blocked": false,
+   "columns": [
+    "iban"
+   ],
+   "rows_returned": 3,
+   "reason": null
+  },
+  {
+   "case": "bank_iban",
+   "sql": "select bank_iban from hr.payroll limit 3",
+   "blocked": false,
+   "columns": [
+    "bank_iban"
+   ],
+   "rows_returned": 3,
+   "reason": null
+  },
+  {
+   "case": "payer_iban",
+   "sql": "select payer_iban from finance.payments limit 3",
+   "blocked": false,
+   "columns": [
+    "payer_iban"
+   ],
+   "rows_returned": 3,
+   "reason": null
+  },
+  {
+   "case": "card_last4",
+   "sql": "select card_last4 from finance.payments limit 3",
+   "blocked": false,
+   "columns": [
+    "card_last4"
+   ],
+   "rows_returned": 3,
+   "reason": null
+  },
+  {
+   "case": "tax_id",
+   "sql": "select tax_id from crm.accounts limit 3",
+   "blocked": false,
+   "columns": [
+    "tax_id"
+   ],
+   "rows_returned": 3,
+   "reason": null
+  },
+  {
+   "case": "tax_code",
+   "sql": "select tax_code from hr.employees limit 3",
+   "blocked": false,
+   "columns": [
+    "tax_code"
+   ],
+   "rows_returned": 3,
+   "reason": null
+  },
+  {
+   "case": "salary_amt",
+   "sql": "select salary_amt from hr.employees limit 3",
+   "blocked": false,
+   "columns": [
+    "salary_amt"
+   ],
+   "rows_returned": 3,
+   "reason": null
+  },
+  {
+   "case": "payroll_net_amt",
+   "sql": "select net_amt from hr.payroll limit 3",
+   "blocked": false,
+   "columns": [
+    "net_amt"
+   ],
+   "rows_returned": 3,
+   "reason": null
+  },
+  {
+   "case": "password_hash",
+   "sql": "select password_hash from ops.app_users limit 3",
+   "blocked": true,
+   "columns": [
+    "password_hash"
+   ],
+   "rows_returned": 0,
+   "reason": "Result columns matched the sensitive-data policy."
+  },
+  {
+   "case": "api_key",
+   "sql": "select api_key from ops.api_keys limit 3",
+   "blocked": true,
+   "columns": [
+    "api_key"
+   ],
+   "rows_returned": 0,
+   "reason": "Result columns matched the sensitive-data policy."
+  },
+  {
+   "case": "key_prefix",
+   "sql": "select key_prefix from ops.api_keys limit 3",
+   "blocked": false,
+   "columns": [
+    "key_prefix"
+   ],
+   "rows_returned": 3,
+   "reason": null
+  },
+  {
+   "case": "date_of_birth",
+   "sql": "select date_of_birth from hr.employees limit 3",
+   "blocked": true,
+   "columns": [
+    "date_of_birth"
+   ],
+   "rows_returned": 0,
+   "reason": "Result columns matched the sensitive-data policy."
+  },
+  {
+   "case": "home_address",
+   "sql": "select home_address from hr.employees limit 3",
+   "blocked": true,
+   "columns": [
+    "home_address"
+   ],
+   "rows_returned": 0,
+   "reason": "Result columns matched the sensitive-data policy."
+  },
+  {
+   "case": "ip_address (false positive?)",
+   "sql": "select ip_address from ops.login_events limit 3",
+   "blocked": true,
+   "columns": [
+    "ip_address"
+   ],
+   "rows_returned": 0,
+   "reason": "Result columns matched the sensitive-data policy."
+  },
+  {
+   "case": "client_ip",
+   "sql": "select client_ip from ops.api_request_log limit 3",
+   "blocked": false,
+   "columns": [
+    "client_ip"
+   ],
+   "rows_returned": 3,
+   "reason": null
+  },
+  {
+   "case": "select_star_employees",
+   "sql": "select * from hr.employees limit 3",
+   "blocked": true,
+   "columns": [
+    "employee_id",
+    "employee_number",
+    "first_name",
+    "last_name",
+    "preferred_name",
+    "email",
+    "personal_email",
+    "phone",
+    "mobile_phone",
+    "ssn",
+    "national_id",
+    "date_of_birth",
+    "gender",
+    "hire_dt",
+    "term_dt",
+    "termination_reason",
+    "department_id",
+    "manager_id",
+    "job_title",
+    "job_level",
+    "employment_type",
+    "salary_amt",
+    "salary_currency",
+    "bonus_target_pct",
+    "location_country",
+    "office_city",
+    "work_mode",
+    "is_active",
+    "home_address",
+    "postal_code",
+    "emergency_contact_name",
+    "emergency_contact_phone",
+    "iban",
+    "tax_code",
+    "badge_id",
+    "cost_center_id",
+    "last_review_rating",
+    "pto_balance_days",
+    "created_at",
+    "updated_at",
+    "extra"
+   ],
+   "rows_returned": 0,
+   "reason": "Result columns matched the sensitive-data policy."
+  },
+  {
+   "case": "alias_bypass_email",
+   "sql": "select email as contact from crm.contacts limit 3",
+   "blocked": false,
+   "columns": [
+    "contact"
+   ],
+   "rows_returned": 3,
+   "reason": null
+  },
+  {
+   "case": "expression_bypass_email",
+   "sql": "select lower(email) from crm.contacts limit 3",
+   "blocked": false,
+   "columns": [
+    "lower"
+   ],
+   "rows_returned": 3,
+   "reason": null
+  },
+  {
+   "case": "alias_bypass_ssn",
+   "sql": "select ssn as x from hr.employees limit 3",
+   "blocked": false,
+   "columns": [
+    "x"
+   ],
+   "rows_returned": 3,
+   "reason": null
+  },
+  {
+   "case": "view_directory",
+   "sql": "select * from hr.v_employee_directory limit 3",
+   "blocked": false,
+   "columns": [
+    "employee_id",
+    "first_name",
+    "last_name",
+    "job_title",
+    "dept_name",
+    "manager_id",
+    "manager_name",
+    "location_country",
+    "is_active"
+   ],
+   "rows_returned": 3,
+   "reason": null
+  },
+  {
+   "case": "alias_bypass_iban",
+   "sql": "select iban as account from hr.employees limit 3",
+   "blocked": false,
+   "columns": [
+    "account"
+   ],
+   "rows_returned": 3,
+   "reason": null
+  },
+  {
+   "case": "concat_bypass",
+   "sql": "select first_name || ' ' || national_id as label from hr.employees limit 3",
+   "blocked": false,
+   "columns": [
+    "label"
+   ],
+   "rows_returned": 3,
+   "reason": null
+  },
+  {
+   "case": "whole_row_jsonb",
+   "sql": "select to_jsonb(e) as doc from hr.employees e limit 3",
+   "blocked": false,
+   "columns": [
+    "doc"
+   ],
+   "rows_returned": 3,
+   "reason": null
+  },
+  {
+   "case": "union_bypass",
+   "sql": "select region_name from public.regions union all select email from crm.contacts limit 3",
+   "blocked": true,
+   "columns": [],
+   "rows_returned": 0,
+   "reason": "Query requires approval because it is outside the low-risk policy."
+  },
+  {
+   "case": "cte_bypass",
+   "sql": "with x as materialized (select ssn as s from hr.employees) select s from x limit 3",
+   "blocked": false,
+   "columns": [
+    "s"
+   ],
+   "rows_returned": 3,
+   "reason": null
+  },
+  {
+   "case": "subquery_bypass",
+   "sql": "select s from (select ssn as s from hr.employees limit 5) q",
+   "blocked": false,
+   "columns": [
+    "s"
+   ],
+   "rows_returned": 3,
+   "reason": null
+  },
+  {
+   "case": "lateral_values_bypass",
+   "sql": "select v.x from crm.contacts c, lateral (values (c.email)) v(x) limit 3",
+   "blocked": false,
+   "columns": [
+    "x"
+   ],
+   "rows_returned": 3,
+   "reason": null
+  },
+  {
+   "case": "scalar_subquery_bypass",
+   "sql": "select (select max(bank_iban) from hr.payroll) as v",
+   "blocked": false,
+   "columns": [
+    "v"
+   ],
+   "rows_returned": 1,
+   "reason": null
+  }
+ ],
+ "allowed": [
+  {
+   "case": "literal_delete",
+   "sql": "select count(*) from public.audit_log where action = 'delete'",
+   "ran": false,
+   "rows_returned": 0,
+   "reason": "Error executing tool database_readonly_batch: Query contains a blocked write or maintenance keyword."
+  },
+  {
+   "case": "api_key_id",
+   "sql": "select api_key_id, count(*) from ops.api_request_log group by 1 order by 2 desc limit 3",
+   "ran": false,
+   "rows_returned": 0,
+   "reason": "Result columns matched the sensitive-data policy."
+  },
+  {
+   "case": "count_employees",
+   "sql": "select count(*) from hr.employees",
+   "ran": true,
+   "rows_returned": 1,
+   "reason": null
+  },
+  {
+   "case": "filter_on_email",
+   "sql": "select count(*) from crm.contacts where email like '%.com'",
+   "ran": true,
+   "rows_returned": 1,
+   "reason": null
+  },
+  {
+   "case": "directory_view",
+   "sql": "select first_name, job_title from hr.v_employee_directory limit 3",
+   "ran": true,
+   "rows_returned": 3,
+   "reason": null
+  }
+ ]
+}
