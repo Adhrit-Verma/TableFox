@@ -261,8 +261,9 @@ def privacy_page() -> str:
              "To delete everything associated with your account, email "
              "<a class=link href='mailto:works.omen@gmail.com'>works.omen@gmail.com</a>.</p>")),
             ("Security", ("<p>Connections require SSL and a public address; only read-only database users are accepted; "
-             "every query runs inside a read-only transaction with timeouts; columns named like emails, phone numbers and "
-             "passwords are left out of results (a name-based safety net; grant TableFox's user only the columns it needs).</p>")),
+             "every query runs inside a read-only transaction with timeouts; personal data such as emails, phone numbers, "
+             "ID numbers and passwords is refused, even when a query renames it (columns are recognised by name, so grant TableFox's "
+             "user only the columns it needs).</p>")),
         ],
     )
 

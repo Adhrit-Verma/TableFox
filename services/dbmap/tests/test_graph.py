@@ -242,7 +242,7 @@ class GraphEngineTests(unittest.TestCase):
         snapshot = GraphEngine("testdb").build(metadata)
 
         context = RetrievalIndex(snapshot).context("flight duty time")
-        columns = context["relations"][0]["columns"]
+        columns = [column.split(" ")[0] for column in context["relations"][0]["columns"]]
 
         self.assertIn("flight_duty_time", columns)
         self.assertIn("hours_flight_block", columns)

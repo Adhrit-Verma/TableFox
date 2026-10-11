@@ -167,6 +167,133 @@ class TermExpansionTests(unittest.TestCase):
         self.assertIn("table:public.employees", ids)
 
 
+def wide_orders_metadata():
+    """One wide transaction table whose date, amount and status names a question rarely uses."""
+    def column(name, data_type="integer", **extra):
+        return {"schema": "sales", "table": "orders", "name": name, "data_type": data_type, **extra}
+
+    filler = [column(f"attribute_{number}", "text") for number in range(12)]
+    return {
+        "relations": [
+            {"schema": "sales", "name": "orders", "kind": "table", "row_estimate": 900_000},
+            {"schema": "sales", "name": "regions", "kind": "table", "row_estimate": 10},
+        ],
+        "columns": [
+            column("order_id", "bigint"),
+            column("region_id"),
+            *filler,
+            column("order_dt", "timestamp with time zone"),
+            column("total_amt", "numeric"),
+            column("status", "text"),
+            column("channel", "USER-DEFINED", allowed_values=["web", "partner"]),
+            column("is_test", "boolean"),
+            {"schema": "sales", "table": "regions", "name": "region_id", "data_type": "integer"},
+            {"schema": "sales", "table": "regions", "name": "region_name", "data_type": "text"},
+        ],
+        "constraints": [
+            {
+                "schema": "sales", "table": "orders", "name": "orders_region_id_fkey", "type": "FOREIGN KEY",
+                "columns": ["region_id"], "foreign_schema": "sales", "foreign_table": "regions",
+                "foreign_columns": ["region_id"],
+            },
+            {
+                "schema": "sales", "table": "orders", "name": "orders_status_check", "type": "CHECK",
+                "columns": ["status"],
+                "definition": "CHECK ((status = ANY (ARRAY['open'::text, 'paid'::text, 'void'::text])))",
+            },
+        ],
+        "indexes": [], "dependencies": [], "usage": [], "usage_status": "disabled",
+    }
+
+
+class PackColumnTests(unittest.TestCase):
+    def setUp(self):
+        self.index = RetrievalIndex(GraphEngine("shopdb").build(wide_orders_metadata()))
+
+    def columns(self, question, relation_id="table:sales.orders", **options):
+        context = self.index.context(question, **options)
+        return next(item["columns"] for item in context["relations"] if item["id"] == relation_id)
+
+    def test_dates_amounts_and_status_are_listed_with_types(self):
+        columns = self.columns("orders per region")
+
+        self.assertIn("order_dt timestamptz", columns)
+        self.assertIn("total_amt numeric", columns)
+        self.assertIn("status text: open|paid|void", columns)
+        self.assertIn("channel enum: web|partner", columns)
+        self.assertIn("is_test bool", columns)
+        self.assertIn("order_id bigint", columns)
+        # Wide tables are not listed in full.
+        self.assertNotIn("attribute_7 text", columns)
+
+    def test_narrow_tables_are_listed_in_full(self):
+        self.assertEqual(
+            self.columns("region names", "table:sales.regions"),
+            ["region_name text", "region_id int"],
+        )
+
+    def test_essential_columns_respect_the_byte_budget(self):
+        context = self.index.context("orders per region", max_bytes=2048)
+        self.assertLessEqual(context["bytes"], 2048)
+
+
+def chain_metadata():
+    """invoices -> customers -> accounts -> regions, plus a shared currencies lookup."""
+    def column(table, name, data_type="integer"):
+        return {"schema": "public", "table": table, "name": name, "data_type": data_type}
+
+    def fk(table, col, target):
+        return {
+            "schema": "public", "table": table, "name": f"{table}_{col}_fkey", "type": "FOREIGN KEY",
+            "columns": [col], "foreign_schema": "public", "foreign_table": target, "foreign_columns": ["id"],
+        }
+
+    tables = {
+        "invoices": [column("invoices", "customer_id"), column("invoices", "currency_id"),
+                     column("invoices", "total_amt", "numeric"), column("invoices", "issued_dt", "date")],
+        "customers": [column("customers", "account_id"), column("customers", "code", "text")],
+        "accounts": [column("accounts", "region_id"), column("accounts", "legal_name", "text")],
+        "regions": [column("regions", "currency_id"), column("regions", "region_name", "text")],
+        "currencies": [column("currencies", "code", "text")],
+        "tickets": [column("tickets", "customer_id"), column("tickets", "issue", "text")],
+    }
+    return {
+        "relations": [{"schema": "public", "name": name, "kind": "table", "row_estimate": 1000} for name in tables],
+        "columns": [column(name, "id") for name in tables] + [item for items in tables.values() for item in items],
+        "constraints": [
+            fk("invoices", "customer_id", "customers"), fk("invoices", "currency_id", "currencies"),
+            fk("customers", "account_id", "accounts"), fk("accounts", "region_id", "regions"),
+            fk("regions", "currency_id", "currencies"), fk("tickets", "customer_id", "customers"),
+        ],
+        "indexes": [], "dependencies": [], "usage": [], "usage_status": "disabled",
+    }
+
+
+class MultiHopTests(unittest.TestCase):
+    def setUp(self):
+        self.index = RetrievalIndex(GraphEngine("chaindb").build(chain_metadata()))
+
+    def test_tables_between_named_ends_of_a_chain_come_first(self):
+        pack = top(self.index, "Total invoiced amount by region", n=4)
+        self.assertEqual(
+            set(pack),
+            {"table:public.invoices", "table:public.regions", "table:public.customers", "table:public.accounts"},
+        )
+
+    def test_shared_lookup_tables_are_not_join_chains(self):
+        # invoices -> currencies <- regions is shorter but joins nothing meaningful.
+        self.assertEqual(
+            self.index._chain_path("table:public.invoices", "table:public.regions", {}),
+            ["table:public.invoices", "table:public.customers", "table:public.accounts", "table:public.regions"],
+        )
+
+    def test_issued_is_not_a_support_issue(self):
+        weights, _, _ = self.index._expanded_terms("invoices issued last quarter")
+        self.assertNotIn("tickets", weights)
+        complaints, _, _ = self.index._expanded_terms("customers with open issues")
+        self.assertIn("tickets", complaints)
+
+
 class ContextCacheTests(unittest.TestCase):
     def test_repeat_call_is_cached_but_returns_independent_objects(self):
         index = build_index()

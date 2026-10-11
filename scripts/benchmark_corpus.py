@@ -16,13 +16,17 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import datetime as dt
 import io
+import ipaddress
 import json
 import math
 import os
+import re
 import statistics
 import sys
 from contextlib import redirect_stderr
+from decimal import Decimal
 from pathlib import Path
 from time import perf_counter
 from typing import Any
@@ -32,6 +36,8 @@ SERVICE_SRC = ROOT / "services" / "dbmap" / "src"
 sys.path.insert(0, str(SERVICE_SRC))
 
 from dbmap.config import Settings
+
+ROWS_EACH = 50
 
 CATALOG_SEARCH_SQL = """
 select
@@ -66,6 +72,70 @@ def mcp_payload(result: Any) -> dict[str, Any]:
         "structuredContent": result.structured_content,
         "content": [item.text for item in result.content if hasattr(item, "text")],
     }
+
+
+def norm(value: Any) -> Any:
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float, Decimal)):
+        return round(float(value), 4)
+    if isinstance(value, (dt.datetime, dt.date)):
+        if isinstance(value, dt.datetime) and value.tzinfo is not None:
+            value = value.astimezone(dt.UTC).replace(tzinfo=None)
+        return value.isoformat()
+    if isinstance(value, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
+        return str(value)
+    if isinstance(value, (dict, list)):
+        return json.dumps(value, sort_keys=True, default=str)
+    text = str(value)
+    if re.fullmatch(r"-?\d+(\.\d+)?", text):
+        return round(float(text), 4)
+    if re.fullmatch(r"\d{4}-\d{2}-\d{2}([T ][\d:.]+)?(Z|[+-]\d{2}:?\d{2})?", text):
+        try:
+            parsed = dt.datetime.fromisoformat(text)
+            return norm(parsed if "T" in text or " " in text else parsed.date())
+        except ValueError:
+            return text
+    return text
+
+
+def has_top_level_order_by(sql: str) -> bool:
+    depth, last = 0, -1
+    lowered = sql.lower()
+    for index, char in enumerate(lowered):
+        depth += char == "("
+        depth -= char == ")"
+        if depth == 0 and lowered.startswith("order by", index):
+            last = index
+    return last >= 0
+
+
+def compare(sql: str, tablefox_rows: list[list[Any]], direct_rows: list[tuple]) -> dict[str, Any]:
+    left = [tuple(norm(v) for v in row) for row in tablefox_rows]
+    right = [tuple(norm(v) for v in row) for row in direct_rows]
+    ordered = has_top_level_order_by(sql)
+    key = lambda row: json.dumps(row, default=str)
+    same = left == right if ordered else sorted(left, key=key) == sorted(right, key=key)
+    return {
+        "match": same,
+        "ordered_compare": ordered,
+        "tablefox_rows": len(left),
+        "direct_rows": len(right),
+    }
+
+
+def relation_names(structured: dict[str, Any]) -> set[str]:
+    """Schema-qualified names ("sales.orders") of every relation a context returned."""
+    ids = [item["id"] for item in structured.get("relations", [])] + list(structured.get("known", []))
+    return {relation_id.split(":", 1)[-1] for relation_id in ids}
+
+
+def recall_misses(needed: list[str], returned: set[str]) -> list[str]:
+    """Needed relations absent from the context; bare names in older corpora match any schema."""
+    bare = {name.split(".")[-1] for name in returned}
+    return sorted(name for name in needed if name not in (returned if "." in name else bare))
 
 
 def percentile(values: list[float], fraction: float) -> float:
@@ -108,18 +178,13 @@ async def run_tablefox(tasks: list[dict[str, Any]], window: int) -> list[dict[st
                 )
                 batch = await session.call_tool(
                     "database_readonly_batch",
-                    {"queries": task["queries"], "max_rows_each": 50, "max_bytes": 32768},
+                    {"queries": task["queries"], "max_rows_each": ROWS_EACH, "max_bytes": 32768},
                 )
                 elapsed_ms = round((perf_counter() - started) * 1000, 2)
                 context_payload = mcp_payload(context)
                 batch_payload = mcp_payload(batch)
                 structured = context_payload["structuredContent"] or {}
-                returned = {
-                    item["id"].split(".")[-1]
-                    for item in structured.get("relations", [])
-                } | {
-                    item.split(".")[-1] for item in structured.get("known", [])
-                }
+                missing = recall_misses(task["needed_relations"], relation_names(structured))
                 answer = (batch_payload["structuredContent"] or {}).get("results", [])
                 results.append(
                     {
@@ -130,9 +195,10 @@ async def run_tablefox(tasks: list[dict[str, Any]], window: int) -> list[dict[st
                         "tokens": payload_tokens(context_payload)
                         + payload_tokens(batch_payload),
                         "context_tokens": payload_tokens(context_payload),
-                        "recall_ok": set(task["needed_relations"]) <= returned,
-                        "missing": sorted(set(task["needed_relations"]) - returned),
+                        "recall_ok": not missing,
+                        "missing": missing,
                         "row_count": sum(item.get("row_count", 0) for item in answer),
+                        "rows": {item["name"]: None if item.get("blocked") or item.get("error") else item["rows"] for item in answer},
                     }
                 )
             if window != previous:
@@ -157,9 +223,13 @@ def run_conventional(tasks: list[dict[str, Any]]) -> list[dict[str, Any]]:
             for term in task["catalog_terms"]:
                 found = list(conn.execute(CATALOG_SEARCH_SQL, (f"%{term}%",)))
                 tokens += payload_tokens({"query": term, "results": found})
+            answers = {}
             for query in task["queries"]:
-                rows = list(conn.execute(query["sql"]))
+                # The same row limit TableFox applies, so the answers are comparable.
+                bounded = f"select * from (\n{query['sql'].rstrip(';')}\n) as q limit {ROWS_EACH}"
+                rows = list(conn.execute(bounded))
                 rows_total += len(rows)
+                answers[query["name"]] = [list(row.values()) for row in rows]
                 tokens += payload_tokens({"query": query["name"], "results": rows})
         results.append(
             {
@@ -167,17 +237,23 @@ def run_conventional(tasks: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 "elapsed_ms": round((perf_counter() - started) * 1000, 2),
                 "tokens": tokens,
                 "row_count": rows_total,
+                "rows": answers,
             }
         )
     return results
 
 
-def summarise(runs: list[list[dict[str, Any]]], conventional: list[dict[str, Any]]) -> dict:
+def summarise(
+    runs: list[list[dict[str, Any]]],
+    conventional: list[dict[str, Any]],
+    task_sql: dict[str, dict[str, str]],
+) -> dict:
     flat = [item for run in runs for item in run]
     warm = [item["elapsed_ms"] for item in flat if not item["cold"]]
     cold = [item["elapsed_ms"] for item in flat if item["cold"]]
     last = runs[-1]
     by_task = {item["task"]: item for item in conventional}
+    mismatches = answer_mismatches(task_sql, last, by_task)
     return {
         "tasks": len(last),
         "repeats": len(runs),
@@ -201,14 +277,24 @@ def summarise(runs: list[list[dict[str, Any]]], conventional: list[dict[str, Any
             "misses": {item["task"]: item["missing"] for item in last if not item["recall_ok"]},
         },
         "answers_match": {
-            "passed": sum(
-                1
-                for item in last
-                if by_task.get(item["task"], {}).get("row_count") == item["row_count"]
-            ),
+            "passed": len(last) - len(mismatches),
             "total": len(last),
+            "mismatches": mismatches,
         },
     }
+
+
+def answer_mismatches(task_sql: dict[str, dict[str, str]], last: list[dict[str, Any]], by_task: dict) -> list[str]:
+    """Tasks whose TableFox rows differ from the direct rows (or were refused)."""
+    failed = []
+    for item in last:
+        direct = by_task.get(item["task"], {}).get("rows", {})
+        for name, sql in task_sql[item["task"]].items():
+            ours = item["rows"].get(name)
+            if ours is None or not compare(sql, ours, direct.get(name, []))["match"]:
+                failed.append(item["task"])
+                break
+    return failed
 
 
 async def main() -> None:
@@ -222,7 +308,8 @@ async def main() -> None:
     tasks = json.loads(args.tasks.read_text(encoding="utf-8"))["tasks"]
     runs = [await run_tablefox(tasks, args.window) for _ in range(max(1, args.repeat))]
     conventional = run_conventional(tasks)
-    summary = summarise(runs, conventional)
+    task_sql = {task["name"]: {query["name"]: query["sql"] for query in task["queries"]} for task in tasks}
+    summary = summarise(runs, conventional, task_sql)
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(

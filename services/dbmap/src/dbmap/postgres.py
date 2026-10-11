@@ -13,7 +13,12 @@ from .config import Settings
 from .context import apply_context
 from .graph import GraphEngine
 from .models import GraphSnapshot
-from .query_policy import assess_query_plan, classify_sensitive_columns
+from .query_policy import (
+    assess_query_plan,
+    classify_sensitive_columns,
+    classify_source_columns,
+    plan_source_columns,
+)
 from .readonly import apply_limit, validate_readonly_sql
 from .security import filter_metadata_schemas, schema_allowed
 
@@ -39,17 +44,46 @@ order by n.nspname, c.relname
 
 COLUMNS_SQL = """
 select
-  table_schema as schema,
-  table_name as table,
-  column_name as name,
-  ordinal_position,
-  data_type,
-  is_nullable,
-  column_default as default,
-  col_description((quote_ident(table_schema) || '.' || quote_ident(table_name))::regclass::oid, ordinal_position) as comment
-from information_schema.columns
-where table_schema not in ('pg_catalog', 'information_schema')
-order by table_schema, table_name, ordinal_position
+  c.table_schema as schema,
+  c.table_name as table,
+  c.column_name as name,
+  c.ordinal_position,
+  c.data_type,
+  c.is_nullable,
+  c.column_default as default,
+  col_description((quote_ident(c.table_schema) || '.' || quote_ident(c.table_name))::regclass::oid, c.ordinal_position) as comment,
+  (
+    select array_agg(e.enumlabel::text order by e.enumsortorder)
+    from pg_type t
+    join pg_namespace tn on tn.oid = t.typnamespace
+    join pg_enum e on e.enumtypid = t.oid
+    where c.data_type = 'USER-DEFINED' and tn.nspname = c.udt_schema and t.typname = c.udt_name
+  ) as allowed_values
+from information_schema.columns c
+where c.table_schema not in ('pg_catalog', 'information_schema')
+union all
+-- information_schema omits materialized views.
+select
+  n.nspname,
+  cl.relname,
+  a.attname,
+  a.attnum,
+  case when t.typtype = 'e' then 'USER-DEFINED' when t.typcategory = 'A' then 'ARRAY'
+       else format_type(a.atttypid, null) end,
+  case when a.attnotnull then 'NO' else 'YES' end,
+  null,
+  col_description(cl.oid, a.attnum),
+  case when t.typtype = 'e' then
+    (select array_agg(e.enumlabel::text order by e.enumsortorder) from pg_enum e where e.enumtypid = t.oid)
+  end
+from pg_class cl
+join pg_namespace n on n.oid = cl.relnamespace
+join pg_attribute a on a.attrelid = cl.oid and a.attnum > 0 and not a.attisdropped
+join pg_type t on t.oid = a.atttypid
+where cl.relkind = 'm'
+  and n.nspname not in ('pg_catalog', 'information_schema')
+  and has_table_privilege(cl.oid, 'SELECT')
+order by 1, 2, 4
 """
 
 CONSTRAINTS_SQL = """
@@ -77,7 +111,8 @@ select
     from unnest(con.confkey) with ordinality as key(attnum, position)
     join pg_attribute att on att.attrelid = con.confrelid and att.attnum = key.attnum
     order by key.position
-  ) as foreign_columns
+  ) as foreign_columns,
+  case when con.contype = 'c' then pg_get_constraintdef(con.oid) end as definition
 from pg_constraint con
 join pg_class rel on rel.oid = con.conrelid
 join pg_namespace n on n.oid = rel.relnamespace
@@ -143,12 +178,49 @@ order by stats.schemaname, stats.relname
 """
 
 
+# SQLSTATEs whose message never contains row data, so it is returned as-is: syntax and
+# undefined-object errors (class 42) are raised while planning, before any row is read.
+_SAFE_ERROR_STATES = ("0A", "21000", "22012", "25006", "42")
+
+
+def safe_error_message(error: Exception) -> str:
+    """PostgreSQL's own explanation where it cannot leak row values or connection details.
+
+    "column x does not exist" plus PostgreSQL's hint lets an assistant correct itself. Data
+    errors (class 22, e.g. a failed cast) quote the offending value, which may come from a
+    row, so only their condition name is returned.
+    """
+    sqlstate = str(getattr(error, "sqlstate", None) or "")
+    diag = getattr(error, "diag", None)
+    if sqlstate.startswith(_SAFE_ERROR_STATES) and diag is not None and diag.message_primary:
+        message = str(diag.message_primary)
+        if diag.message_hint:
+            message += f" Hint: {diag.message_hint}"
+        return f"{message} (SQLSTATE {sqlstate})"
+    condition = re.sub(r"(?<!^)(?=[A-Z])", " ", type(error).__name__).lower()
+    if sqlstate == "57014":
+        return (
+            "The query was cancelled by the statement timeout. Add filters, aggregate in "
+            "the database, or narrow the date range (SQLSTATE 57014)."
+        )
+    if sqlstate.startswith("22"):
+        return (
+            f"PostgreSQL could not evaluate a value ({condition}, SQLSTATE {sqlstate}). The "
+            "detail is withheld because it can quote row data; check casts, date formats "
+            "and functions applied to columns."
+        )
+    if not sqlstate or sqlstate.startswith("08"):
+        return "The database connection failed. Check that the database is reachable."
+    return f"PostgreSQL rejected the query ({condition}, SQLSTATE {sqlstate})."
+
+
 class PostgresIntrospector:
     def __init__(self, settings: Settings | None = None) -> None:
         self.settings = settings or Settings.from_env()
         self._pool: Any | None = None
         self._pool_lock = Lock()
         self._prewarming = False
+        self._relation_columns_cache: tuple[int | None, dict[str, list[str]]] | None = None
 
     def _connection(self):
         if self._pool is None:
@@ -262,9 +334,14 @@ class PostgresIntrospector:
         limit: int | None = None,
         approved: bool = False,
     ) -> dict[str, Any]:
-        with self._connection() as conn:
-            self._configure_readonly_transaction(conn)
-            return self._readonly_query_on_connection(conn, sql, limit, approved)
+        import psycopg
+
+        try:
+            with self._connection() as conn:
+                self._configure_readonly_transaction(conn)
+                return self._readonly_query_on_connection(conn, sql, limit, approved)
+        except psycopg.Error as error:
+            raise ValueError(safe_error_message(error)) from None
 
     def readonly_batch(
         self,
@@ -291,37 +368,62 @@ class PostgresIntrospector:
             requested_limit = item.get("limit") or max_rows_each
             prepared.append((name, sql, requested_limit))
 
+        import psycopg
+
         classifications = self._context_classifications()
         results = []
-        with self._connection() as conn:
-            self._configure_readonly_transaction(conn)
-            for name, sql, limit in prepared:
-                full = self._readonly_query_on_connection(
-                    conn,
-                    sql,
-                    limit,
-                    approved,
-                    classifications,
-                )
-                columns = full.get("columns", [])
-                result = {
-                    "name": name,
-                    "columns": columns,
-                    "rows": [[row.get(column) for column in columns] for row in full["rows"]],
-                    "row_count": full["row_count"],
-                }
-                if full["blocked"]:
-                    result.update({"blocked": True, "reason": full.get("reason")})
-                review = []
-                if not full.get("plan", {}).get("within_policy", False):
-                    review.append("cost")
-                if not full.get("join_validation", {}).get("verified", False):
-                    review.append("join")
-                if full.get("sensitive_columns"):
-                    review.append("sensitive")
-                if review:
-                    result["review"] = review
-                results.append(result)
+        try:
+            with self._connection() as conn:
+                self._configure_readonly_transaction(conn)
+                for name, sql, limit in prepared:
+                    try:
+                        # A savepoint per statement: one failing query must not abort the rest.
+                        with conn.transaction():
+                            full = self._readonly_query_on_connection(
+                                conn,
+                                sql,
+                                limit,
+                                approved,
+                                classifications,
+                            )
+                    except psycopg.Error as error:
+                        if str(getattr(error, "sqlstate", None) or "").startswith("08") or conn.closed:
+                            raise
+                        results.append(
+                            {
+                                "name": name,
+                                "columns": [],
+                                "rows": [],
+                                "row_count": 0,
+                                "error": safe_error_message(error),
+                            }
+                        )
+                        continue
+                    columns = full.get("columns", [])
+                    result = {
+                        "name": name,
+                        "columns": columns,
+                        "rows": [[row.get(column) for column in columns] for row in full["rows"]],
+                        "row_count": full["row_count"],
+                    }
+                    if full["blocked"]:
+                        result.update({"blocked": True, "reason": full.get("reason")})
+                        if full.get("sensitive_columns"):
+                            result["sensitive_columns"] = [
+                                item["column"] for item in full["sensitive_columns"]
+                            ]
+                    review = []
+                    if not full.get("plan", {}).get("within_policy", False):
+                        review.append("cost")
+                    if not full.get("join_validation", {}).get("verified", False):
+                        review.append("join")
+                    if full.get("sensitive_columns"):
+                        review.append("sensitive")
+                    if review:
+                        result["review"] = review
+                    results.append(result)
+        except psycopg.Error as error:
+            raise ValueError(safe_error_message(error)) from None
         return self._bound_batch(results, max(2_048, min(max_bytes, 1_000_000)))
 
     def explain_query(self, sql: str, include_plan: bool = False) -> dict[str, Any]:
@@ -334,6 +436,7 @@ class PostgresIntrospector:
         conn: Any,
         sql: str,
         include_plan: bool = False,
+        row_limit: int | None = None,
     ) -> dict[str, Any]:
         statement = validate_readonly_sql(sql)
         explain_sql = (
@@ -348,8 +451,14 @@ class PostgresIntrospector:
             max_total_cost=self.settings.max_explain_cost,
             max_plan_rows=self.settings.max_explain_rows,
             include_plan=include_plan,
+            # Every read is wrapped in this LIMIT, so it bounds what can be returned.
+            row_limit=row_limit or self.settings.max_query_rows,
         )
         result["sql"] = statement
+        known_columns = self._relation_columns() if result["summary"]["relations"] else {}
+        result["sources"] = sorted(
+            f"{relation}.{column}" for relation, column in plan_source_columns(row[0], known_columns)
+        )
         blocked_relations = []
         for relation in result["summary"]["relations"]:
             schema = relation.split(".", 1)[0] if "." in relation else None
@@ -380,7 +489,7 @@ class PostgresIntrospector:
         requested_limit = self.settings.max_query_rows if limit is None else int(limit)
         row_limit = max(1, min(requested_limit, self.settings.max_query_rows))
         guarded_sql = apply_limit(sql, row_limit)
-        plan = self._explain_query_on_connection(conn, sql)
+        plan = self._explain_query_on_connection(conn, sql, row_limit=row_limit)
         join_validation = self._validate_plan_relations(plan)
         restricted = any(
             reason.get("code") == "schema_not_allowed"
@@ -404,12 +513,35 @@ class PostgresIntrospector:
                 "columns": [],
                 "rows": [],
             }
+        if classifications is None:
+            classifications = self._context_classifications()
+        marker_options = {
+            "extra_markers": self.settings.sensitive_markers,
+            "block_ip_addresses": self.settings.block_ip_addresses,
+        }
+        sources = {
+            tuple(source.rsplit(".", 1)) for source in plan.get("sources", [])
+        }
+        source_findings = classify_source_columns(sources, classifications, **marker_options)
+        if source_findings and not self.settings.allow_sensitive_data:
+            # Refused before execution: an alias or expression cannot hide the column read.
+            return {
+                "sql": guarded_sql,
+                "blocked": True,
+                "reason": "Query reads columns matched by the sensitive-data policy.",
+                "sensitive_columns": source_findings,
+                "plan": plan,
+                "join_validation": join_validation,
+                "row_count": 0,
+                "limit": row_limit,
+                "columns": [],
+                "rows": [],
+            }
         with conn.cursor(row_factory=dict_row) as cursor:
             cursor.execute(guarded_sql)
             columns = [column.name for column in cursor.description or []]
-            sensitive_columns = classify_sensitive_columns(
-                columns,
-                classifications if classifications is not None else self._context_classifications(),
+            sensitive_columns = source_findings + classify_sensitive_columns(
+                columns, classifications, **marker_options
             )
             if sensitive_columns and not self.settings.allow_sensitive_data:
                 return {
@@ -475,6 +607,27 @@ class PostgresIntrospector:
             snapshot,
             {ids_by_label[relation] for relation in relations},
         )
+
+    def _relation_columns(self) -> dict[str, list[str]]:
+        """Column names per "schema.relation", reloaded only when the snapshot changes."""
+        path = self._cache_path()
+        stamp = path.stat().st_mtime_ns if path.exists() else None
+        cached = self._relation_columns_cache
+        if cached is not None and stamp is not None and cached[0] == stamp:
+            return cached[1]
+        snapshot = self.snapshot()
+        labels = {
+            node.id: node.label
+            for node in snapshot.nodes
+            if node.kind in {"table", "view", "materialized_view"}
+        }
+        columns: dict[str, list[str]] = {label: [] for label in labels.values()}
+        for node in snapshot.nodes:
+            if node.kind == "column" and node.parent_id in labels:
+                columns[labels[node.parent_id]].append(str(node.name))
+        stamp = path.stat().st_mtime_ns if path.exists() else None
+        self._relation_columns_cache = (stamp, columns)
+        return columns
 
     def _context_classifications(self) -> dict[str, str]:
         if not self.settings.context_file:

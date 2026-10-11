@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from collections import deque
 from collections.abc import Iterable
 
@@ -102,6 +103,7 @@ class GraphEngine:
                         "is_nullable": column.get("is_nullable"),
                         "default": column.get("default"),
                         "comment": column.get("comment"),
+                        "allowed_values": column.get("allowed_values"),
                     },
                 )
             )
@@ -160,6 +162,12 @@ class GraphEngine:
                         label="uses",
                     )
                 )
+
+            allowed = _check_values(constraint.get("definition")) if constraint.get("type") == "CHECK" else None
+            if allowed and len(columns) == 1:
+                column_node = nodes_by_id.get(node_id("column", schema, table, columns[0]))
+                if column_node is not None and not column_node.metadata.get("allowed_values"):
+                    column_node.metadata["allowed_values"] = allowed
 
             if constraint.get("type") == "FOREIGN KEY":
                 foreign_schema = constraint.get("foreign_schema")
@@ -452,3 +460,16 @@ def _usage_metadata(usage: dict | None, kind: str, status: str) -> dict:
     if kind in {"view", "materialized_view"}:
         return {"status": "not_applicable"}
     return {"status": "unavailable" if status == "available" else status}
+
+
+_CHECK_ARRAY = re.compile(r"=\s*ANY\s*\(\s*\(?\s*ARRAY\[(.*)\]", re.DOTALL)
+_CHECK_LITERAL = re.compile(r"'((?:[^']|'')*)'")
+
+
+def _check_values(definition: str | None) -> list[str] | None:
+    """Allowed values of a `CHECK (col = ANY (ARRAY['a', 'b']))` (or `IN (...)`) constraint."""
+    match = _CHECK_ARRAY.search(definition or "")
+    if not match or " OR " in definition.upper() or " AND " in definition.upper():
+        return None
+    values = [value.replace("''", "'") for value in _CHECK_LITERAL.findall(match.group(1))]
+    return values or None

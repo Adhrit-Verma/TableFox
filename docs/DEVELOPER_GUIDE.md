@@ -69,7 +69,9 @@ Set in `.env` (or the file named by `DBMAP_ENV_FILE`). The file overrides proces
 | `DBMAP_MAX_QUERY_ROWS` | row cap per query (default 200) |
 | `DBMAP_MAX_EXPLAIN_COST`, `DBMAP_MAX_EXPLAIN_ROWS` | plan ceilings before a query is refused |
 | `DBMAP_ALLOWED_SCHEMAS`, `DBMAP_RESTRICTED_SCHEMAS` | schema allow/deny lists |
-| `DBMAP_ALLOW_SENSITIVE_DATA` | `false` by default; hides result columns whose names look like credentials or PII |
+| `DBMAP_ALLOW_SENSITIVE_DATA` | `false` by default; refuses queries that read columns whose names look like credentials, PII or financial identifiers |
+| `DBMAP_BLOCK_IP_ADDRESSES` | `false` by default; `true` also treats `ip_address`, `client_ip` and similar columns as personal data |
+| `DBMAP_SENSITIVE_MARKERS` | comma-separated extra column-name markers to treat as sensitive, e.g. `loyalty_number,badge_id` |
 | `DBMAP_CONTEXT_WINDOW` | relations remembered as already sent (0 = off) |
 
 **MCP transport**
@@ -103,7 +105,7 @@ Set in `.env` (or the file named by `DBMAP_ENV_FILE`). The file overrides proces
 
 ### Operating notes
 
-- **Back up `DBMAP_TENANT_KEY`.** It encrypts every saved connection; if it is lost, every user must reconnect. Key rotation is not supported yet (planned: accept several keys, encrypt with the newest).
+- **Back up `DBMAP_TENANT_KEY`.** It encrypts every saved connection; if it is lost, every user must reconnect. To rotate it, set `DBMAP_TENANT_KEY=<new key>,<old key>` and restart: connections are re-encrypted with the new key at start-up, after which the old key can be removed.
 - **Free hosts sleep.** Render's free tier stops after 15 idle minutes and takes up to a minute to wake. Point an uptime monitor at `/health` every 5 minutes, or use a paid instance.
 - **Rate limits are basic.** Each user gets at most two pooled database connections and every statement has a timeout; there is no per-user request limit yet. Put a rate-limiting proxy in front if you expect heavy public use.
 - **Reachability.** The hosted mode only connects to public addresses on allowed ports (`DBMAP_TENANT_PORTS`). Users with private databases should self-host.
@@ -113,7 +115,7 @@ Set in `.env` (or the file named by `DBMAP_ENV_FILE`). The file overrides proces
 - Only `SELECT`/`WITH`; everything else is rejected before connecting (`readonly.py`).
 - Every query runs in a read-only transaction with statement and lock timeouts, after an `EXPLAIN` policy check.
 - Multi-relation queries must be connected by declared foreign keys or catalog dependencies.
-- Result columns whose names look like credentials or PII are hidden unless an operator opts in. Known gap: the check reads output names only, so aliases and expressions bypass it, and some identifiers (IBAN, national ID, tax ID, card digits, salary) are not recognised yet. See [the benchmark](benchmarks/large-db/summary.md#safety).
+- Queries that return credentials or PII are refused unless an operator opts in. Each output value is traced through `EXPLAIN (VERBOSE)` output lists to its source table column (`query_policy.plan_source_columns`), so aliases, expressions, set operations, CTEs, subqueries and whole-row references are judged by the column they read; plans containing nodes that hide their inputs (`VALUES`, recursive CTEs) are checked conservatively. Result-column names are checked as well. Known gap: source columns are still classified by name, so sensitive values in generically named columns (an audit table's `old_value`) are not detected. See [the benchmark](benchmarks/large-db/summary.md#safety).
 - Hosted mode: only read-only database users are accepted; connections must use SSL and resolve to public addresses (pinned with `hostaddr`, so DNS changes cannot redirect them); credentials are entered on `/connect`, never in chat, and stored encrypted.
 - Audit events record actor, action and a SQL hash, never SQL text or rows.
 

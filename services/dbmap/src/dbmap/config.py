@@ -57,6 +57,8 @@ class Settings:
     max_explain_cost: float = 100000.0
     max_explain_rows: int = 100000
     allow_sensitive_data: bool = False
+    block_ip_addresses: bool = False
+    sensitive_markers: tuple[str, ...] = ()
     allowed_schemas: tuple[str, ...] = ()
     restricted_schemas: tuple[str, ...] = ()
     enable_usage_telemetry: bool = False
@@ -100,6 +102,8 @@ class Settings:
             max_explain_cost=float(os.getenv("DBMAP_MAX_EXPLAIN_COST", "100000")),
             max_explain_rows=int(os.getenv("DBMAP_MAX_EXPLAIN_ROWS", "100000")),
             allow_sensitive_data=_env_bool("DBMAP_ALLOW_SENSITIVE_DATA", False),
+            block_ip_addresses=_env_bool("DBMAP_BLOCK_IP_ADDRESSES", False),
+            sensitive_markers=_env_list("DBMAP_SENSITIVE_MARKERS"),
             allowed_schemas=_env_list("DBMAP_ALLOWED_SCHEMAS"),
             restricted_schemas=_env_list("DBMAP_RESTRICTED_SCHEMAS"),
             enable_usage_telemetry=_env_bool("DBMAP_ENABLE_USAGE_TELEMETRY", False),

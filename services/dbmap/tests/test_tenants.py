@@ -150,6 +150,31 @@ class CredentialStoreTests(unittest.TestCase):
             other.close()
 
 
+    def test_key_rotation_keeps_old_secrets_and_links_readable(self):
+        old_key = Fernet.generate_key().decode()
+        new_key = Fernet.generate_key().decode()
+        path = Path(self.tmp.name) / "rotating.sqlite"
+        before = CredentialStore(path, old_key)
+        before.put("auth0|alice", "main", "postgresql://reader:pw@db.example.com/app")
+        link = before.make_link_token("auth0|alice")
+        before.close()
+
+        rotating = CredentialStore(path, f"{new_key},{old_key}")
+        try:
+            self.assertEqual(rotating.get("auth0|alice", "main"), "postgresql://reader:pw@db.example.com/app")
+            self.assertEqual(rotating.read_link_token(link)["sub"], "auth0|alice")
+            self.assertEqual(rotating.rotate(), 1)
+        finally:
+            rotating.close()
+
+        after = CredentialStore(path, new_key)
+        try:
+            # Re-encrypted with the new key, so the old one can now be dropped.
+            self.assertEqual(after.get("auth0|alice", "main"), "postgresql://reader:pw@db.example.com/app")
+        finally:
+            after.close()
+
+
 class FakeService:
     def __init__(self, settings):
         self.settings = settings

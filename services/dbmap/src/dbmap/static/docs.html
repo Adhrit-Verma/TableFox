@@ -136,7 +136,7 @@ alter default privileges for role &lt;table_owner&gt; in schema public
     <li><em>How many orders were cancelled per country this year?</em></li>
     <li><em>Which customers signed up but never ordered?</em></li>
   </ul>
-  <p>TableFox refuses anything that would change data (delete, update, create table). It also leaves out columns named like emails, phone numbers and passwords, but that filter goes by column name, so it is a safety net rather than a guarantee.</p>
+  <p>TableFox refuses anything that would change data (delete, update, create table). It also refuses to return personal data such as emails, phone numbers, ID numbers, bank details, salaries and passwords, even when a query renames or transforms the column. It recognises those columns by their names, so data kept in a generically named column is not caught: to be certain, <a href="#reader">give TableFox's user access only to what it needs</a>.</p>
 </section>
 
 <section id="several">

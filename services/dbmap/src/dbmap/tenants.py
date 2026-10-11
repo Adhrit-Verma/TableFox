@@ -105,10 +105,21 @@ class CredentialStore:
     """
 
     def __init__(self, location: Path | str, key: str) -> None:
-        from cryptography.fernet import Fernet
+        """`key` is one Fernet key, or several separated by commas, newest first.
 
-        self._fernet = Fernet(key.encode())
-        self._link_key = hashlib.sha256(b"dbmap-connect-link" + key.encode()).digest()
+        Rotation: set DBMAP_TENANT_KEY to "new,old". Secrets are encrypted with the newest key
+        and still read with any listed key; `rotate()` re-encrypts the stored ones, after
+        which the old key can be removed.
+        """
+        from cryptography.fernet import Fernet, MultiFernet
+
+        keys = [item.strip() for item in key.split(",") if item.strip()]
+        if not keys:
+            raise ValueError("DBMAP_TENANT_KEY is empty.")
+        self.key_count = len(keys)
+        self._fernet = MultiFernet([Fernet(item.encode()) for item in keys])
+        self._link_keys = [hashlib.sha256(b"dbmap-connect-link" + item.encode()).digest() for item in keys]
+        self._link_key = self._link_keys[0]
         self._lock = Lock()
         self._postgres_url = str(location) if str(location).startswith(("postgres://", "postgresql://")) else None
         self._db = None
@@ -153,6 +164,16 @@ class CredentialStore:
             (user_id, name, self._fernet.encrypt(database_url.encode())),
         )
 
+    def rotate(self) -> int:
+        """Re-encrypt every stored connection with the newest key; returns how many."""
+        rows = self._run("select user_id, name, secret from connections")
+        for user_id, name, secret in rows:
+            self._run(
+                "update connections set secret = ? where user_id = ? and name = ?",
+                (self._fernet.rotate(bytes(secret)), user_id, name),
+            )
+        return len(rows)
+
     def delete(self, user_id: str, name: str) -> None:
         self._run("delete from connections where user_id = ? and name = ?", (user_id, name))
 
@@ -169,8 +190,10 @@ class CredentialStore:
     def read_link_token(self, token: str, now: float | None = None) -> dict:
         """Return the link payload if the signature and expiry are valid."""
         body, _, signature = token.partition(".")
-        expected = hmac.new(self._link_key, body.encode(), hashlib.sha256).hexdigest()
-        if not hmac.compare_digest(signature, expected):
+        if not any(
+            hmac.compare_digest(signature, hmac.new(link_key, body.encode(), hashlib.sha256).hexdigest())
+            for link_key in self._link_keys
+        ):
             raise TenantError("This connect link is not valid.")
         payload = json.loads(base64.urlsafe_b64decode(body))
         if payload["exp"] < (now or time.time()):

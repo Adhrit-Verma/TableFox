@@ -47,7 +47,7 @@
     <li><strong>Only SELECT and WITH statements</strong> are accepted. Everything else is rejected before reaching your database.</li>
     <li><strong>Every query runs in a read-only transaction</strong> with statement and lock timeouts.</li>
     <li><strong>Each query is planned first</strong> (EXPLAIN), and queries over cost and row limits are refused.</li>
-    <li><strong>Personal-data columns</strong> named like emails, phone numbers or password hashes are left out of results. This check goes by column name, so treat it as a safety net, not a guarantee.</li>
+    <li><strong>Personal data is refused.</strong> Before a query runs, TableFox traces every value it would return back to the table column it comes from, so renaming (<code>email AS contact</code>) or transforming (<code>lower(email)</code>) a column does not get past the check. It covers emails, phone numbers, addresses, dates of birth, national, tax and passport IDs, bank and card numbers, salaries, passwords and API keys.</li>
   </ol>
 </section>
 
@@ -82,9 +82,9 @@
   <ul>
     <li>TableFox has <strong>not had an independent security audit</strong>. The code is public for anyone to review.</li>
     <li>The hosted service runs on <strong>free infrastructure</strong> operated by one maintainer.</li>
-    <li>All saved connections are protected by <strong>one server encryption key</strong>. Support for rotating that key is planned.</li>
+    <li>All saved connections are protected by <strong>one server encryption key</strong>, which can be rotated without users reconnecting.</li>
     <li>Per-user <strong>rate limits</strong> are basic today: two connections per user plus query timeouts.</li>
-    <li>The <strong>personal-data filter works by column name</strong>. Our own testing showed that renaming a column in a query (for example <code>email AS contact</code>) gets past it, and some kinds of data such as bank account numbers and national IDs are not recognised yet. Until that is improved, protect sensitive data in the database itself: <a href="/docs#reader">give TableFox's user access only to the tables and columns it needs</a>.</li>
+    <li>The <strong>personal-data filter recognises columns by their names</strong>. Data kept in a generically named column (for example an audit table's <code>old_value</code>) is not detected. Protect sensitive data in the database itself too: <a href="/docs#reader">give TableFox's user access only to the tables and columns it needs</a>.</li>
   </ul>
   <p>If any of these matter for your data, <a href="#self-host">self-host</a>.</p>
 </section>

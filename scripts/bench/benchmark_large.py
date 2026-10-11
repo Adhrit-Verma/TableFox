@@ -35,18 +35,14 @@ from __future__ import annotations
 
 import argparse
 import asyncio
-import datetime as dt
 import io
-import ipaddress
 import json
 import math
 import os
-import re
 import shutil
 import statistics
 import sys
 from contextlib import redirect_stderr
-from decimal import Decimal
 from pathlib import Path
 from time import perf_counter
 from typing import Any
@@ -57,7 +53,13 @@ OUT = ROOT / "docs" / "benchmarks" / "large-db"
 TASKS = ROOT / "scripts" / "bench" / "large_tasks.json"
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from benchmark_corpus import CATALOG_SEARCH_SQL, mcp_payload, payload_tokens
+from benchmark_corpus import (
+    CATALOG_SEARCH_SQL,
+    compare,
+    mcp_payload,
+    norm,
+    payload_tokens,
+)
 from dbmap.config import Settings
 
 ROWS_EACH = 200
@@ -92,60 +94,6 @@ def stats(values: list[float]) -> dict[str, Any]:
 
 def nbytes(payload: Any) -> int:
     return len(json.dumps(payload, separators=(",", ":"), default=str))
-
-
-# ---------- value normalisation for row comparison ----------
-
-def norm(value: Any) -> Any:
-    if value is None:
-        return None
-    if isinstance(value, bool):
-        return value
-    if isinstance(value, (int, float, Decimal)):
-        return round(float(value), 4)
-    if isinstance(value, (dt.datetime, dt.date)):
-        if isinstance(value, dt.datetime) and value.tzinfo is not None:
-            value = value.astimezone(dt.UTC).replace(tzinfo=None)
-        return value.isoformat()
-    if isinstance(value, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
-        return str(value)
-    if isinstance(value, (dict, list)):
-        return json.dumps(value, sort_keys=True, default=str)
-    text = str(value)
-    if re.fullmatch(r"-?\d+(\.\d+)?", text):
-        return round(float(text), 4)
-    if re.fullmatch(r"\d{4}-\d{2}-\d{2}([T ][\d:.]+)?(Z|[+-]\d{2}:?\d{2})?", text):
-        try:
-            parsed = dt.datetime.fromisoformat(text)
-            return norm(parsed if "T" in text or " " in text else parsed.date())
-        except ValueError:
-            return text
-    return text
-
-
-def has_top_level_order_by(sql: str) -> bool:
-    depth, last = 0, -1
-    lowered = sql.lower()
-    for index, char in enumerate(lowered):
-        depth += char == "("
-        depth -= char == ")"
-        if depth == 0 and lowered.startswith("order by", index):
-            last = index
-    return last >= 0
-
-
-def compare(sql: str, tablefox_rows: list[list[Any]], direct_rows: list[tuple]) -> dict[str, Any]:
-    left = [tuple(norm(v) for v in row) for row in tablefox_rows]
-    right = [tuple(norm(v) for v in row) for row in direct_rows]
-    ordered = has_top_level_order_by(sql)
-    key = lambda row: json.dumps(row, default=str)
-    same = left == right if ordered else sorted(left, key=key) == sorted(right, key=key)
-    return {
-        "match": same,
-        "ordered_compare": ordered,
-        "tablefox_rows": len(left),
-        "direct_rows": len(right),
-    }
 
 
 def direct_rows(sql: str, limit: int = ROWS_EACH) -> tuple[list[str], list[tuple]]:
@@ -491,6 +439,23 @@ SENSITIVE = {
     "expression_bypass_email": "select lower(email) from crm.contacts limit 3",
     "alias_bypass_ssn": "select ssn as x from hr.employees limit 3",
     "view_directory": "select * from hr.v_employee_directory limit 3",
+    # Further alias and expression shapes (added with the source-column check).
+    "alias_bypass_iban": "select iban as account from hr.employees limit 3",
+    "concat_bypass": "select first_name || ' ' || national_id as label from hr.employees limit 3",
+    "whole_row_jsonb": "select to_jsonb(e) as doc from hr.employees e limit 3",
+    "union_bypass": "select region_name from public.regions union all select email from crm.contacts limit 3",
+    "cte_bypass": "with x as materialized (select ssn as s from hr.employees) select s from x limit 3",
+    "subquery_bypass": "select s from (select ssn as s from hr.employees limit 5) q",
+    "lateral_values_bypass": "select v.x from crm.contacts c, lateral (values (c.email)) v(x) limit 3",
+    "scalar_subquery_bypass": "select (select max(bank_iban) from hr.payroll) as v",
+}
+# Reads that must run: string literals, foreign keys named after secrets, filters and counts.
+ALLOWED = {
+    "literal_delete": "select count(*) from public.audit_log where action = 'delete'",
+    "api_key_id": "select api_key_id, count(*) from ops.api_request_log group by 1 order by 2 desc limit 3",
+    "count_employees": "select count(*) from hr.employees",
+    "filter_on_email": "select count(*) from crm.contacts where email like '%.com'",
+    "directory_view": "select first_name, job_title from hr.v_employee_directory limit 3",
 }
 
 
@@ -520,14 +485,25 @@ async def cmd_safety(args) -> None:
             sensitive.append({"case": name, "sql": sql, "blocked": bool(is_error or result.get("blocked")),
                               "columns": result.get("columns"), "rows_returned": len(result.get("rows") or []),
                               "reason": " ".join(payload["content"])[:300] if is_error else result.get("reason")})
+        allowed = []
+        for name, sql in ALLOWED.items():
+            payload, ms, is_error = await server.call(
+                "database_readonly_batch", {"queries": [{"name": "probe", "sql": sql}], "max_rows_each": 3})
+            result = ((payload["structuredContent"] or {}).get("results") or [{}])[0]
+            ran = not is_error and not result.get("blocked") and not result.get("error")
+            allowed.append({"case": name, "sql": sql, "ran": ran, "rows_returned": len(result.get("rows") or []),
+                            "reason": " ".join(payload["content"])[:300] if is_error else (result.get("reason") or result.get("error"))})
     after = region_fingerprint()
     summary = {
         "writes_refused": sum(w["refused"] for w in writes), "writes_total": len(writes),
         "database_unchanged": before == after,
         "sensitive_blocked": [s["case"] for s in sensitive if s["blocked"]],
         "sensitive_returned": [s["case"] for s in sensitive if not s["blocked"]],
+        "allowed_ran": [a["case"] for a in allowed if a["ran"]],
+        "allowed_refused": [a["case"] for a in allowed if not a["ran"]],
     }
-    (OUT / "safety.json").write_text(json.dumps({"summary": summary, "writes": writes, "sensitive": sensitive},
+    (OUT / "safety.json").write_text(json.dumps({"summary": summary, "writes": writes, "sensitive": sensitive,
+                                                 "allowed": allowed},
                                                 indent=1, default=str) + "\n", encoding="utf-8")
     print(json.dumps(summary, indent=1))
 
@@ -535,7 +511,7 @@ async def cmd_safety(args) -> None:
 # ---------- blind authoring ----------
 
 async def cmd_blind(args) -> None:
-    attempts = json.loads((OUT / "blind-attempts.json").read_text(encoding="utf-8"))["attempts"]
+    attempts = json.loads((OUT / f"{args.prefix}-attempts.json").read_text(encoding="utf-8"))["attempts"]
     by_name = {t["name"]: t for t in load_tasks()}
     results = {}
     async with Server() as server:
@@ -556,7 +532,7 @@ async def cmd_blind(args) -> None:
                     "rows": [[norm(v) for v in r] for r in (result.get("rows") or [])],
                 })
             results[name] = entry
-    (OUT / "blind-raw.json").write_text(json.dumps(results, indent=1, default=str) + "\n", encoding="utf-8")
+    (OUT / f"{args.prefix}-raw.json").write_text(json.dumps(results, indent=1, default=str) + "\n", encoding="utf-8")
     for name, e in results.items():
         print(name, "ERR" if e.get("error") else ("BLOCKED" if e.get("blocked") else len(e.get("rows", []))),
               (e.get("error") or e.get("reason") or "")[:160])
@@ -576,7 +552,8 @@ def main() -> None:
     cold = sub.add_parser("cold")
     cold.add_argument("--repeat", type=int, default=3)
     sub.add_parser("safety")
-    sub.add_parser("blind")
+    blind = sub.add_parser("blind")
+    blind.add_argument("--prefix", default="blind", help="reads <prefix>-attempts.json, writes <prefix>-raw.json")
     args = parser.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
     handler = {"run": cmd_run, "conventional": cmd_conventional, "cold": cmd_cold,

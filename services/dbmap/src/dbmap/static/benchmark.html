@@ -33,9 +33,9 @@
   <h2>At a glance</h2>
   <div class="tiles" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:1rem">
     <div class="tile"><span class="lbl">Median time per question</span><span class="big">80<small>ms</small></span><p style="margin:0;font-size:.875rem">vs 282 ms the usual way (3.5× faster)</p></div>
-    <div class="tile"><span class="lbl">Tokens per question</span><span class="big">~1,892</span><p style="margin:0;font-size:.875rem">vs ~2,493 the usual way (24% smaller)</p></div>
-    <div class="tile"><span class="lbl">Right tables found (top 6)</span><span class="big">93<small>%</small></span><p style="margin:0;font-size:.875rem">of 129 tables the 70 answers needed (was 84.5%)</p></div>
-    <div class="tile"><span class="lbl">Identical answers</span><span class="big">64/64</span><p style="margin:0;font-size:.875rem">queries returned exactly the same rows as direct SQL</p></div>
+    <div class="tile"><span class="lbl">Tokens per question</span><span class="big">~2,395</span><p style="margin:0;font-size:.875rem">vs ~2,493 the usual way; packs now include column types and values</p></div>
+    <div class="tile"><span class="lbl">Right tables found (top 6)</span><span class="big">97<small>%</small></span><p style="margin:0;font-size:.875rem">of 129 tables the 70 answers needed (was 84.5%)</p></div>
+    <div class="tile"><span class="lbl">Identical answers</span><span class="big">67/67</span><p style="margin:0;font-size:.875rem">queries returned exactly the same rows as direct SQL</p></div>
     <div class="tile"><span class="lbl">Write attempts refused</span><span class="big">17/17</span><p style="margin:0;font-size:.875rem">database unchanged afterwards</p></div>
     <div class="tile"><span class="lbl">Vague questions</span><span class="big">88<small>%</small></span><p style="margin:0;font-size:.875rem">of needed tables found, up from 31%</p></div>
   </div>
@@ -65,7 +65,7 @@
 
 <section id="size">
   <h2>Size</h2>
-  <p>Assistants pay for every word they read. TableFox sends a small "context pack" describing just the relevant tables, about <strong>960 tokens</strong> on average, plus the results. In total that's <strong>about 1,892 tokens per question</strong>, against about 2,493 the usual way. Turning on the optional context memory saved a further 10% of the context.</p>
+  <p>Assistants pay for every word they read. TableFox sends a small "context pack" describing just the relevant tables, about <strong>1,450 tokens</strong> on average, plus the results. In total that's <strong>about 2,395 tokens per question</strong>, against about 2,493 the usual way. Packs grew from about 960 tokens when they started listing every date, amount and status column with its type and allowed values; that is what lifted the blind test from 13 to 21 correct answers. Turning on the optional context memory saved a further 10% of the context.</p>
 </section>
 
 <section id="retrieval">
@@ -75,48 +75,48 @@
     <tr><td>Simple lookups, synonyms, two-table joins, audit logs, ambiguous names, legacy and wide tables</td><td><strong>100%</strong></td></tr>
     <tr><td>Totals over time</td><td>96%</td></tr>
     <tr><td>Vague business questions</td><td><strong>88%</strong> (was 31%)</td></tr>
-    <tr><td>Four- and five-table joins</td><td>80% (was 76%)</td></tr>
-    <tr><td><strong>All 70 questions</strong></td><td><strong>93%</strong> of needed tables (was 84.5%)</td></tr>
+    <tr><td>Four- and five-table joins</td><td><strong>96%</strong> (was 76%, then 80%)</td></tr>
+    <tr><td><strong>All 70 questions</strong></td><td><strong>97%</strong> of needed tables (was 84.5%)</td></tr>
   </tbody></table>
-  <p>Audit and log tables, a weak spot in earlier testing, score perfectly. The remaining weak spot is long chains of joins, where a connecting table in the middle is sometimes ranked too low.</p>
+  <p>Audit and log tables, a weak spot in earlier testing, score perfectly. Long chains of joins now keep the tables between the two named ends; the one remaining miss is a genuinely ambiguous "sales region".</p>
 </section>
 
 <section id="accuracy">
   <h2>Accuracy</h2>
   <p>We ran every correct answer query through TableFox and directly against the database, then compared the results row by row.</p>
   <ul>
-    <li><strong>64 of 64</strong> queries that ran returned exactly the same rows.</li>
-    <li><strong>6 of 70</strong> were stopped by TableFox's safety rules: 2 because PostgreSQL overestimated how many rows a monthly total would return, 2 because columns were mistaken for personal data (<code>ip_address</code>, <code>api_key_id</code>), and 2 because the tables had no declared relationship. With higher limits, 66 of 70 ran, all identical.</li>
+    <li><strong>67 of 67</strong> queries that ran returned exactly the same rows.</li>
+    <li><strong>3 of 70</strong> were stopped by TableFox's safety rules: 2 because the tables had no declared relationship and 1 over the cost limit. The earlier false alarms are gone: monthly totals that PostgreSQL overestimates now run, because TableFox's own row limit caps what they can return, and <code>ip_address</code> and <code>api_key_id</code> are no longer mistaken for personal data.</li>
   </ul>
 </section>
 
 <section id="blind">
   <h2>Blind test: can an assistant answer from TableFox alone?</h2>
-  <p>Measured before the vague-question update; we will re-run it after the next round of fixes. The toughest test. For 28 questions, an AI assistant saw only what TableFox returned, wrote its own SQL, and got one try with no corrections.</p>
-  <table class="dtable"><thead><tr><th>Result</th><th>Questions</th></tr></thead><tbody>
-    <tr><td>Fully correct</td><td><strong>13</strong></td></tr>
-    <tr><td>Partly correct</td><td>2</td></tr>
-    <tr><td>Wrong</td><td>8</td></tr>
-    <tr><td>TableFox didn't find a needed table</td><td>4</td></tr>
-    <tr><td>Correct, but stopped by a safety limit</td><td>1</td></tr>
+  <p>The toughest test. For 28 questions, an AI assistant saw only what TableFox returned, wrote its own SQL, and got one try with no corrections. We ran it twice: before and after adding dates, amounts, status values and column types to the context packs. The second run used a fresh assistant that could see nothing but the questions and the packs.</p>
+  <table class="dtable"><thead><tr><th>Result</th><th>First run</th><th>After the fixes</th></tr></thead><tbody>
+    <tr><td>Fully correct</td><td>13</td><td><strong>21</strong></td></tr>
+    <tr><td>Partly correct</td><td>2</td><td>3</td></tr>
+    <tr><td>Wrong</td><td>8</td><td>2</td></tr>
+    <tr><td>TableFox didn't find a needed table</td><td>4</td><td>0 (one wrong answer followed a missing table)</td></tr>
+    <tr><td>Stopped by the cost limit</td><td>1</td><td>2</td></tr>
   </tbody></table>
-  <p>Most mistakes came from <strong>missing columns, not missing tables</strong>: the context pack doesn't always list date, amount and status columns, so the assistant guessed names. And when a guess was wrong, TableFox's error message didn't say which column was missing, so the assistant couldn't fix it. Both are top of the improvement list. Real assistants retry, so everyday results should be better than a single try. We also want this number much higher.</p>
+  <p>No query failed on a guessed column name this time. When one does, TableFox now returns PostgreSQL's own message, such as <em>column "x" does not exist</em> with its suggestion, so an assistant can correct itself. The remaining misses are interpretations (what counts as "active") and a materialized view whose filter the pack does not show.</p>
 </section>
 
 <section id="safety">
   <h2>Safety</h2>
   <p><strong>Writing is impossible.</strong> All 17 attempts to change data (delete, update, insert, drop, create, copy, change role, lock rows, read server files and more) were refused, and the database was checked to be unchanged.</p>
-  <p><strong>The personal-data filter needs work.</strong> It hides columns named like emails, phone numbers, password hashes and API keys. But it goes by name: renaming a column in a query (<code>email AS contact</code>) gets past it, and bank account numbers, national IDs, tax IDs, card digits and salaries aren't recognised yet. Until that's fixed, keep sensitive data out of reach with database permissions: <a href="/docs#reader">give TableFox's user access only to what it needs</a>.</p>
+  <p><strong>Personal data is refused, however a query names it.</strong> 29 of 29 attempts to read personal data were refused, including 12 that renamed, transformed, combined or wrapped the column (<code>email AS contact</code>, <code>lower(email)</code>, a <code>UNION</code>, a CTE, a subquery, <code>to_jsonb(row)</code>). Before the fix, 10 were refused. Ordinary questions that only filter or count on such columns still run. One limit remains: columns are recognised by their names, so data kept in a generically named column (an audit table's <code>old_value</code>) is not caught. Keep such tables out of reach with database permissions: <a href="/docs#reader">give TableFox's user access only to what it needs</a>.</p>
 </section>
 
 <section id="weak">
   <h2>Weak spots and what we're fixing</h2>
   <ol>
-    <li><strong>Clearer errors</strong> so assistants can correct a wrong column name.</li>
-    <li><strong>Richer context packs</strong> with date, amount and status columns and their types.</li>
-    <li><strong>Long chains of joins</strong>: keep the tables in the middle of a chain higher in the list.</li>
-    <li><strong>A stronger personal-data filter</strong> that checks where each value comes from, not just its name.</li>
-    <li><strong>Smarter limits</strong> for monthly totals that PostgreSQL overestimates.</li>
+    <li><strong>Done:</strong> clearer errors, richer context packs, long join chains, a personal-data filter that checks where each value comes from, and smarter limits for monthly totals.</li>
+    <li><strong>Smaller packs:</strong> the richer packs cost about 490 more tokens per question.</li>
+    <li><strong>Names for people tables:</strong> packs can list an employee number but not the employee's name.</li>
+    <li><strong>Several foreign keys between two tables:</strong> the pack shows only one of them.</li>
+    <li><strong>Data in generically named columns</strong> is not recognised as personal data.</li>
   </ol>
 </section>
 

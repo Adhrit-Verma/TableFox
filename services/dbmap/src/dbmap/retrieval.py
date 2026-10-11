@@ -153,7 +153,35 @@ MONEY_OR_COUNT_TERMS = {
     "net", "gross", "qty", "quantity", "units",
 }
 NUMERIC_TYPES = {"bigint", "decimal", "double precision", "integer", "numeric", "real", "smallint", "money"}
+STATUS_TERMS = {"status", "state", "stage", "phase", "outcome", "result"}
+STATUS_FLAGS = {"active", "archived", "deleted", "enabled", "success", "succeeded", "failed", "escalated"}
+# Short type names shown next to each column ("total_amt numeric").
+TYPE_ABBREVIATIONS = {
+    "ARRAY": "array",
+    "USER-DEFINED": "enum",
+    "boolean": "bool",
+    "character": "char",
+    "character varying": "varchar",
+    "double precision": "float8",
+    "integer": "int",
+    "real": "float4",
+    "time with time zone": "timetz",
+    "time without time zone": "time",
+    "timestamp with time zone": "timestamptz",
+    "timestamp without time zone": "timestamp",
+}
+# Tables this narrow are listed in full; wider ones get matches, keys and essentials.
+SMALL_TABLE_COLUMNS = 10
+MAX_ESSENTIAL_COLUMNS = 8
+MAX_ALLOWED_VALUES = 12
 CONCEPT_WEIGHT = 0.7
+# Words whose stem collides with a concept trigger but mean something else:
+# "invoices issued in Q3" are not support issues.
+NOT_CONCEPTS = {"issued", "issuing"}
+# Multi-hop questions name both ends of a foreign-key chain ("invoices by region"); at most
+# this many named relations are joined, through at most this many connecting tables.
+MAX_NAMED_ANCHORS = 4
+MAX_CHAIN_CONNECTORS = 3
 # A business word the schema already uses is understood; expand it only lightly.
 KNOWN_CONCEPT_WEIGHT = 0.35
 # "Who ..." asks about a party: a customer, employee, account, supplier.
@@ -210,6 +238,17 @@ def _similarity(left: str, right: str) -> float:
     return 2 * len(left_parts & right_parts) / (len(left_parts) + len(right_parts))
 
 
+def _column_type(column: GraphNode) -> str:
+    """Compact type, plus the allowed values of an enum or CHECK list: "status text: open|paid"."""
+    data_type = str(column.metadata.get("data_type") or "")
+    label = TYPE_ABBREVIATIONS.get(data_type, data_type)
+    values = [str(value)[:40] for value in column.metadata.get("allowed_values") or []]
+    if values:
+        shown = values[:MAX_ALLOWED_VALUES]
+        label += ": " + "|".join(shown) + ("|..." if len(values) > len(shown) else "")
+    return label
+
+
 class RetrievalIndex:
     """Small in-memory schema index; never indexes application rows."""
 
@@ -236,6 +275,10 @@ class RetrievalIndex:
             for column in node.metadata.get("columns", []):
                 self.key_roles[node.parent_id][str(column)] = role
 
+        self.column_types: dict[str, dict[str, str]] = {
+            relation_id: {str(column.name): _column_type(column) for column in columns}
+            for relation_id, columns in self.columns.items()
+        }
         self.term_frequencies: dict[str, Counter[str]] = {}
         self.column_terms: dict[str, dict[str, set[str]]] = {}
         self.acronym_phrases: dict[str, Counter[tuple[str, ...]]] = {}
@@ -275,11 +318,15 @@ class RetrievalIndex:
         # Foreign-key neighbours and a "transaction table" score, used when a question asks
         # for a ranking, total or trend without naming the table that holds the facts.
         self.neighbours: dict[str, set[str]] = {key: set() for key in self.relations}
+        self.references: dict[str, set[str]] = {key: set() for key in self.relations}
+        self.referenced_by: dict[str, set[str]] = {key: set() for key in self.relations}
         outgoing: Counter[str] = Counter()
         for edge in snapshot.edges:
             if edge.kind == "foreign_key" and edge.source in self.relations and edge.target in self.relations:
                 self.neighbours[edge.source].add(edge.target)
                 self.neighbours[edge.target].add(edge.source)
+                self.references[edge.source].add(edge.target)
+                self.referenced_by[edge.target].add(edge.source)
                 outgoing[edge.source] += 1
         row_counts = sorted(int(rel.metadata.get("row_estimate") or 0) for rel in self.relations.values())
         median_rows = row_counts[len(row_counts) // 2] if row_counts else 0
@@ -389,6 +436,8 @@ class RetrievalIndex:
         question_lower = question.lower()
         concept_terms: dict[str, float] = {}
         for term in original:
+            if term in NOT_CONCEPTS:
+                continue
             weight = KNOWN_CONCEPT_WEIGHT if term in self.vocabulary else CONCEPT_WEIGHT
             for concept in CONCEPT_INDEX.get(term, CONCEPT_INDEX.get(_stem(term), ())):
                 concept_terms[concept] = max(concept_terms.get(concept, 0.0), weight)
@@ -401,6 +450,117 @@ class RetrievalIndex:
                 if token in self.vocabulary:
                     add(token, weight)
         return weights, fuzzy, acronyms
+
+    def _named_chain(
+        self,
+        question: str,
+        terminal_ids: list[str],
+        scores: dict[str, float],
+    ) -> tuple[list[str], list[str]] | None:
+        """The relations a question names in full, and the foreign-key chain joining them.
+
+        "Total invoiced amount by sales region" names invoices and regions; the answer also
+        needs every table between them (customers, accounts), which match no word and
+        otherwise rank below speculative matches. Returns None unless at least two named
+        relations, the strongest match among them, join through a short chain.
+        """
+        if not terminal_ids:
+            return None
+        words = {_stem(token) for token in _tokens(question)}
+        named = []
+        for relation_id in sorted(scores, key=lambda item: -scores[item]):
+            name_terms = [_stem(token) for token in _tokens(self.relations[relation_id].name)]
+            if name_terms and all(term in words for term in name_terms):
+                named.append(relation_id)
+        leader = terminal_ids[0]
+        anchors = [leader, *(item for item in named if item != leader)][:MAX_NAMED_ANCHORS]
+        if len(anchors) < 2:
+            return None
+        paths = []
+        for index, source in enumerate(anchors):
+            for target in anchors[index + 1 :]:
+                path = self._chain_path(source, target, scores)
+                if path:
+                    paths.append((len(path), source, target, path))
+        parent = {anchor: anchor for anchor in anchors}
+
+        def find(item: str) -> str:
+            while parent[item] != item:
+                item = parent[item]
+            return item
+
+        connectors: list[str] = []
+        for _, source, target, path in sorted(paths):
+            if find(source) != find(target):
+                parent[find(source)] = find(target)
+                connectors += [node for node in path[1:-1] if node not in anchors and node not in connectors]
+        connected = len({find(anchor) for anchor in anchors}) == 1
+        # Directly joined names need no help; long chains are more likely wrong than right.
+        if not connected or not 1 <= len(connectors) <= MAX_CHAIN_CONNECTORS:
+            return None
+        return anchors, connectors
+
+    def _chain_path(
+        self,
+        source: str,
+        target: str,
+        scores: dict[str, float],
+        max_hops: int = 4,
+    ) -> list[str] | None:
+        """Shortest foreign-key path that never passes through a shared lookup table.
+
+        `invoices -> currencies <- regions` joins two tables only because both reference the
+        same lookup, which answers nothing; real chains follow references in one direction
+        or fork from a table that references both sides (invoice_lines -> invoices and
+        invoice_lines -> order_items). So a step that arrived along a reference may not
+        leave against one. Among equally short paths, the one through tables that matched
+        the question better wins (customers over warehouses for "sales region").
+        """
+        start = (source, False)
+        previous: dict[tuple[str, bool], tuple[str, bool] | None] = {start: None}
+        gathered = {start: 0.0}
+        frontier = [start]
+        for _ in range(max_hops):
+            following = []
+            arrivals = []
+            for state in sorted(frontier, key=lambda item: (-gathered[item], item)):
+                node, arrived_forward = state
+                steps = [(item, True) for item in sorted(self.references[node])]
+                if not arrived_forward:
+                    steps += [(item, False) for item in sorted(self.referenced_by[node])]
+                for step in steps:
+                    if step[0] == node or step in previous:
+                        continue
+                    previous[step] = state
+                    gathered[step] = gathered[state] + scores.get(step[0], 0.0)
+                    (arrivals if step[0] == target else following).append(step)
+            if arrivals:
+                cursor: tuple[str, bool] | None = max(arrivals, key=lambda item: gathered[item])
+                path = []
+                while cursor is not None:
+                    path.append(cursor[0])
+                    cursor = previous[cursor]
+                return path[::-1]
+            frontier = following
+        return None
+
+    def _essential_columns(self, relation_id: str, column_names: set[str]) -> list[str]:
+        """Status, date and amount columns, the ones questions use without naming them."""
+        status, dates, amounts = [], [], []
+        for column in self.columns[relation_id]:
+            name = str(column.name)
+            if name.endswith("_time_zone") and name.removesuffix("_time_zone") in column_names:
+                continue
+            data_type = str(column.metadata.get("data_type") or "")
+            terms = self.column_terms[relation_id].get(name, set())
+            flag = data_type == "boolean" and (name.startswith(("is_", "has_")) or terms & STATUS_FLAGS)
+            if terms & STATUS_TERMS or data_type == "USER-DEFINED" or flag:
+                status.append(name)
+            elif data_type.startswith(("date", "timestamp")):
+                dates.append(name)
+            elif data_type in NUMERIC_TYPES and terms & MONEY_OR_COUNT_TERMS:
+                amounts.append(name)
+        return status + dates + amounts
 
     def _foreign_key_neighbours(self, relation_id: str, limit: int) -> list[str]:
         """Relations reachable by one declared foreign key, targets before sources."""
@@ -528,6 +688,7 @@ class RetrievalIndex:
         max_relations = max(1, min(max_relations, 12))
         max_bytes = max(2_048, min(max_bytes, 32_768))
         ranked, terms, fuzzy, acronyms = self._rank(question, max_relations * 4)
+        scores = {relation_id: score for score, relation_id in ranked}
         if ranked:
             confidence_floor = max(1.5, ranked[0][0] * 0.30)
             candidates = [item for item in ranked if item[0] >= confidence_floor]
@@ -554,6 +715,13 @@ class RetrievalIndex:
                 ] += 1
             ranked = diverse
         terminal_ids = [relation_id for _, relation_id in ranked]
+        chain = self._named_chain(question, terminal_ids, scores)
+        if chain:
+            anchors, chain_connectors = chain
+            others = [item for item in terminal_ids if item not in anchors and item not in chain_connectors]
+            # The named relations and the tables joining them come first; speculative
+            # matches fill the remaining ranked slots.
+            terminal_ids = anchors + chain_connectors + others[: max(0, max_relations - len(anchors))]
         # Prefer real foreign-key joins: a view's dependency links are not join paths and
         # otherwise act as shortcuts that skip the tables a query must actually join.
         subgraph = GraphEngine.join_subgraph(self.snapshot, terminal_ids, edge_kinds=frozenset({"foreign_key"}))
@@ -562,7 +730,8 @@ class RetrievalIndex:
         connectors = [node for node in subgraph["nodes"] if node not in terminal_ids]
         # Tables that join the strongest matches are required for the answer; list them
         # before lower-ranked, speculative matches.
-        relation_ids = terminal_ids[:3] + connectors + terminal_ids[3:]
+        lead = len(chain[0]) + len(chain[1]) if chain else 3
+        relation_ids = terminal_ids[:lead] + connectors + terminal_ids[lead:]
         if len(terminal_ids) == 1:
             # A single confident match still needs its lookup tables, and join_subgraph
             # returns early for one terminal, so add direct foreign-key neighbours.
@@ -616,6 +785,18 @@ class RetrievalIndex:
             for name in keys:
                 if name not in selected and len(selected) < 12:
                     selected.append(name)
+            if relation_id in terminal_ids:
+                # Most wrong answers came from guessed date, amount and status columns,
+                # so every ranked relation lists them whatever the question's wording.
+                essentials = self._essential_columns(relation_id, column_names)
+                selected += [name for name in essentials if name not in selected][:MAX_ESSENTIAL_COLUMNS]
+                if len(self.columns[relation_id]) <= SMALL_TABLE_COLUMNS:
+                    selected += [
+                        str(column.name)
+                        for column in self.columns[relation_id]
+                        if str(column.name) not in selected
+                        and str(column.name).removesuffix("_time_zone") not in selected
+                    ]
 
             if relation_id not in terminal_ids:
                 for column in self.columns[relation_id]:
@@ -629,10 +810,11 @@ class RetrievalIndex:
                         selected.append(name)
                     if len(selected) >= 4:
                         break
+            types = self.column_types[relation_id]
             relations.append(
                 {
                     "id": relation_id,
-                    "columns": selected,
+                    "columns": [f"{name} {types[name]}" if types.get(name) else name for name in selected],
                 }
             )
 

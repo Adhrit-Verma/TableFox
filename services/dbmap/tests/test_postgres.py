@@ -153,11 +153,18 @@ class PostgresIntrospectorTests(unittest.TestCase):
         checkouts = 0
         calls = []
 
+        class Connection:
+            closed = False
+
+            @contextmanager
+            def transaction(self):
+                yield
+
         @contextmanager
         def checkout():
             nonlocal checkouts
             checkouts += 1
-            yield object()
+            yield Connection()
 
         def run(_connection, sql, limit, approved, _classifications):
             calls.append((sql, limit, approved))

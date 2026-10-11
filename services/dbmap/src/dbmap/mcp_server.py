@@ -470,6 +470,9 @@ def create_multi_tenant_mcp():
         os.getenv("DBMAP_TENANT_DB", "").strip() or base.cache_dir / "tenants.sqlite",
         required("DBMAP_TENANT_KEY"),
     )
+    if store.key_count > 1:
+        # Old keys stay readable; re-encrypting now lets the operator drop them afterwards.
+        store.rotate()
     ports = {int(port) for port in os.getenv("DBMAP_TENANT_PORTS", "5432").split(",") if port.strip()}
     registry = TenantRegistry(base, store, ports)
     return create_mcp(
