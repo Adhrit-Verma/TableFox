@@ -10,7 +10,7 @@
 <a class="skip" href="#main">Skip to content</a>
 <header class="top"><div class="wrap">
   <a class="brand" href="/" aria-label="TableFox home"><img src="/icon.png" alt="" width="32" height="32">TableFox</a>
-  <nav class="nav" aria-label="Primary"><a href="/#how">How it works</a><a href="/docs">Docs</a><a href="/security" aria-current="page">Security</a></nav>
+  <nav class="nav" aria-label="Primary"><a href="/#how">How it works</a><a href="/docs">Docs</a><a href="/security" aria-current="page">Security</a><a href="/benchmark">Benchmark</a></nav>
   <a class="btn btn-primary" href="/docs#start">Get started</a>
 </div></header>
 
@@ -47,7 +47,7 @@
     <li><strong>Only SELECT and WITH statements</strong> are accepted. Everything else is rejected before reaching your database.</li>
     <li><strong>Every query runs in a read-only transaction</strong> with statement and lock timeouts.</li>
     <li><strong>Each query is planned first</strong> (EXPLAIN), and queries over cost and row limits are refused.</li>
-    <li><strong>Personal-data columns</strong> such as emails, phone numbers and password hashes are blocked from results.</li>
+    <li><strong>Personal-data columns</strong> named like emails, phone numbers or password hashes are left out of results. This check goes by column name, so treat it as a safety net, not a guarantee.</li>
   </ol>
 </section>
 
@@ -84,6 +84,7 @@
     <li>The hosted service runs on <strong>free infrastructure</strong> operated by one maintainer.</li>
     <li>All saved connections are protected by <strong>one server encryption key</strong>. Support for rotating that key is planned.</li>
     <li>Per-user <strong>rate limits</strong> are basic today: two connections per user plus query timeouts.</li>
+    <li>The <strong>personal-data filter works by column name</strong>. Our own testing showed that renaming a column in a query (for example <code>email AS contact</code>) gets past it, and some kinds of data such as bank account numbers and national IDs are not recognised yet. Until that is improved, protect sensitive data in the database itself: <a href="/docs#reader">give TableFox's user access only to the tables and columns it needs</a>.</li>
   </ul>
   <p>If any of these matter for your data, <a href="#self-host">self-host</a>.</p>
 </section>
@@ -93,7 +94,7 @@
 
 <footer><div class="wrap foot">
   <a class="foot-brand" href="/"><img src="/icon.png" alt="" width="32" height="32">TableFox</a>
-  <nav aria-label="Footer"><a href="/docs">Docs</a><a href="/security">Security</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></nav>
+  <nav aria-label="Footer"><a href="/docs">Docs</a><a href="/security">Security</a><a href="/benchmark">Benchmark</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></nav>
   <p>TableFox - read-only PostgreSQL for AI assistants · MIT licensed</p>
 </div></footer>
 </body></html>

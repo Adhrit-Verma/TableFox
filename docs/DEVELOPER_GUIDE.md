@@ -69,7 +69,7 @@ Set in `.env` (or the file named by `DBMAP_ENV_FILE`). The file overrides proces
 | `DBMAP_MAX_QUERY_ROWS` | row cap per query (default 200) |
 | `DBMAP_MAX_EXPLAIN_COST`, `DBMAP_MAX_EXPLAIN_ROWS` | plan ceilings before a query is refused |
 | `DBMAP_ALLOWED_SCHEMAS`, `DBMAP_RESTRICTED_SCHEMAS` | schema allow/deny lists |
-| `DBMAP_ALLOW_SENSITIVE_DATA` | `false` by default; blocks credential/PII-like columns |
+| `DBMAP_ALLOW_SENSITIVE_DATA` | `false` by default; hides result columns whose names look like credentials or PII |
 | `DBMAP_CONTEXT_WINDOW` | relations remembered as already sent (0 = off) |
 
 **MCP transport**
@@ -113,7 +113,7 @@ Set in `.env` (or the file named by `DBMAP_ENV_FILE`). The file overrides proces
 - Only `SELECT`/`WITH`; everything else is rejected before connecting (`readonly.py`).
 - Every query runs in a read-only transaction with statement and lock timeouts, after an `EXPLAIN` policy check.
 - Multi-relation queries must be connected by declared foreign keys or catalog dependencies.
-- Credential/PII-like columns are blocked unless an operator opts in.
+- Result columns whose names look like credentials or PII are hidden unless an operator opts in. Known gap: the check reads output names only, so aliases and expressions bypass it, and some identifiers (IBAN, national ID, tax ID, card digits, salary) are not recognised yet. See [the benchmark](benchmarks/large-db/summary.md#safety).
 - Hosted mode: only read-only database users are accepted; connections must use SSL and resolve to public addresses (pinned with `hostaddr`, so DNS changes cannot redirect them); credentials are entered on `/connect`, never in chat, and stored encrypted.
 - Audit events record actor, action and a SQL hash, never SQL text or rows.
 

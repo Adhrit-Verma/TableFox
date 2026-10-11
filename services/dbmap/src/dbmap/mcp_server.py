@@ -16,7 +16,7 @@ service = build_service()
 
 ICON_FILE = Path(__file__).with_name("static") / "icon.png"
 STATIC_DIR = Path(__file__).with_name("static")
-SITE_PAGES = {"/": "landing.html", "/docs": "docs.html", "/security": "security.html"}
+SITE_PAGES = {"/": "landing.html", "/docs": "docs.html", "/security": "security.html", "/benchmark": "benchmark.html"}
 LANDING_HEADERS = {
     "Cache-Control": "no-cache",
     "X-Content-Type-Options": "nosniff",
@@ -144,6 +144,7 @@ def create_mcp(
     @mcp.custom_route("/", methods=["GET"])
     @mcp.custom_route("/docs", methods=["GET"])
     @mcp.custom_route("/security", methods=["GET"])
+    @mcp.custom_route("/benchmark", methods=["GET"])
     async def site_page(request):
         from starlette.responses import HTMLResponse
 

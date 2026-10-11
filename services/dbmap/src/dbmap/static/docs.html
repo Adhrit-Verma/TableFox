@@ -10,7 +10,7 @@
 <a class="skip" href="#main">Skip to content</a>
 <header class="top"><div class="wrap">
   <a class="brand" href="/" aria-label="TableFox home"><img src="/icon.png" alt="" width="32" height="32">TableFox</a>
-  <nav class="nav" aria-label="Primary"><a href="/#how">How it works</a><a href="/docs" aria-current="page">Docs</a><a href="/security">Security</a></nav>
+  <nav class="nav" aria-label="Primary"><a href="/#how">How it works</a><a href="/docs" aria-current="page">Docs</a><a href="/security">Security</a><a href="/benchmark">Benchmark</a></nav>
   <a class="btn btn-primary" href="#start">Get started</a>
 </div></header>
 
@@ -124,6 +124,7 @@ alter default privileges for role &lt;table_owner&gt; in schema public
     <li><strong>Supabase, AWS RDS and others:</strong> the same SQL works. Make sure the database accepts connections from the internet over SSL.</li>
     <li><strong>PostgreSQL 14 or older:</strong> everyone can create tables in <code>public</code> by default, so also run <code>grant create on schema public to &lt;table_owner&gt;;</code> then <code>revoke create on schema public from public;</code>.</li>
     <li><strong>Other schemas:</strong> repeat the usage and select lines for each schema you want TableFox to read.</li>
+    <li><strong>Keep sensitive data out:</strong> instead of <code>select on all tables</code>, grant only the tables TableFox needs, or only some columns, for example <code>grant select (id, name, country) on customers to tablefox_reader;</code>. Data the user cannot read can never reach your assistant.</li>
   </ul>
 </section>
 
@@ -135,7 +136,7 @@ alter default privileges for role &lt;table_owner&gt; in schema public
     <li><em>How many orders were cancelled per country this year?</em></li>
     <li><em>Which customers signed up but never ordered?</em></li>
   </ul>
-  <p>TableFox refuses anything that would change data (delete, update, create table) and hides personal-data columns such as emails, phone numbers and passwords.</p>
+  <p>TableFox refuses anything that would change data (delete, update, create table). It also leaves out columns named like emails, phone numbers and passwords, but that filter goes by column name, so it is a safety net rather than a guarantee.</p>
 </section>
 
 <section id="several">
@@ -226,7 +227,7 @@ python -m venv .venv
     <li><strong>Size:</strong> how much text each path sends to the model, estimated in tokens.</li>
     <li><strong>Accuracy:</strong> whether TableFox found every table the answer needs, and whether its answers match the hand-written SQL.</li>
   </ul>
-  <p>Current published numbers come from one 38-table database with 14 reviewed questions, each run 3 times. A larger test is in progress. Your results will vary with your database and network.</p>
+  <p>Our latest test used a 71-table, 25-million-row database and 70 questions, each run 3 times: a median of 96 ms per question against 282 ms the usual way, about 28% fewer tokens, and 64 of 64 queries returning identical rows. It also found weak spots we are working on. <a href="/benchmark">See the full results</a>. Your results will vary with your database and network.</p>
 </section>
 </div>
 </div>
@@ -234,7 +235,7 @@ python -m venv .venv
 
 <footer><div class="wrap foot">
   <a class="foot-brand" href="/"><img src="/icon.png" alt="" width="32" height="32">TableFox</a>
-  <nav aria-label="Footer"><a href="/docs">Docs</a><a href="/security">Security</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></nav>
+  <nav aria-label="Footer"><a href="/docs">Docs</a><a href="/security">Security</a><a href="/benchmark">Benchmark</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></nav>
   <p>TableFox - read-only PostgreSQL for AI assistants · MIT licensed</p>
 </div></footer>
 

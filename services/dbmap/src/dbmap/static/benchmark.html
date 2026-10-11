@@ -1,0 +1,141 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Benchmark · TableFox</title>
+<meta name="description" content="TableFox measured on a 71-table, 25-million-row PostgreSQL database: speed, size, accuracy, safety and weak spots.">
+<link rel="icon" href="/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/site.css">
+</head><body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="wrap">
+  <a class="brand" href="/" aria-label="TableFox home"><img src="/icon.png" alt="" width="32" height="32">TableFox</a>
+  <nav class="nav" aria-label="Primary"><a href="/#how">How it works</a><a href="/docs">Docs</a><a href="/security">Security</a><a href="/benchmark" aria-current="page">Benchmark</a></nav>
+  <a class="btn btn-primary" href="/docs#start">Get started</a>
+</div></header>
+
+<main id="main">
+<div class="page-head"><div class="wrap">
+  <p class="eyebrow">Benchmark · 11 October 2026</p>
+  <h1>TableFox on a big, messy database</h1>
+  <p class="lede">We built a realistic company database with 71 tables and 25 million rows, asked 70 questions three times each, and compared TableFox with the usual way of working. Here is everything we found, good and bad.</p>
+</div></div>
+
+<div class="wrap doc-layout">
+<nav class="toc" aria-label="On this page">
+  <a href="#summary">At a glance</a><a href="#database">The test database</a><a href="#speed">Speed</a><a href="#size">Size</a>
+  <a href="#retrieval">Finding the right tables</a><a href="#accuracy">Accuracy</a><a href="#blind">Blind test</a>
+  <a href="#safety">Safety</a><a href="#weak">Weak spots</a><a href="#method">Method</a>
+</nav>
+
+<div class="prose">
+<section id="summary">
+  <h2>At a glance</h2>
+  <div class="tiles" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:1rem">
+    <div class="tile"><span class="lbl">Median time per question</span><span class="big">96<small>ms</small></span><p style="margin:0;font-size:.875rem">vs 282 ms the usual way (2.9× faster)</p></div>
+    <div class="tile"><span class="lbl">Tokens per question</span><span class="big">~1,805</span><p style="margin:0;font-size:.875rem">vs ~2,493 the usual way (28% smaller)</p></div>
+    <div class="tile"><span class="lbl">Right tables found (top 6)</span><span class="big">84.5<small>%</small></span><p style="margin:0;font-size:.875rem">of 129 tables the 70 answers needed</p></div>
+    <div class="tile"><span class="lbl">Identical answers</span><span class="big">64/64</span><p style="margin:0;font-size:.875rem">queries returned exactly the same rows as direct SQL</p></div>
+    <div class="tile"><span class="lbl">Write attempts refused</span><span class="big">17/17</span><p style="margin:0;font-size:.875rem">database unchanged afterwards</p></div>
+    <div class="tile"><span class="lbl">Blind test</span><span class="big">13/28</span><p style="margin:0;font-size:.875rem">questions answered fully correctly on the first try</p></div>
+  </div>
+  <div class="callout"><p>These numbers come from one database on one laptop. Your results will vary with your data, your network and your assistant.</p></div>
+</section>
+
+<section id="database">
+  <h2>The test database</h2>
+  <p>A made-up mid-size company, built to be hard: <strong>71 tables</strong> across 10 areas (sales, finance, HR, CRM, support, marketing, inventory, operations, analytics and legacy), <strong>748 columns</strong>, <strong>147 relationships</strong>, <strong>25 million rows</strong> and <strong>3.9 GB</strong> of data.</p>
+  <p>It includes the things real databases have: abbreviations (<code>qty</code>, <code>amt</code>), synonyms (client, customer, account), two different tables both called <code>orders</code>, old tables with no relationships, very wide tables, millions of log rows, and personal data such as emails and bank details.</p>
+  <p>The 70 questions are split into 10 kinds, 7 each: simple lookups, synonyms, two-table joins, four- and five-table joins, totals over time, audit logs, ambiguous names, legacy tables, wide tables, and vague business questions like <em>"who owes us money?"</em>.</p>
+</section>
+
+<section id="speed">
+  <h2>Speed</h2>
+  <p>Time from asking to having the answer rows, with TableFox already running:</p>
+  <table class="dtable"><thead><tr><th></th><th>Median</th><th>95% of questions under</th></tr></thead><tbody>
+    <tr><td><strong>TableFox</strong> (both calls)</td><td><strong>96 ms</strong></td><td>498 ms</td></tr>
+    <tr><td>Finding the tables alone</td><td>17 ms</td><td>25 ms</td></tr>
+    <tr><td>The usual way (search the catalog, then run SQL)</td><td>282 ms</td><td>690 ms</td></tr>
+  </tbody></table>
+  <p>The slowest questions are slow because they read millions of rows, not because of TableFox. Starting TableFox from nothing takes about 2.5 seconds, most of it starting Python.</p>
+</section>
+
+<section id="size">
+  <h2>Size</h2>
+  <p>Assistants pay for every word they read. TableFox sends a small "context pack" describing just the relevant tables, about <strong>873 tokens</strong> on average, plus the results. In total that's <strong>about 1,805 tokens per question</strong>, against about 2,493 the usual way. Turning on the optional context memory saved a further 10% of the context.</p>
+</section>
+
+<section id="retrieval">
+  <h2>Finding the right tables</h2>
+  <p>For each question we listed the tables a correct answer needs, then checked whether TableFox put them in its top six.</p>
+  <table class="dtable"><thead><tr><th>Kind of question</th><th>Tables found</th></tr></thead><tbody>
+    <tr><td>Simple lookups, two-table joins, audit logs, legacy and wide tables</td><td><strong>100%</strong></td></tr>
+    <tr><td>Synonyms and abbreviations; totals over time</td><td>93%</td></tr>
+    <tr><td>Ambiguous names (two tables called orders)</td><td>88%</td></tr>
+    <tr><td>Four- and five-table joins</td><td>76%</td></tr>
+    <tr><td>Vague business questions</td><td><strong>31%</strong></td></tr>
+    <tr><td><strong>All 70 questions</strong></td><td><strong>84.5%</strong></td></tr>
+  </tbody></table>
+  <p>Audit and log tables, a weak spot in earlier testing, now score perfectly. Vague questions are the clear weakness: TableFox matches words, so <em>"who owes us money?"</em> doesn't lead it to the invoices table.</p>
+</section>
+
+<section id="accuracy">
+  <h2>Accuracy</h2>
+  <p>We ran every correct answer query through TableFox and directly against the database, then compared the results row by row.</p>
+  <ul>
+    <li><strong>64 of 64</strong> queries that ran returned exactly the same rows.</li>
+    <li><strong>6 of 70</strong> were stopped by TableFox's safety rules: 2 because PostgreSQL overestimated how many rows a monthly total would return, 2 because columns were mistaken for personal data (<code>ip_address</code>, <code>api_key_id</code>), and 2 because the tables had no declared relationship. With higher limits, 66 of 70 ran, all identical.</li>
+  </ul>
+</section>
+
+<section id="blind">
+  <h2>Blind test: can an assistant answer from TableFox alone?</h2>
+  <p>The toughest test. For 28 questions, an AI assistant saw only what TableFox returned, wrote its own SQL, and got one try with no corrections.</p>
+  <table class="dtable"><thead><tr><th>Result</th><th>Questions</th></tr></thead><tbody>
+    <tr><td>Fully correct</td><td><strong>13</strong></td></tr>
+    <tr><td>Partly correct</td><td>2</td></tr>
+    <tr><td>Wrong</td><td>8</td></tr>
+    <tr><td>TableFox didn't find a needed table</td><td>4</td></tr>
+    <tr><td>Correct, but stopped by a safety limit</td><td>1</td></tr>
+  </tbody></table>
+  <p>Most mistakes came from <strong>missing columns, not missing tables</strong>: the context pack doesn't always list date, amount and status columns, so the assistant guessed names. And when a guess was wrong, TableFox's error message didn't say which column was missing, so the assistant couldn't fix it. Both are top of the improvement list. Real assistants retry, so everyday results should be better than a single try. We also want this number much higher.</p>
+</section>
+
+<section id="safety">
+  <h2>Safety</h2>
+  <p><strong>Writing is impossible.</strong> All 17 attempts to change data (delete, update, insert, drop, create, copy, change role, lock rows, read server files and more) were refused, and the database was checked to be unchanged.</p>
+  <p><strong>The personal-data filter needs work.</strong> It hides columns named like emails, phone numbers, password hashes and API keys. But it goes by name: renaming a column in a query (<code>email AS contact</code>) gets past it, and bank account numbers, national IDs, tax IDs, card digits and salaries aren't recognised yet. Until that's fixed, keep sensitive data out of reach with database permissions: <a href="/docs#reader">give TableFox's user access only to what it needs</a>.</p>
+</section>
+
+<section id="weak">
+  <h2>Weak spots and what we're fixing</h2>
+  <ol>
+    <li><strong>Clearer errors</strong> so assistants can correct a wrong column name.</li>
+    <li><strong>Richer context packs</strong> with date, amount and status columns and their types.</li>
+    <li><strong>Better word matching</strong>: years and short words like "us" are sometimes misread.</li>
+    <li><strong>Vague business questions</strong>, via built-in business synonyms (owe, churn, complaints).</li>
+    <li><strong>A stronger personal-data filter</strong> that checks where each value comes from, not just its name.</li>
+    <li><strong>Smarter limits</strong> for monthly totals that PostgreSQL overestimates.</li>
+  </ol>
+</section>
+
+<section id="method">
+  <h2>Method</h2>
+  <ul>
+    <li><strong>Machine:</strong> one laptop (AMD Ryzen 7, 16 GB RAM, NVMe SSD), with TableFox, the assistant harness and PostgreSQL 17 all on it. Real networks add latency.</li>
+    <li><strong>The usual way:</strong> a fresh connection per question, a catalog search per keyword, then the correct SQL. It assumes you already know the right SQL, so it flatters the usual way.</li>
+    <li><strong>Tokens</strong> are estimated as characters ÷ 4, not provider billing.</li>
+    <li><strong>Who did the testing:</strong> the questions, answers and blind test were produced by the same AI agent, and that agent had seen a description of the database before the blind test, so treat 13/28 as an upper bound.</li>
+    <li><strong>Reproducible:</strong> the database generator, all 70 questions, the test harness and every raw result are published in the project repository, with the commands to rerun them.</li>
+  </ul>
+</section>
+</div>
+</div>
+</main>
+
+<footer><div class="wrap foot">
+  <a class="foot-brand" href="/"><img src="/icon.png" alt="" width="32" height="32">TableFox</a>
+  <nav aria-label="Footer"><a href="/docs">Docs</a><a href="/security">Security</a><a href="/benchmark">Benchmark</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></nav>
+  <p>TableFox - read-only PostgreSQL for AI assistants · MIT licensed</p>
+</div></footer>
+</body></html>

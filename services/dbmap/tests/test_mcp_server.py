@@ -77,6 +77,7 @@ class McpServerTests(unittest.TestCase):
             ("/terms", "No warranty"),
             ("/docs", "Get started with TableFox"),
             ("/security", "How we protect your database"),
+            ("/benchmark", "TableFox on a big, messy database"),
             ("/site.css", "--fox"),
         ):
             response = client.get(path)
