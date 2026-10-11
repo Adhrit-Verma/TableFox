@@ -4,6 +4,8 @@ TableFox lets an AI assistant answer questions about your PostgreSQL database. Y
 
 It works with any assistant that supports MCP connectors: ChatGPT, Claude, and coding agents such as Claude Code, Codex, Cursor and VS Code. Setup for each is in [AGENTS.md](AGENTS.md).
 
+> **Two ways to run it.** The hosted service is the quickest. If you would rather not give a hosted service a database password, or your database is on a private network, [run TableFox yourself](AGENTS.md#self-hosted-setup): your password never leaves your machine. How the hosted service protects credentials: [tablefox.onrender.com/security](https://tablefox.onrender.com/security).
+
 ---
 
 ## 1. Add TableFox to your assistant
@@ -85,7 +87,7 @@ Add more databases with the same private link (ask *"give me the TableFox link t
 | "This link has expired or is incomplete" | Ask for a new link; each works once for 10 minutes. |
 | "'…' is not read-only" | Connect with your read-only user, not the owner/admin. |
 | "The server does not accept SSL connections" | Enable SSL on your database; TableFox requires it. |
-| "The database host must be a public internet address" | TableFox can't reach private/internal addresses. |
+| "The database host must be a public internet address" | The hosted service can't reach private networks. [Self-host](AGENTS.md#self-hosted-setup) inside your network instead. |
 | "Wrong user or password" | Check the read-only user's password. |
 | The assistant uses old tool names or can't find a TableFox tool | Refresh or reconnect TableFox in your assistant's connector settings, then start a new chat. |
 

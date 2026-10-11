@@ -101,6 +101,13 @@ Set in `.env` (or the file named by `DBMAP_ENV_FILE`). The file overrides proces
 4. **Deploy:** Render reads `render.yaml` (Docker, health check `/health`, secret prompts). Any container host works: build `services/dbmap/Dockerfile`, set the variables above, expose the port behind HTTPS.
 5. **Check:** `curl https://your-host/health` returns `{"status":"ok"}`; `POST /mcp` without a token returns `401` with a `WWW-Authenticate` header.
 
+### Operating notes
+
+- **Back up `DBMAP_TENANT_KEY`.** It encrypts every saved connection; if it is lost, every user must reconnect. Key rotation is not supported yet (planned: accept several keys, encrypt with the newest).
+- **Free hosts sleep.** Render's free tier stops after 15 idle minutes and takes up to a minute to wake. Point an uptime monitor at `/health` every 5 minutes, or use a paid instance.
+- **Rate limits are basic.** Each user gets at most two pooled database connections and every statement has a timeout; there is no per-user request limit yet. Put a rate-limiting proxy in front if you expect heavy public use.
+- **Reachability.** The hosted mode only connects to public addresses on allowed ports (`DBMAP_TENANT_PORTS`). Users with private databases should self-host.
+
 ## Safety rules (do not weaken)
 
 - Only `SELECT`/`WITH`; everything else is rejected before connecting (`readonly.py`).

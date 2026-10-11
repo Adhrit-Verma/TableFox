@@ -1,28 +1,26 @@
-# Database Agent MCP Guide
+# TableFox agent guide
 
-This document is written for AI agents and LLM clients using the Database Agent MCP server. It describes how to navigate a PostgreSQL database accurately while keeping context, latency, and database load low.
+This guide is for AI agents and LLM clients using TableFox (the Python package is named `dbmap`). It explains how to navigate a PostgreSQL database accurately while keeping context, latency and database load low.
+
+People setting TableFox up should start with the [user guide](docs/USER_GUIDE.md); per-client setup (hosted and self-hosted) is in [docs/AGENTS.md](docs/AGENTS.md).
 
 ## Purpose
 
-Use Database Agent when you need to understand an unfamiliar PostgreSQL database before writing queries, explaining data, planning migrations, or locating the source of a business concept.
+Use TableFox when you need to understand an unfamiliar PostgreSQL database before writing queries, explaining data, planning migrations, or locating the source of a business concept.
 
 The server exposes stable graph IDs and bounded navigation tools. Prefer incremental discovery over requesting the entire database graph.
 
-## Connect the MCP Server
+## Connect
 
-The server reads database credentials from the repository's ignored `.env` file. Do not place passwords in prompts, committed MCP configuration, or chat messages.
+- **Hosted:** `https://tablefox.onrender.com/mcp` with OAuth sign-in. The user connects databases on TableFox's private page; never ask for credentials in chat.
+- **Self-hosted:** run `dbmap-mcp` (stdio) with `DBMAP_ENV_FILE` pointing at a `.env` that holds a read-only `DATABASE_URL`. Example for any `mcpServers`-style client:
 
 ```json
 {
   "mcpServers": {
-    "dbmap-postgres": {
-      "command": "powershell",
-      "args": [
-        "-ExecutionPolicy",
-        "Bypass",
-        "-File",
-        "C:\\Code\\AI Agents\\Database Agent\\scripts\\run_mcp.ps1"
-      ]
+    "tablefox": {
+      "command": "/path/to/TableFox/.venv/bin/dbmap-mcp",
+      "env": { "DBMAP_ENV_FILE": "/path/to/TableFox/.env" }
     }
   }
 }
@@ -30,39 +28,9 @@ The server reads database credentials from the repository's ignored `.env` file.
 
 Restart the MCP client after changing `.env`, because a running stdio server keeps the configuration loaded by its process.
 
-## Connect ChatGPT (personal use, via Cloudflare)
+### Advanced: expose your own single-user server privately
 
-ChatGPT ↔ `https://<host>/mcp` ↔ Cloudflare Access (OAuth) ↔ Cloudflare Tunnel ↔ `http://127.0.0.1:8765/mcp`.
-
-The server only listens on loopback and has no login of its own; Cloudflare Access is the only gate. Never expose port 8765 any other way, and never use a quick tunnel (`cloudflared tunnel --url`).
-
-Each person runs their own TableFox with their own database, tunnel, and ChatGPT account. Credentials stay in a local file on that machine and are never typed into ChatGPT.
-
-1. **Run the server over HTTP with its own credentials.** Create a read-only role for your database (README "Safety model"); with ChatGPT in the loop it is the second line of defense if anything above it fails. Then create `.env.chatgpt` in the repo root (git-ignored) holding only what this server needs, so your everyday `.env` is never exposed:
-
-   ```
-   DATABASE_URL=postgresql://dbmap_reader:<password>@<db-host>:5432/<database>
-   DBMAP_MCP_TRANSPORT=streamable-http
-   DBMAP_MCP_PORT=8765
-   DBMAP_MCP_PUBLIC_HOST=<host>
-   DBMAP_MCP_ACTOR=chatgpt
-   DBMAP_AUDIT_DIR=.logs/audit-chatgpt
-   DBMAP_RUNTIME_FILE=.tablefox-runtime-chatgpt.json
-   ```
-
-   Then `$env:DBMAP_ENV_FILE = "$PWD\.env.chatgpt"; .\scripts\run_mcp.ps1`. Without `DBMAP_ENV_FILE` the server falls back to `.env`. Requests whose `Host` is not loopback or `<host>` get `421`.
-2. **Tunnel.** Cloudflare dashboard → Networking → Tunnels → Create a tunnel → Windows → run the generated install command in an admin terminal. Routes → Add route → Published application: your subdomain/domain, no path, Service URL `http://127.0.0.1:8765`.
-3. **Access app.** Zero Trust → Access controls → AI controls → MCP servers → Add an MCP server. HTTP URL `https://<host>/mcp`, policy Allow → Emails → your email only.
-4. **Managed OAuth.** Applications → that app → Edit → Advanced settings → turn on Managed OAuth. Allowed redirect URIs:
-   - `https://chatgpt.com/connector_platform_oauth_redirect`
-   - `https://chatgpt.com/connector/oauth/*`
-
-   Copy the app's AUD tag (Configure → Additional settings).
-5. **Verify the Access token at the tunnel.** Tunnels → your tunnel → Routes → Edit route → Additional application settings → Access → Protect with Access: on, team name, AUD tag. `cloudflared` then rejects any request without a valid `Cf-Access-Jwt-Assertion`.
-6. **Check from outside.** `curl -i https://<host>/mcp` must return `401` with a `WWW-Authenticate` header, never a 200 or a tool list.
-7. **ChatGPT.** Settings → Security and login → Developer mode on. chatgpt.com/plugins → + → Add custom MCP server → URL `https://<host>/mcp`, auth OAuth → Create as a plugin. Sign in through Cloudflare when prompted, then `@` it in a new chat.
-
-Every ChatGPT call is audited with actor `chatgpt`. Revoke access by disabling the Access policy or stopping the tunnel (`sc stop cloudflared`).
+To reach a self-hosted server from a web assistant without the hosted service, run it with `DBMAP_MCP_TRANSPORT=streamable-http` (it binds to `127.0.0.1:8765`) and put an authenticating HTTPS proxy in front of it, for example Cloudflare Tunnel plus Cloudflare Access with Managed OAuth. Set `DBMAP_MCP_PUBLIC_HOST` to the public host name; requests for any other `Host` get `421`. Never expose the port directly. `curl -i https://<host>/mcp` must return `401`, never a tool list.
 
 ## Recommended Navigation Workflow
 
@@ -170,7 +138,7 @@ The query tools enforce SELECT/CTE-only SQL, block known state-changing function
 An MCP client can include this compact instruction:
 
 ```text
-Use Database Agent's two-call path: database_task_context for the complete task, then one database_readonly_batch containing explicit bounded reads. Preserve stable IDs and declared joins. Use database_source_of_truth for authority claims and diagnostic tools only when context is ambiguous or disconnected. Treat the database as production and never request or expose credentials or sensitive row data.
+Use TableFox's two-call path: database_task_context for the complete task, then one database_readonly_batch containing explicit bounded reads. Preserve stable IDs and declared joins. Use database_source_of_truth for authority claims and diagnostic tools only when context is ambiguous or disconnected. Treat the database as production and never request or expose credentials or sensitive row data.
 ```
 
 ## Troubleshooting

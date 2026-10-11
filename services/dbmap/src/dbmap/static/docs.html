@@ -1,0 +1,255 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Docs · TableFox</title>
+<meta name="description" content="Get started with TableFox: add it to ChatGPT, Claude or a coding agent, connect a read-only PostgreSQL database, and ask questions.">
+<link rel="icon" href="/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/site.css">
+</head><body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="wrap">
+  <a class="brand" href="/" aria-label="TableFox home"><img src="/icon.png" alt="" width="32" height="32">TableFox</a>
+  <nav class="nav" aria-label="Primary"><a href="/#how">How it works</a><a href="/docs" aria-current="page">Docs</a><a href="/security">Security</a></nav>
+  <a class="btn btn-primary" href="#start">Get started</a>
+</div></header>
+
+<main id="main">
+<div class="page-head"><div class="wrap">
+  <p class="eyebrow">Documentation</p>
+  <h1>Get started with TableFox</h1>
+  <p class="lede">Add TableFox to your AI assistant, connect a read-only PostgreSQL database, and ask questions in plain English. About five minutes.</p>
+</div></div>
+
+<div class="wrap doc-layout">
+<nav class="toc" aria-label="On this page">
+  <p>Start</p>
+  <a href="#start">Overview</a><a href="#assistants">ChatGPT and Claude</a><a href="#coding-agents">Coding agents</a>
+  <p>Use</p>
+  <a href="#connect">Connect a database</a><a href="#reader">Create a read-only user</a><a href="#asking">Ask questions</a><a href="#several">Several databases</a>
+  <p>Run it yourself</p>
+  <a href="#self-host">Self-host</a><a href="#agent-rules">Agent instructions</a>
+  <p>Reference</p>
+  <a href="#troubleshooting">Troubleshooting</a><a href="#limits">Current limits</a><a href="#benchmark">How we measure</a>
+</nav>
+
+<div class="prose">
+<section id="start">
+  <h2>Overview</h2>
+  <p>TableFox connects an AI assistant to your PostgreSQL database. When you ask a question, it finds the few tables that matter and runs safe, <strong>read-only</strong> queries. It can never change your data.</p>
+  <ol>
+    <li><strong>Add TableFox</strong> to your assistant with this address and sign in:</li>
+  </ol>
+  <div class="code"><pre>https://tablefox.onrender.com/mcp</pre></div>
+  <ol start="2">
+    <li><strong>Connect a database</strong> on TableFox's private page, using a read-only user.</li>
+    <li><strong>Ask</strong> anything, like <em>"Which 5 products earned the most revenue?"</em></li>
+  </ol>
+  <div class="callout"><p>Prefer not to share a database password with a hosted service, or is your database on a private network? <a href="#self-host">Run TableFox on your own machine</a>. It works the same way and the password never leaves your computer.</p></div>
+</section>
+
+<section id="assistants">
+  <h2>ChatGPT and Claude</h2>
+  <h3>ChatGPT</h3>
+  <ol>
+    <li>Open <strong>Settings → Security and login</strong> and switch on <strong>Developer mode</strong>.</li>
+    <li>Go to <strong>Plugins</strong>, choose <strong>+</strong>, then <strong>Add custom MCP server</strong>.</li>
+    <li>Enter the address above, choose <strong>OAuth</strong> sign-in, and create it.</li>
+    <li>Sign up or sign in on the TableFox page that opens, then start a new chat.</li>
+  </ol>
+  <h3>Claude (claude.ai or Claude Desktop)</h3>
+  <ol>
+    <li>Open <strong>Settings → Connectors</strong> and choose <strong>Add custom connector</strong>.</li>
+    <li>Paste the address above and sign in when asked.</li>
+  </ol>
+</section>
+
+<section id="coding-agents">
+  <h2>Coding agents</h2>
+  <p>Any tool that supports MCP works. Pick yours, add TableFox, then sign in when the tool asks.</p>
+  <div class="agent-grid">
+    <div class="agent"><h3>Claude Code</h3><div class="code"><pre>claude mcp add --transport http tablefox https://tablefox.onrender.com/mcp</pre></div><p>Then run <code>/mcp</code>, pick tablefox, and choose Authenticate.</p></div>
+    <div class="agent"><h3>Codex</h3><div class="code"><pre>codex mcp add tablefox --url https://tablefox.onrender.com/mcp
+codex mcp login tablefox</pre></div></div>
+    <div class="agent"><h3>Cursor</h3><div class="code"><pre>{
+  "mcpServers": {
+    "tablefox": { "url": "https://tablefox.onrender.com/mcp" }
+  }
+}</pre></div><p>In <code>~/.cursor/mcp.json</code>, then Connect in Settings → MCP.</p></div>
+    <div class="agent"><h3>VS Code (Copilot)</h3><div class="code"><pre>{
+  "servers": {
+    "tablefox": { "type": "http", "url": "https://tablefox.onrender.com/mcp" }
+  }
+}</pre></div><p>In <code>.vscode/mcp.json</code>. Sign in on first use.</p></div>
+    <div class="agent"><h3>Gemini CLI</h3><div class="code"><pre>{
+  "mcpServers": {
+    "tablefox": { "httpUrl": "https://tablefox.onrender.com/mcp" }
+  }
+}</pre></div><p>In <code>~/.gemini/settings.json</code>.</p></div>
+    <div class="agent"><h3>Windsurf</h3><div class="code"><pre>{
+  "mcpServers": {
+    "tablefox": { "serverUrl": "https://tablefox.onrender.com/mcp" }
+  }
+}</pre></div><p>In <code>~/.codeium/windsurf/mcp_config.json</code>, then refresh.</p></div>
+  </div>
+  <div class="callout"><p>Sign-in has been tested end to end with ChatGPT. The other tools use the same standard sign-in, so they should work. If one does not, use the <a href="#self-host">self-hosted setup</a>, which needs no sign-in.</p></div>
+</section>
+
+<section id="connect">
+  <h2>Connect a database</h2>
+  <p>Ask your assistant anything, for example <em>"What tables are in my database?"</em>. The first time, TableFox replies with a <strong>private link</strong>. It works once and expires after 10 minutes. Open it and fill in:</p>
+  <table class="dtable"><thead><tr><th>Field</th><th>What to enter</th></tr></thead><tbody>
+    <tr><td>Name</td><td>A short name you will use when asking, like <code>sales</code></td></tr>
+    <tr><td>Host and port</td><td>Your database address, like <code>db.example.com</code> and <code>5432</code></td></tr>
+    <tr><td>Database</td><td>The database name, like <code>postgres</code></td></tr>
+    <tr><td>User and password</td><td>A <a href="#reader">read-only user</a> made for TableFox</td></tr>
+    <tr><td>SSL</td><td>Require</td></tr>
+  </tbody></table>
+  <p>Choose <strong>Test and connect</strong>. TableFox checks the user really is read-only, then saves the details encrypted. Your assistant never sees them.</p>
+  <div class="callout warn"><p>Never paste a database password into the chat. Always use the private link.</p></div>
+</section>
+
+<section id="reader">
+  <h2>Create a read-only user</h2>
+  <p>TableFox only accepts users that cannot change anything. Run this once as your database administrator, replacing the &lt;placeholders&gt;:</p>
+  <div class="code"><pre>create role tablefox_reader login password '&lt;long random password&gt;';
+alter role tablefox_reader set default_transaction_read_only = on;
+grant connect on database &lt;your_database&gt; to tablefox_reader;
+grant usage on schema public to tablefox_reader;
+grant select on all tables in schema public to tablefox_reader;
+alter default privileges for role &lt;table_owner&gt; in schema public
+  grant select on tables to tablefox_reader;</pre></div>
+  <ul>
+    <li><strong>Neon:</strong> run it in your project's SQL Editor. The owner is usually <code>neondb_owner</code>. Copy the host from Connect.</li>
+    <li><strong>Supabase, AWS RDS and others:</strong> the same SQL works. Make sure the database accepts connections from the internet over SSL.</li>
+    <li><strong>PostgreSQL 14 or older:</strong> everyone can create tables in <code>public</code> by default, so also run <code>grant create on schema public to &lt;table_owner&gt;;</code> then <code>revoke create on schema public from public;</code>.</li>
+    <li><strong>Other schemas:</strong> repeat the usage and select lines for each schema you want TableFox to read.</li>
+  </ul>
+</section>
+
+<section id="asking">
+  <h2>Ask questions</h2>
+  <p>Specific questions work best:</p>
+  <ul>
+    <li><em>Which 5 products earned the most revenue last quarter?</em></li>
+    <li><em>How many orders were cancelled per country this year?</em></li>
+    <li><em>Which customers signed up but never ordered?</em></li>
+  </ul>
+  <p>TableFox refuses anything that would change data (delete, update, create table) and hides personal-data columns such as emails, phone numbers and passwords.</p>
+</section>
+
+<section id="several">
+  <h2>Several databases</h2>
+  <p>Ask for <em>"the TableFox link to manage my databases"</em> to add more, each with its own short name. If a question does not say which one, the assistant asks. Answer with the name, like <em>"use sales"</em>. The same page lets you remove a database at any time.</p>
+</section>
+
+<section id="self-host">
+  <h2>Run TableFox yourself</h2>
+  <p>Self-hosting keeps your database password on your own computer and works with databases on private networks. There is no sign-in; your assistant starts TableFox directly.</p>
+  <ol>
+    <li>Install Python 3.11 or newer, then in a terminal:</li>
+  </ol>
+  <div class="code"><pre>git clone https://github.com/Adhrit-Verma/TableFox.git
+cd TableFox
+python -m venv .venv
+.venv/bin/pip install -e services/dbmap</pre></div>
+  <p>On Windows use <code>.venv\Scripts\pip</code>.</p>
+  <ol start="2"><li>Create a file named <code>.env</code> in that folder with your read-only user:</li></ol>
+  <div class="code"><pre>DATABASE_URL=postgresql://tablefox_reader:&lt;password&gt;@db.example.com:5432/postgres?sslmode=require</pre></div>
+  <ol start="3"><li>Point your assistant at it. Use your real folder path; on Windows the command ends in <code>.venv\Scripts\dbmap-mcp.exe</code>.</li></ol>
+  <div class="agent-grid">
+    <div class="agent"><h3>Claude Code</h3><div class="code"><pre>claude mcp add tablefox \
+  --env DBMAP_ENV_FILE=/path/to/TableFox/.env \
+  -- /path/to/TableFox/.venv/bin/dbmap-mcp</pre></div></div>
+    <div class="agent"><h3>Codex</h3><div class="code"><pre>codex mcp add tablefox \
+  --env DBMAP_ENV_FILE=/path/to/TableFox/.env \
+  -- /path/to/TableFox/.venv/bin/dbmap-mcp</pre></div></div>
+    <div class="agent"><h3>Cursor, Gemini CLI, Windsurf, Claude Desktop</h3><div class="code"><pre>{
+  "mcpServers": {
+    "tablefox": {
+      "command": "/path/to/TableFox/.venv/bin/dbmap-mcp",
+      "env": { "DBMAP_ENV_FILE": "/path/to/TableFox/.env" }
+    }
+  }
+}</pre></div></div>
+    <div class="agent"><h3>VS Code</h3><div class="code"><pre>{
+  "servers": {
+    "tablefox": {
+      "type": "stdio",
+      "command": "/path/to/TableFox/.venv/bin/dbmap-mcp",
+      "env": { "DBMAP_ENV_FILE": "/path/to/TableFox/.env" }
+    }
+  }
+}</pre></div></div>
+  </div>
+  <p>Restart your assistant after changing <code>.env</code>.</p>
+</section>
+
+<section id="agent-rules">
+  <h2>Instructions for your agent</h2>
+  <p>Paste this into your project's agent instructions (<code>AGENTS.md</code>, <code>CLAUDE.md</code> or your tool's rules) so it uses TableFox well:</p>
+  <div class="code"><pre>## Database (TableFox)
+- For any question about the database, call database_task_context with the full question first.
+- Then answer with at most five bounded SELECT/WITH statements in one database_readonly_batch call,
+  using only the joins it returned.
+- TableFox is read-only. Never attempt writes, and never ask for database credentials in chat.
+- If several databases are connected, pass the right name as the database argument (ask if unclear).</pre></div>
+</section>
+
+<section id="troubleshooting">
+  <h2>Troubleshooting</h2>
+  <table class="dtable"><thead><tr><th>You see</th><th>What to do</th></tr></thead><tbody>
+    <tr><td>This link has expired or is incomplete</td><td>Ask for a new link. Each one works once, for 10 minutes.</td></tr>
+    <tr><td>'…' is not read-only</td><td>Check the user name in the message. Use your read-only user, not the owner or admin account.</td></tr>
+    <tr><td>The server does not accept SSL connections</td><td>Turn on SSL for your database. TableFox requires it.</td></tr>
+    <tr><td>The database host must be a public internet address</td><td>The hosted service cannot reach private networks. <a href="#self-host">Self-host</a> instead.</td></tr>
+    <tr><td>Wrong user or password</td><td>Check the read-only user's password.</td></tr>
+    <tr><td>The assistant can't find a TableFox tool</td><td>Refresh or reconnect TableFox in your assistant's connector settings, then start a new chat.</td></tr>
+  </tbody></table>
+</section>
+
+<section id="limits">
+  <h2>Current limits</h2>
+  <ul>
+    <li><strong>PostgreSQL only</strong> for now.</li>
+    <li><strong>Public databases only</strong> on the hosted service. Private networks need <a href="#self-host">self-hosting</a>.</li>
+    <li><strong>Free hosting.</strong> The hosted service runs on free infrastructure kept awake by a health check. If it has been idle, the first request can take up to a minute.</li>
+    <li><strong>Usage limits</strong> are basic: each user gets at most two database connections and every query has a timeout. Stricter per-user rate limits are planned.</li>
+  </ul>
+</section>
+
+<section id="benchmark">
+  <h2>How we measure</h2>
+  <p>We compare TableFox's two calls with what a careful developer does without it: search the database catalog for the right tables, then write SQL by hand. Both paths run the same questions against the same database, and the answers must match.</p>
+  <ul>
+    <li><strong>Speed:</strong> end-to-end time per question, reported as median and 95th percentile.</li>
+    <li><strong>Size:</strong> how much text each path sends to the model, estimated in tokens.</li>
+    <li><strong>Accuracy:</strong> whether TableFox found every table the answer needs, and whether its answers match the hand-written SQL.</li>
+  </ul>
+  <p>Current published numbers come from one 38-table database with 14 reviewed questions, each run 3 times. A larger test is in progress. Your results will vary with your database and network.</p>
+</section>
+</div>
+</div>
+</main>
+
+<footer><div class="wrap foot">
+  <a class="foot-brand" href="/"><img src="/icon.png" alt="" width="32" height="32">TableFox</a>
+  <nav aria-label="Footer"><a href="/docs">Docs</a><a href="/security">Security</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></nav>
+  <p>TableFox - read-only PostgreSQL for AI assistants · MIT licensed</p>
+</div></footer>
+
+<script>
+document.querySelectorAll('.code').forEach(function (block) {
+  if (!navigator.clipboard) return;
+  var button = document.createElement('button');
+  button.type = 'button'; button.className = 'copy'; button.textContent = 'Copy';
+  button.addEventListener('click', function () {
+    navigator.clipboard.writeText(block.querySelector('pre').innerText).then(function () {
+      button.textContent = 'Copied';
+      setTimeout(function () { button.textContent = 'Copy'; }, 1500);
+    });
+  });
+  block.appendChild(button);
+});
+</script>
+</body></html>

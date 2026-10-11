@@ -15,15 +15,16 @@ from .tenants import TenantError, TenantRegistry
 service = build_service()
 
 ICON_FILE = Path(__file__).with_name("static") / "icon.png"
-LANDING_FILE = Path(__file__).with_name("static") / "landing.html"
+STATIC_DIR = Path(__file__).with_name("static")
+SITE_PAGES = {"/": "landing.html", "/docs": "docs.html", "/security": "security.html"}
 LANDING_HEADERS = {
-    "Cache-Control": "public, max-age=600",
+    "Cache-Control": "no-cache",
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY",
     "Referrer-Policy": "strict-origin-when-cross-origin",
     # Inline styles/script are the page's own; fonts are the only third-party requests.
     "Content-Security-Policy": (
-        "default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline' https://fonts.googleapis.com; "
+        "default-src 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
         "font-src https://fonts.gstatic.com; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; "
         "frame-ancestors 'none'"
     ),
@@ -141,10 +142,19 @@ def create_mcp(
     )
 
     @mcp.custom_route("/", methods=["GET"])
-    async def landing(_request):
+    @mcp.custom_route("/docs", methods=["GET"])
+    @mcp.custom_route("/security", methods=["GET"])
+    async def site_page(request):
         from starlette.responses import HTMLResponse
 
-        return HTMLResponse(LANDING_FILE.read_text(encoding="utf-8"), headers=LANDING_HEADERS)
+        page = STATIC_DIR / SITE_PAGES[request.url.path]
+        return HTMLResponse(page.read_text(encoding="utf-8"), headers=LANDING_HEADERS)
+
+    @mcp.custom_route("/site.css", methods=["GET"])
+    async def site_css(_request):
+        from starlette.responses import FileResponse
+
+        return FileResponse(STATIC_DIR / "site.css", media_type="text/css", headers={"Cache-Control": "no-cache"})
 
     @mcp.custom_route("/privacy", methods=["GET"])
     async def privacy(_request):

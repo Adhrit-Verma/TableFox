@@ -70,7 +70,15 @@ class McpServerTests(unittest.TestCase):
         self.assertEqual(home.status_code, 200)
         self.assertIn("Ask your PostgreSQL database anything", home.text)
         self.assertIn("frame-ancestors 'none'", home.headers["content-security-policy"])
-        for path, text in (("/privacy", "What TableFox stores"), ("/terms", "No warranty")):
+        # Only the "View on GitHub" button may point at the repository.
+        self.assertEqual(home.text.count("github.com"), 1)
+        for path, text in (
+            ("/privacy", "What TableFox stores"),
+            ("/terms", "No warranty"),
+            ("/docs", "Get started with TableFox"),
+            ("/security", "How we protect your database"),
+            ("/site.css", "--fox"),
+        ):
             response = client.get(path)
             self.assertEqual(response.status_code, 200, path)
             self.assertIn(text, response.text)

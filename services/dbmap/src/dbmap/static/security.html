@@ -1,0 +1,99 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Security · TableFox</title>
+<meta name="description" content="How TableFox protects your database credentials and keeps every query read-only, and how to run it yourself if you prefer.">
+<link rel="icon" href="/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/site.css">
+</head><body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="wrap">
+  <a class="brand" href="/" aria-label="TableFox home"><img src="/icon.png" alt="" width="32" height="32">TableFox</a>
+  <nav class="nav" aria-label="Primary"><a href="/#how">How it works</a><a href="/docs">Docs</a><a href="/security" aria-current="page">Security</a></nav>
+  <a class="btn btn-primary" href="/docs#start">Get started</a>
+</div></header>
+
+<main id="main">
+<div class="page-head"><div class="wrap">
+  <p class="eyebrow">Security</p>
+  <h1>How we protect your database</h1>
+  <p class="lede">Giving any service a database password is a real decision. Here is exactly what TableFox does with it, what it can and cannot do, and how to avoid sharing it at all.</p>
+</div></div>
+
+<div class="wrap doc-layout">
+<nav class="toc" aria-label="On this page">
+  <a href="#password">Your password</a><a href="#readonly">Read-only at every layer</a><a href="#isolation">Isolation between users</a>
+  <a href="#logs">What we log</a><a href="#control">You stay in control</a><a href="#self-host">Don't want to share it?</a><a href="#honest">What is not done yet</a>
+</nav>
+
+<div class="prose">
+<section id="password">
+  <h2>Your password</h2>
+  <ul>
+    <li><strong>Entered on TableFox's own page</strong>, over HTTPS, through a private single-use link. Never typed into a chat.</li>
+    <li><strong>Tested before it is saved.</strong> TableFox connects once and refuses any user that can write, change the schema or administer the database.</li>
+    <li><strong>Encrypted before storage</strong> with Fernet (AES-128 plus an HMAC-SHA256 integrity check), in a database separate from the TableFox server.</li>
+    <li><strong>Decrypted only in memory</strong>, only to open a connection to your database.</li>
+    <li><strong>Never shown to your assistant</strong>, never written to logs, never included in error messages.</li>
+  </ul>
+</section>
+
+<section id="readonly">
+  <h2>Read-only at every layer</h2>
+  <p>Even if one guard failed, the others still stop a write. A request has to pass all of them:</p>
+  <ol>
+    <li><strong>A read-only database user</strong>, which TableFox checks before accepting it.</li>
+    <li><strong>Only SELECT and WITH statements</strong> are accepted. Everything else is rejected before reaching your database.</li>
+    <li><strong>Every query runs in a read-only transaction</strong> with statement and lock timeouts.</li>
+    <li><strong>Each query is planned first</strong> (EXPLAIN), and queries over cost and row limits are refused.</li>
+    <li><strong>Personal-data columns</strong> such as emails, phone numbers and password hashes are blocked from results.</li>
+  </ol>
+</section>
+
+<section id="isolation">
+  <h2>Isolation between users</h2>
+  <p>Every signed-in user gets a separate connection pool, cache and audit trail. A user can only reach the databases they saved themselves; names are looked up only within their own account.</p>
+  <p>Connections must use SSL and a public address. TableFox checks the address before every connection and locks onto it, so a database host cannot be pointed at TableFox's own network.</p>
+</section>
+
+<section id="logs">
+  <h2>What we log</h2>
+  <p>For each tool call: the time, the action, object names (such as a table name), counts, and a one-way fingerprint of the SQL. <strong>Never</strong> the SQL text, your rows or your password. We keep a cache of table and column names so answers are fast, and never your data. Full detail is in the <a href="/privacy">privacy policy</a>.</p>
+</section>
+
+<section id="control">
+  <h2>You stay in control</h2>
+  <ul>
+    <li>Create a <strong>dedicated read-only user</strong> just for TableFox. You can change its password or drop it at any time, and TableFox loses access immediately.</li>
+    <li>Remove any saved database from your private manage page.</li>
+    <li>Disconnect TableFox in your assistant to stop all access.</li>
+  </ul>
+</section>
+
+<section id="self-host">
+  <h2>Don't want to share it? Run TableFox yourself</h2>
+  <p>TableFox is open source under the MIT license. You can run the same software on your own computer: your password stays in a file on your machine, nothing is sent to our server, and it also works with databases on private company networks. <a href="/docs#self-host">Self-hosting takes about five minutes.</a></p>
+</section>
+
+<section id="honest">
+  <h2>What is not done yet</h2>
+  <p>We would rather you know:</p>
+  <ul>
+    <li>TableFox has <strong>not had an independent security audit</strong>. The code is public for anyone to review.</li>
+    <li>The hosted service runs on <strong>free infrastructure</strong> operated by one maintainer.</li>
+    <li>All saved connections are protected by <strong>one server encryption key</strong>. Support for rotating that key is planned.</li>
+    <li>Per-user <strong>rate limits</strong> are basic today: two connections per user plus query timeouts.</li>
+  </ul>
+  <p>If any of these matter for your data, <a href="#self-host">self-host</a>.</p>
+</section>
+</div>
+</div>
+</main>
+
+<footer><div class="wrap foot">
+  <a class="foot-brand" href="/"><img src="/icon.png" alt="" width="32" height="32">TableFox</a>
+  <nav aria-label="Footer"><a href="/docs">Docs</a><a href="/security">Security</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></nav>
+  <p>TableFox - read-only PostgreSQL for AI assistants · MIT licensed</p>
+</div></footer>
+</body></html>
