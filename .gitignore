@@ -26,10 +26,10 @@ yarn-error.log*
 pnpm-debug.log*
 
 # Local app state
-.dbmap-cache/
+.dbmap-cache*/
 .logs/
 .tablefox-context.json
-.tablefox-runtime.json
+.tablefox-runtime*.json
 tablefox-auth.json
 *.sqlite
 *.db

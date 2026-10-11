@@ -1,0 +1,8346 @@
+{
+ "st_kb_articles": {
+  "truth_columns": [
+   "article_id",
+   "title",
+   "view_count"
+  ],
+  "truth_rows": [
+   [
+    436.0,
+    "FAQ: export orders #436",
+    49868.0
+   ],
+   [
+    556.0,
+    "Troubleshooting add seats #556",
+    49805.0
+   ],
+   [
+    1175.0,
+    "How to rotate API keys #1175",
+    49751.0
+   ],
+   [
+    7.0,
+    "Troubleshooting export orders #7",
+    49712.0
+   ],
+   [
+    1463.0,
+    "Guide: rotate API keys #1463",
+    49652.0
+   ],
+   [
+    1307.0,
+    "FAQ: rotate API keys #1307",
+    49577.0
+   ],
+   [
+    1480.0,
+    "Troubleshooting configure SSO #1480",
+    49487.0
+   ],
+   [
+    350.0,
+    "Troubleshooting rotate API keys #350",
+    49385.0
+   ],
+   [
+    865.0,
+    "Guide: request a return #865",
+    49269.0
+   ],
+   [
+    503.0,
+    "Guide: configure SSO #503",
+    49259.0
+   ],
+   [
+    345.0,
+    "Troubleshooting export orders #345",
+    48870.0
+   ],
+   [
+    457.0,
+    "FAQ: configure SSO #457",
+    48821.0
+   ],
+   [
+    736.0,
+    "FAQ: export orders #736",
+    48715.0
+   ],
+   [
+    442.0,
+    "Troubleshooting rotate API keys #442",
+    48603.0
+   ],
+   [
+    393.0,
+    "Guide: request a return #393",
+    48458.0
+   ],
+   [
+    1078.0,
+    "FAQ: add seats #1078",
+    48431.0
+   ],
+   [
+    839.0,
+    "Troubleshooting read your invoice #839",
+    48361.0
+   ],
+   [
+    684.0,
+    "How to configure SSO #684",
+    47504.0
+   ],
+   [
+    398.0,
+    "How to configure SSO #398",
+    47336.0
+   ],
+   [
+    498.0,
+    "FAQ: configure SSO #498",
+    47315.0
+   ]
+  ],
+  "error": null,
+  "blocked": false,
+  "reason": null,
+  "review": null,
+  "columns": [
+   "article_id",
+   "title",
+   "view_count"
+  ],
+  "rows": [
+   [
+    436.0,
+    "FAQ: export orders #436",
+    49868.0
+   ],
+   [
+    556.0,
+    "Troubleshooting add seats #556",
+    49805.0
+   ],
+   [
+    1175.0,
+    "How to rotate API keys #1175",
+    49751.0
+   ],
+   [
+    7.0,
+    "Troubleshooting export orders #7",
+    49712.0
+   ],
+   [
+    1463.0,
+    "Guide: rotate API keys #1463",
+    49652.0
+   ],
+   [
+    1307.0,
+    "FAQ: rotate API keys #1307",
+    49577.0
+   ],
+   [
+    1480.0,
+    "Troubleshooting configure SSO #1480",
+    49487.0
+   ],
+   [
+    350.0,
+    "Troubleshooting rotate API keys #350",
+    49385.0
+   ],
+   [
+    865.0,
+    "Guide: request a return #865",
+    49269.0
+   ],
+   [
+    503.0,
+    "Guide: configure SSO #503",
+    49259.0
+   ],
+   [
+    345.0,
+    "Troubleshooting export orders #345",
+    48870.0
+   ],
+   [
+    457.0,
+    "FAQ: configure SSO #457",
+    48821.0
+   ],
+   [
+    736.0,
+    "FAQ: export orders #736",
+    48715.0
+   ],
+   [
+    442.0,
+    "Troubleshooting rotate API keys #442",
+    48603.0
+   ],
+   [
+    393.0,
+    "Guide: request a return #393",
+    48458.0
+   ],
+   [
+    1078.0,
+    "FAQ: add seats #1078",
+    48431.0
+   ],
+   [
+    839.0,
+    "Troubleshooting read your invoice #839",
+    48361.0
+   ],
+   [
+    684.0,
+    "How to configure SSO #684",
+    47504.0
+   ],
+   [
+    398.0,
+    "How to configure SSO #398",
+    47336.0
+   ],
+   [
+    498.0,
+    "FAQ: configure SSO #498",
+    47315.0
+   ]
+  ]
+ },
+ "st_promo_codes": {
+  "truth_columns": [
+   "promo_code",
+   "discount_pct"
+  ],
+  "truth_rows": [
+   [
+    "BF163",
+    40.0
+   ],
+   [
+    "BF180",
+    40.0
+   ],
+   [
+    "BF189",
+    40.0
+   ],
+   [
+    "BF224",
+    40.0
+   ],
+   [
+    "BF312",
+    40.0
+   ],
+   [
+    "BF37",
+    40.0
+   ],
+   [
+    "BF373",
+    40.0
+   ],
+   [
+    "BF410",
+    40.0
+   ],
+   [
+    "BF456",
+    40.0
+   ],
+   [
+    "BF461",
+    40.0
+   ],
+   [
+    "BF78",
+    40.0
+   ],
+   [
+    "PARTNER148",
+    40.0
+   ],
+   [
+    "PARTNER18",
+    40.0
+   ],
+   [
+    "PARTNER281",
+    40.0
+   ],
+   [
+    "PARTNER316",
+    40.0
+   ],
+   [
+    "PARTNER319",
+    40.0
+   ],
+   [
+    "PARTNER40",
+    40.0
+   ],
+   [
+    "PARTNER405",
+    40.0
+   ],
+   [
+    "PARTNER434",
+    40.0
+   ],
+   [
+    "PARTNER435",
+    40.0
+   ]
+  ],
+  "error": null,
+  "blocked": false,
+  "reason": null,
+  "review": null,
+  "columns": [
+   "promo_code",
+   "discount_pct"
+  ],
+  "rows": [
+   [
+    "VIP86",
+    40.0
+   ],
+   [
+    "SAVE114",
+    40.0
+   ],
+   [
+    "VIP80",
+    40.0
+   ],
+   [
+    "PARTNER81",
+    40.0
+   ],
+   [
+    "SPRING96",
+    40.0
+   ],
+   [
+    "WELCOME111",
+    40.0
+   ],
+   [
+    "SAVE42",
+    40.0
+   ],
+   [
+    "BF78",
+    40.0
+   ],
+   [
+    "VIP55",
+    40.0
+   ],
+   [
+    "PARTNER40",
+    40.0
+   ],
+   [
+    "SPRING94",
+    40.0
+   ],
+   [
+    "SAVE95",
+    40.0
+   ],
+   [
+    "PARTNER67",
+    40.0
+   ],
+   [
+    "VIP15",
+    40.0
+   ],
+   [
+    "WELCOME16",
+    40.0
+   ],
+   [
+    "SPRING28",
+    40.0
+   ],
+   [
+    "PARTNER18",
+    40.0
+   ],
+   [
+    "WELCOME77",
+    40.0
+   ],
+   [
+    "BF37",
+    40.0
+   ],
+   [
+    "WELCOME120",
+    40.0
+   ]
+  ]
+ },
+ "syn_clients_region": {
+  "truth_columns": [
+   "region_code",
+   "clients"
+  ],
+  "truth_rows": [
+   [
+    "NA",
+    7814.0
+   ],
+   [
+    "EMEA",
+    6144.0
+   ],
+   [
+    "APAC",
+    3655.0
+   ],
+   [
+    "LATAM",
+    2299.0
+   ],
+   [
+    "UNASSIGNED",
+    88.0
+   ]
+  ],
+  "error": null,
+  "blocked": false,
+  "reason": null,
+  "review": null,
+  "columns": [
+   "region_code",
+   "clients"
+  ],
+  "rows": [
+   [
+    "NA",
+    7814.0
+   ],
+   [
+    "EMEA",
+    6144.0
+   ],
+   [
+    "APAC",
+    3655.0
+   ],
+   [
+    "LATAM",
+    2299.0
+   ],
+   [
+    "UNASSIGNED",
+    88.0
+   ]
+  ]
+ },
+ "syn_staff_per_dept": {
+  "truth_columns": [
+   "dept_name",
+   "staff"
+  ],
+  "truth_rows": [
+   [
+    "Support Tier 2",
+    265.0
+   ],
+   [
+    "Support Tier 1",
+    262.0
+   ],
+   [
+    "Sales EMEA",
+    244.0
+   ],
+   [
+    "Sales North America",
+    229.0
+   ],
+   [
+    "Sales LATAM",
+    217.0
+   ],
+   [
+    "Sales APAC",
+    209.0
+   ],
+   [
+    "Application Engineering",
+    208.0
+   ],
+   [
+    "Procurement",
+    186.0
+   ],
+   [
+    "Data Engineering",
+    184.0
+   ],
+   [
+    "Platform Engineering",
+    184.0
+   ],
+   [
+    "Warehousing",
+    177.0
+   ],
+   [
+    "Logistics",
+    158.0
+   ],
+   [
+    "FP&A",
+    75.0
+   ],
+   [
+    "Operations",
+    68.0
+   ],
+   [
+    "Legal",
+    67.0
+   ],
+   [
+    "Finance",
+    66.0
+   ],
+   [
+    "Brand & Content",
+    65.0
+   ],
+   [
+    "Demand Generation",
+    65.0
+   ],
+   [
+    "Talent Acquisition",
+    63.0
+   ],
+   [
+    "Accounts Receivable",
+    59.0
+   ],
+   [
+    "Product",
+    59.0
+   ],
+   [
+    "Security Office",
+    59.0
+   ],
+   [
+    "People",
+    57.0
+   ],
+   [
+    "Engineering",
+    54.0
+   ],
+   [
+    "Sales",
+    53.0
+   ],
+   [
+    "Customer Support",
+    51.0
+   ],
+   [
+    "IT & Security",
+    51.0
+   ],
+   [
+    "Marketing",
+    50.0
+   ],
+   [
+    "Product Design",
+    50.0
+   ],
+   [
+    "Executive",
+    1.0
+   ]
+  ],
+  "error": null,
+  "blocked": false,
+  "reason": null,
+  "review": null,
+  "columns": [
+   "dept_code",
+   "staff"
+  ],
+  "rows": [
+   [
+    "SUP-T2",
+    300.0
+   ],
+   [
+    "SUP-T1",
+    292.0
+   ],
+   [
+    "SALES-EMEA",
+    272.0
+   ],
+   [
+    "SALES-NA",
+    263.0
+   ],
+   [
+    "SALES-LATAM",
+    242.0
+   ],
+   [
+    "SALES-APAC",
+    240.0
+   ],
+   [
+    "ENG-APPS",
+    233.0
+   ],
+   [
+    "ENG-PLAT",
+    215.0
+   ],
+   [
+    "OPS-PROC",
+    215.0
+   ],
+   [
+    "ENG-DATA",
+    212.0
+   ],
+   [
+    "OPS-WH",
+    194.0
+   ],
+   [
+    "OPS-LOG",
+    179.0
+   ],
+   [
+    "FIN-FPA",
+    88.0
+   ],
+   [
+    "LEGAL",
+    78.0
+   ],
+   [
+    "FIN",
+    75.0
+   ],
+   [
+    "MKT-DG",
+    73.0
+   ],
+   [
+    "MKT-BRAND",
+    72.0
+   ],
+   [
+    "OPS",
+    71.0
+   ],
+   [
+    "PPL-TA",
+    68.0
+   ],
+   [
+    "PPL",
+    68.0
+   ],
+   [
+    "IT-SEC",
+    67.0
+   ],
+   [
+    "PROD",
+    65.0
+   ],
+   [
+    "MKT",
+    64.0
+   ],
+   [
+    "SALES",
+    64.0
+   ],
+   [
+    "FIN-AR",
+    62.0
+   ],
+   [
+    "ENG",
+    60.0
+   ],
+   [
+    "IT",
+    59.0
+   ],
+   [
+    "SUP",
+    55.0
+   ],
+   [
+    "PROD-DES",
+    53.0
+   ],
+   [
+    "EXEC",
+    1.0
+   ]
+  ]
+ },
+ "syn_qty_sold": {
+  "truth_columns": [
+   "sku",
+   "total_qty"
+  ],
+  "truth_rows": [
+   [
+    "SKU-000001",
+    299760.0
+   ],
+   [
+    "SKU-000002",
+    94083.0
+   ],
+   [
+    "SKU-000003",
+    69661.0
+   ],
+   [
+    "SKU-000004",
+    57060.0
+   ],
+   [
+    "SKU-000005",
+    47298.0
+   ],
+   [
+    "SKU-000006",
+    43066.0
+   ],
+   [
+    "SKU-000007",
+    39679.0
+   ],
+   [
+    "SKU-000008",
+    36656.0
+   ],
+   [
+    "SKU-000009",
+    32571.0
+   ],
+   [
+    "SKU-000010",
+    31047.0
+   ],
+   [
+    "SKU-000011",
+    28873.0
+   ],
+   [
+    "SKU-000012",
+    28021.0
+   ],
+   [
+    "SKU-000013",
+    25278.0
+   ],
+   [
+    "SKU-000014",
+    24995.0
+   ],
+   [
+    "SKU-000015",
+    24410.0
+   ],
+   [
+    "SKU-000016",
+    22940.0
+   ],
+   [
+    "SKU-000017",
+    22057.0
+   ],
+   [
+    "SKU-000018",
+    21325.0
+   ],
+   [
+    "SKU-000019",
+    21238.0
+   ],
+   [
+    "SKU-000020",
+    20705.0
+   ]
+  ],
+  "error": null,
+  "blocked": false,
+  "reason": null,
+  "review": null,
+  "columns": [
+   "sku",
+   "total_qty"
+  ],
+  "rows": [
+   [
+    "SKU-000001",
+    195690.0
+   ],
+   [
+    "SKU-000002",
+    104570.0
+   ],
+   [
+    "SKU-000003",
+    73850.0
+   ],
+   [
+    "SKU-000004",
+    66080.0
+   ],
+   [
+    "SKU-000005",
+    64180.0
+   ],
+   [
+    "SKU-000006",
+    60640.0
+   ],
+   [
+    "SKU-000009",
+    56810.0
+   ],
+   [
+    "SKU-000008",
+    55660.0
+   ],
+   [
+    "SKU-000007",
+    54970.0
+   ],
+   [
+    "SKU-000010",
+    51240.0
+   ],
+   [
+    "SKU-000021",
+    41040.0
+   ],
+   [
+    "SKU-000015",
+    40200.0
+   ],
+   [
+    "SKU-000011",
+    39150.0
+   ],
+   [
+    "SKU-000014",
+    38540.0
+   ],
+   [
+    "SKU-000012",
+    36730.0
+   ],
+   [
+    "SKU-000019",
+    36570.0
+   ],
+   [
+    "SKU-000016",
+    36570.0
+   ],
+   [
+    "SKU-000017",
+    36280.0
+   ],
+   [
+    "SKU-000013",
+    35490.0
+   ],
+   [
+    "SKU-000024",
+    35340.0
+   ]
+  ]
+ },
+ "syn_opp_amt": {
+  "truth_columns": [
+   "stage",
+   "total_amt",
+   "opps"
+  ],
+  "truth_rows": [
+   [
+    "closed_won",
+    1387921622.85,
+    13161.0
+   ],
+   [
+    "closed_lost",
+    1265230302.79,
+    12030.0
+   ],
+   [
+    "prospecting",
+    445778667.66,
+    4019.0
+   ],
+   [
+    "qualification",
+    423421873.39,
+    4004.0
+   ],
+   [
+    "proposal",
+    411738877.42,
+    3992.0
+   ],
+   [
+    "negotiation",
+    300045659.95,
+    2794.0
+   ]
+  ],
+  "error": null,
+  "blocked": false,
+  "reason": null,
+  "review": null,
+  "columns": [
+   "stage",
+   "total_amt",
+   "opps"
+  ],
+  "rows": [
+   [
+    "closed_won",
+    1387921622.85,
+    13161.0
+   ],
+   [
+    "closed_lost",
+    1265230302.79,
+    12030.0
+   ],
+   [
+    "prospecting",
+    445778667.66,
+    4019.0
+   ],
+   [
+    "qualification",
+    423421873.39,
+    4004.0
+   ],
+   [
+    "proposal",
+    411738877.42,
+    3992.0
+   ],
+   [
+    "negotiation",
+    300045659.95,
+    2794.0
+   ]
+  ]
+ },
+ "j2_tickets_by_tier": {
+  "truth_columns": [
+   "tier_name",
+   "avg_hours"
+  ],
+  "truth_rows": [
+   [
+    "Platinum",
+    11.5
+   ],
+   [
+    "Gold",
+    24.5
+   ],
+   [
+    "Silver",
+    49.9
+   ],
+   [
+    "Bronze",
+    92.8
+   ]
+  ],
+  "error": "Error executing tool database_readonly_batch",
+  "blocked": false,
+  "reason": null,
+  "review": null,
+  "columns": null,
+  "rows": []
+ },
+ "j2_mrr_by_plan": {
+  "truth_columns": [
+   "plan_code",
+   "plan_name",
+   "active_subscriptions",
+   "mrr_usd"
+  ],
+  "truth_rows": [
+   [
+    "BUS",
+    "Business",
+    3311.0,
+    22649687.44
+   ],
+   [
+    "TEAM",
+    "Team",
+    4976.0,
+    7400501.31
+   ],
+   [
+    "ENT",
+    "Enterprise",
+    1453.0,
+    3419881.5
+   ],
+   [
+    "PRO-OLD",
+    "Professional (legacy)",
+    708.0,
+    3077580.1
+   ],
+   [
+    "ENT-PLUS",
+    "Enterprise Plus",
+    552.0,
+    2604478.38
+   ],
+   [
+    "TEAM-2019",
+    "Team (2019 pricing)",
+    939.0,
+    1066920.19
+   ],
+   [
+    "START",
+    "Starter",
+    4664.0,
+    215521.19
+   ],
+   [
+    "FREE",
+    "Free",
+    1811.0,
+    0.0
+   ]
+  ],
+  "error": null,
+  "blocked": false,
+  "reason": null,
+  "review": null,
+  "columns": [
+   "plan_code",
+   "plan_name",
+   "active_subscriptions",
+   "mrr_usd"
+  ],
+  "rows": [
+   [
+    "BUS",
+    "Business",
+    3311.0,
+    22649687.44
+   ],
+   [
+    "TEAM",
+    "Team",
+    4976.0,
+    7400501.31
+   ],
+   [
+    "ENT",
+    "Enterprise",
+    1453.0,
+    3419881.5
+   ],
+   [
+    "PRO-OLD",
+    "Professional (legacy)",
+    708.0,
+    3077580.1
+   ],
+   [
+    "ENT-PLUS",
+    "Enterprise Plus",
+    552.0,
+    2604478.38
+   ],
+   [
+    "TEAM-2019",
+    "Team (2019 pricing)",
+    939.0,
+    1066920.19
+   ],
+   [
+    "START",
+    "Starter",
+    4664.0,
+    215521.19
+   ],
+   [
+    "FREE",
+    "Free",
+    1811.0,
+    0.0
+   ]
+  ]
+ },
+ "j2_campaign_leads": {
+  "truth_columns": [
+   "campaign_id",
+   "campaign_name",
+   "leads",
+   "converted"
+  ],
+  "truth_rows": [
+   [
+    149.0,
+    "Autumn ABM Push 2024",
+    224.0,
+    21.0
+   ],
+   [
+    359.0,
+    "Summer Webinar 2026",
+    223.0,
+    17.0
+   ],
+   [
+    316.0,
+    "Launch Nurture 2023",
+    222.0,
+    18.0
+   ],
+   [
+    257.0,
+    "Launch Trade Show 2024",
+    221.0,
+    18.0
+   ],
+   [
+    245.0,
+    "Autumn Nurture 2024",
+    220.0,
+    18.0
+   ],
+   [
+    45.0,
+    "Summer ABM Push 2024",
+    218.0,
+    18.0
+   ],
+   [
+    266.0,
+    "Launch Trade Show 2025",
+    217.0,
+    28.0
+   ],
+   [
+    386.0,
+    "Q2 Webinar 2025",
+    217.0,
+    17.0
+   ],
+   [
+    220.0,
+    "Winter Newsletter 2023",
+    214.0,
+    22.0
+   ],
+   [
+    246.0,
+    "Black Friday Trade Show 2025",
+    214.0,
+    23.0
+   ],
+   [
+    355.0,
+    "Autumn Newsletter 2026",
+    214.0,
+    13.0
+   ],
+   [
+    23.0,
+    "Black Friday ABM Push 2026",
+    213.0,
+    12.0
+   ],
+   [
+    29.0,
+    "Launch Webinar 2024",
+    213.0,
+    15.0
+   ],
+   [
+    183.0,
+    "Winter Nurture 2026",
+    213.0,
+    12.0
+   ],
+   [
+    319.0,
+    "Winter Promo 2026",
+    213.0,
+    27.0
+   ],
+   [
+    130.0,
+    "Winter Nurture 2025",
+    211.0,
+    10.0
+   ],
+   [
+    135.0,
+    "Winter Trade Show 2026",
+    211.0,
+    13.0
+   ],
+   [
+    153.0,
+    "Winter Newsletter 2024",
+    210.0,
+    11.0
+   ],
+   [
+    2.0,
+    "Q3 Webinar 2025",
+    209.0,
+    16.0
+   ],
+   [
+    116.0,
+    "Q4 Newsletter 2023",
+    209.0,
+    25.0
+   ],
+   [
+    132.0,
+    "Q1 ABM Push 2023",
+    209.0,
+    14.0
+   ],
+   [
+    133.0,
+    "Summer Newsletter 2024",
+    209.0,
+    17.0
+   ],
+   [
+    255.0,
+    "Q3 Newsletter 2026",
+    209.0,
+    21.0
+   ],
+   [
+    363.0,
+    "Winter Promo 2026",
+    209.0,
+    22.0
+   ],
+   [
+    365.0,
+    "Q4 Webinar 2024",
+    209.0,
+    13.0
+   ],
+   [
+    6.0,
+    "Q2 Retargeting 2025",
+    208.0,
+    11.0
+   ],
+   [
+    115.0,
+    "Winter Retargeting 2026",
+    208.0,
+    12.0
+   ],
+   [
+    121.0,
+    "Launch ABM Push 2024",
+    208.0,
+    19.0
+   ],
+   [
+    209.0,
+    "Q2 Webinar 2024",
+    208.0,
+    16.0
+   ],
+   [
+    230.0,
+    "Autumn ABM Push 2025",
+    208.0,
+    18.0
+   ],
+   [
+    306.0,
+    "Autumn Trade Show 2025",
+    208.0,
+    26.0
+   ],
+   [
+    311.0,
+    "Autumn Retargeting 2026",
+    208.0,
+    10.0
+   ],
+   [
+    84.0,
+    "Q1 Nurture 2023",
+    207.0,
+    17.0
+   ],
+   [
+    236.0,
+    "Winter Retargeting 2023",
+    207.0,
+    15.0
+   ],
+   [
+    91.0,
+    "Q2 ABM Push 2026",
+    206.0,
+    24.0
+   ],
+   [
+    94.0,
+    "Q1 Trade Show 2025",
+    206.0,
+    11.0
+   ],
+   [
+    108.0,
+    "Spring Retargeting 2023",
+    206.0,
+    15.0
+   ],
+   [
+    142.0,
+    "Winter ABM Push 2025",
+    206.0,
+    16.0
+   ],
+   [
+    171.0,
+    "Q4 Retargeting 2026",
+    206.0,
+    10.0
+   ],
+   [
+    243.0,
+    "Q2 ABM Push 2026",
+    206.0,
+    17.0
+   ],
+   [
+    281.0,
+    "Q2 Retargeting 2024",
+    206.0,
+    14.0
+   ],
+   [
+    282.0,
+    "Q2 Nurture 2025",
+    206.0,
+    17.0
+   ],
+   [
+    331.0,
+    "Spring Nurture 2026",
+    206.0,
+    21.0
+   ],
+   [
+    105.0,
+    "Q1 Trade Show 2024",
+    205.0,
+    14.0
+   ],
+   [
+    128.0,
+    "Spring Webinar 2023",
+    205.0,
+    14.0
+   ],
+   [
+    165.0,
+    "Winter Trade Show 2024",
+    205.0,
+    8.0
+   ],
+   [
+    215.0,
+    "Q4 Webinar 2026",
+    205.0,
+    14.0
+   ],
+   [
+    217.0,
+    "Q1 Webinar 2024",
+    205.0,
+    22.0
+   ],
+   [
+    221.0,
+    "Q2 ABM Push 2024",
+    205.0,
+    13.0
+   ],
+   [
+    247.0,
+    "Q4 Trade Show 2026",
+    205.0,
+    17.0
+   ]
+  ],
+  "error": null,
+  "blocked": false,
+  "reason": null,
+  "review": null,
+  "columns": [
+   "campaign_id",
+   "campaign_name",
+   "leads",
+   "converted"
+  ],
+  "rows": [
+   [
+    149.0,
+    "Autumn ABM Push 2024",
+    224.0,
+    21.0
+   ],
+   [
+    359.0,
+    "Summer Webinar 2026",
+    223.0,
+    17.0
+   ],
+   [
+    316.0,
+    "Launch Nurture 2023",
+    222.0,
+    18.0
+   ],
+   [
+    257.0,
+    "Launch Trade Show 2024",
+    221.0,
+    18.0
+   ],
+   [
+    245.0,
+    "Autumn Nurture 2024",
+    220.0,
+    18.0
+   ],
+   [
+    45.0,
+    "Summer ABM Push 2024",
+    218.0,
+    18.0
+   ],
+   [
+    266.0,
+    "Launch Trade Show 2025",
+    217.0,
+    28.0
+   ],
+   [
+    386.0,
+    "Q2 Webinar 2025",
+    217.0,
+    17.0
+   ],
+   [
+    355.0,
+    "Autumn Newsletter 2026",
+    214.0,
+    13.0
+   ],
+   [
+    220.0,
+    "Winter Newsletter 2023",
+    214.0,
+    22.0
+   ],
+   [
+    246.0,
+    "Black Friday Trade Show 2025",
+    214.0,
+    23.0
+   ],
+   [
+    183.0,
+    "Winter Nurture 2026",
+    213.0,
+    12.0
+   ],
+   [
+    23.0,
+    "Black Friday ABM Push 2026",
+    213.0,
+    12.0
+   ],
+   [
+    29.0,
+    "Launch Webinar 2024",
+    213.0,
+    15.0
+   ],
+   [
+    319.0,
+    "Winter Promo 2026",
+    213.0,
+    27.0
+   ],
+   [
+    135.0,
+    "Winter Trade Show 2026",
+    211.0,
+    13.0
+   ],
+   [
+    130.0,
+    "Winter Nurture 2025",
+    211.0,
+    10.0
+   ],
+   [
+    153.0,
+    "Winter Newsletter 2024",
+    210.0,
+    11.0
+   ],
+   [
+    363.0,
+    "Winter Promo 2026",
+    209.0,
+    22.0
+   ],
+   [
+    116.0,
+    "Q4 Newsletter 2023",
+    209.0,
+    25.0
+   ],
+   [
+    132.0,
+    "Q1 ABM Push 2023",
+    209.0,
+    14.0
+   ],
+   [
+    133.0,
+    "Summer Newsletter 2024",
+    209.0,
+    17.0
+   ],
+   [
+    255.0,
+    "Q3 Newsletter 2026",
+    209.0,
+    21.0
+   ],
+   [
+    365.0,
+    "Q4 Webinar 2024",
+    209.0,
+    13.0
+   ],
+   [
+    2.0,
+    "Q3 Webinar 2025",
+    209.0,
+    16.0
+   ],
+   [
+    121.0,
+    "Launch ABM Push 2024",
+    208.0,
+    19.0
+   ],
+   [
+    6.0,
+    "Q2 Retargeting 2025",
+    208.0,
+    11.0
+   ],
+   [
+    306.0,
+    "Autumn Trade Show 2025",
+    208.0,
+    26.0
+   ],
+   [
+    209.0,
+    "Q2 Webinar 2024",
+    208.0,
+    16.0
+   ],
+   [
+    311.0,
+    "Autumn Retargeting 2026",
+    208.0,
+    10.0
+   ],
+   [
+    115.0,
+    "Winter Retargeting 2026",
+    208.0,
+    12.0
+   ],
+   [
+    230.0,
+    "Autumn ABM Push 2025",
+    208.0,
+    18.0
+   ],
+   [
+    84.0,
+    "Q1 Nurture 2023",
+    207.0,
+    17.0
+   ],
+   [
+    236.0,
+    "Winter Retargeting 2023",
+    207.0,
+    15.0
+   ],
+   [
+    108.0,
+    "Spring Retargeting 2023",
+    206.0,
+    15.0
+   ],
+   [
+    142.0,
+    "Winter ABM Push 2025",
+    206.0,
+    16.0
+   ],
+   [
+    281.0,
+    "Q2 Retargeting 2024",
+    206.0,
+    14.0
+   ],
+   [
+    171.0,
+    "Q4 Retargeting 2026",
+    206.0,
+    10.0
+   ],
+   [
+    243.0,
+    "Q2 ABM Push 2026",
+    206.0,
+    17.0
+   ],
+   [
+    282.0,
+    "Q2 Nurture 2025",
+    206.0,
+    17.0
+   ],
+   [
+    94.0,
+    "Q1 Trade Show 2025",
+    206.0,
+    11.0
+   ],
+   [
+    331.0,
+    "Spring Nurture 2026",
+    206.0,
+    21.0
+   ],
+   [
+    91.0,
+    "Q2 ABM Push 2026",
+    206.0,
+    24.0
+   ],
+   [
+    165.0,
+    "Winter Trade Show 2024",
+    205.0,
+    8.0
+   ],
+   [
+    221.0,
+    "Q2 ABM Push 2024",
+    205.0,
+    13.0
+   ],
+   [
+    105.0,
+    "Q1 Trade Show 2024",
+    205.0,
+    14.0
+   ],
+   [
+    215.0,
+    "Q4 Webinar 2026",
+    205.0,
+    14.0
+   ],
+   [
+    128.0,
+    "Spring Webinar 2023",
+    205.0,
+    14.0
+   ],
+   [
+    217.0,
+    "Q1 Webinar 2024",
+    205.0,
+    22.0
+   ],
+   [
+    247.0,
+    "Q4 Trade Show 2026",
+    205.0,
+    17.0
+   ]
+  ]
+ },
+ "mh_invoice_region": {
+  "truth_columns": [
+   "region_code",
+   "invoiced"
+  ],
+  "truth_rows": [
+   [
+    "APAC",
+    6656125834.08
+   ],
+   [
+    "LATAM",
+    575875589.22
+   ],
+   [
+    "EMEA",
+    531545945.49
+   ],
+   [
+    "NA",
+    265985589.31
+   ],
+   [
+    "UNASSIGNED",
+    45786894.55
+   ]
+  ],
+  "error": null,
+  "blocked": false,
+  "reason": null,
+  "review": null,
+  "columns": [
+   "region_code",
+   "invoiced"
+  ],
+  "rows": [
+   [
+    "APAC",
+    6656125834.08
+   ],
+   [
+    "LATAM",
+    575875589.22
+   ],
+   [
+    "EMEA",
+    531545945.49
+   ],
+   [
+    "NA",
+    265985589.31
+   ],
+   [
+    "UNASSIGNED",
+    45786894.55
+   ]
+  ]
+ },
+ "mh_return_rate_category": {
+  "truth_columns": [
+   "category_name",
+   "returns",
+   "items",
+   "return_rate"
+  ],
+  "truth_rows": [
+   [
+    "Industrial",
+    2967.0,
+    211045.0,
+    0.0141
+   ],
+   [
+    "Food Service",
+    2981.0,
+    215985.0,
+    0.0138
+   ],
+   [
+    "Software",
+    2830.0,
+    205096.0,
+    0.0138
+   ],
+   [
+    "Tools",
+    2793.0,
+    205669.0,
+    0.0136
+   ],
+   [
+    "Cleaning",
+    2907.0,
+    215163.0,
+    0.0135
+   ],
+   [
+    "Packaging",
+    2992.0,
+    223070.0,
+    0.0134
+   ],
+   [
+    "Office Supplies",
+    2971.0,
+    220899.0,
+    0.0134
+   ],
+   [
+    "Medical",
+    2935.0,
+    219646.0,
+    0.0134
+   ],
+   [
+    "Furniture",
+    2765.0,
+    206549.0,
+    0.0134
+   ],
+   [
+    "Electronics",
+    2587.0,
+    197598.0,
+    0.0131
+   ],
+   [
+    "Networking",
+    3642.0,
+    282196.0,
+    0.0129
+   ],
+   [
+    "Safety",
+    2674.0,
+    207723.0,
+    0.0129
+   ]
+  ],
+  "error": null,
+  "blocked": false,
+  "reason": null,
+  "review": null,
+  "columns": [
+   "category_name",
+   "returns",
+   "items",
+   "return_rate"
+  ],
+  "rows": [
+   [
+    "Industrial",
+    2967.0,
+    211045.0,
+    0.0141
+   ],
+   [
+    "Food Service",
+    2981.0,
+    215985.0,
+    0.0138
+   ],
+   [
+    "Software",
+    2830.0,
+    205096.0,
+    0.0138
+   ],
+   [
+    "Tools",
+    2793.0,
+    205669.0,
+    0.0136
+   ],
+   [
+    "Cleaning",
+    2907.0,
+    215163.0,
+    0.0135
+   ],
+   [
+    "Packaging",
+    2992.0,
+    223070.0,
+    0.0134
+   ],
+   [
+    "Office Supplies",
+    2971.0,
+    220899.0,
+    0.0134
+   ],
+   [
+    "Medical",
+    2935.0,
+    219646.0,
+    0.0134
+   ],
+   [
+    "Furniture",
+    2765.0,
+    206549.0,
+    0.0134
+   ],
+   [
+    "Electronics",
+    2587.0,
+    197598.0,
+    0.0131
+   ],
+   [
+    "Networking",
+    3642.0,
+    282196.0,
+    0.0129
+   ],
+   [
+    "Safety",
+    2674.0,
+    207723.0,
+    0.0129
+   ]
+  ]
+ },
+ "mh_api_failures_region": {
+  "truth_columns": [
+   "region_code",
+   "failed"
+  ],
+  "truth_rows": [
+   [
+    "NA",
+    1084.0
+   ],
+   [
+    "EMEA",
+    1000.0
+   ],
+   [
+    "APAC",
+    452.0
+   ],
+   [
+    "LATAM",
+    386.0
+   ],
+   [
+    "UNASSIGNED",
+    6.0
+   ]
+  ],
+  "error": "Error executing tool database_readonly_batch",
+  "blocked": false,
+  "reason": null,
+  "review": null,
+  "columns": null,
+  "rows": []
+ },
+ "mh_payments_tier": {
+  "truth_columns": [
+   "tier",
+   "paid"
+  ],
+  "truth_rows": [
+   [
+    "smb",
+    869476426.76
+   ],
+   [
+    "mid_market",
+    569230135.77
+   ],
+   [
+    "enterprise",
+    433602315.23
+   ],
+   [
+    "strategic",
+    359201943.96
+   ]
+  ],
+  "error": "Error executing tool database_readonly_batch",
+  "blocked": false,
+  "reason": null,
+  "review": null,
+  "columns": null,
+  "rows": []
+ },
+ "agg_top_customers_q3_emea": {
+  "truth_columns": [
+   "cust_id",
+   "customer_name",
+   "revenue_usd"
+  ],
+  "truth_rows": [
+   [
+    3.0,
+    "Litware Pharma",
+    1493921.16
+   ],
+   [
+    6.0,
+    "Cyberdyne Media",
+    1202617.93
+   ],
+   [
+    5.0,
+    "Contoso Retail",
+    1107692.65
+   ],
+   [
+    10.0,
+    "Aperture Labs",
+    952821.65
+   ],
+   [
+    8.0,
+    "Adventure Works Pharma",
+    818852.73
+   ],
+   [
+    12.0,
+    "Proseware Industries",
+    604519.88
+   ],
+   [
+    22.0,
+    "Nakatomi Media",
+    604356.72
+   ],
+   [
+    14.0,
+    "Umbrella Media",
+    485584.0
+   ],
+   [
+    16.0,
+    "Northwind Logistics",
+    459507.85
+   ],
+   [
+    18.0,
+    "Wayne Retail",
+    458071.51
+   ]
+  ],
+  "error": "Error executing tool database_readonly_batch",
+  "blocked": false,
+  "reason": null,
+  "review": null,
+  "columns": null,
+  "rows": []
+ },
+ "agg_monthly_orders": {
+  "truth_columns": [
+   "month",
+   "orders",
+   "revenue_usd"
+  ],
+  "truth_rows": [
+   [
+    "2025-01-01T00:00:00",
+    25538.0,
+    210347207.37
+   ],
+   [
+    "2025-02-01T00:00:00",
+    23367.0,
+    188303848.23
+   ],
+   [
+    "2025-03-01T00:00:00",
+    25421.0,
+    211667951.51
+   ],
+   [
+    "2025-04-01T00:00:00",
+    25893.0,
+    212722848.92
+   ],
+   [
+    "2025-05-01T00:00:00",
+    26552.0,
+    222299810.67
+   ],
+   [
+    "2025-06-01T00:00:00",
+    26015.0,
+    216276166.26
+   ],
+   [
+    "2025-07-01T00:00:00",
+    24023.0,
+    199284391.94
+   ],
+   [
+    "2025-08-01T00:00:00",
+    23780.0,
+    198089857.55
+   ],
+   [
+    "2025-09-01T00:00:00",
+    27780.0,
+    232641275.58
+   ],
+   [
+    "2025-10-01T00:00:00",
+    29316.0,
+    242950528.67
+   ],
+   [
+    "2025-11-01T00:00:00",
+    37849.0,
+    312254164.2
+   ],
+   [
+    "2025-12-01T00:00:00",
+    40844.0,
+    342299124.12
+   ]
+  ],
+  "error": null,
+  "blocked": true,
+  "reason": "Query requires approval because it is outside the low-risk policy.",
+  "review": [
+   "cost"
+  ],
+  "columns": [],
+  "rows": []
+ },
+ "agg_gl_q2": {
+  "truth_columns": [
+   "cc_code",
+   "cc_name",
+   "actual",
+   "budget"
+  ],
+  "truth_rows": [
+   [
+    "CC-ENG-0",
+    "Engineering - Opex",
+    7637360.03,
+    898717.1
+   ],
+   [
+    "CC-ENG-1",
+    "Engineering - Programs",
+    7646480.24,
+    1285085.96
+   ],
+   [
+    "CC-ENG-APPS-0",
+    "Application Engineering - Opex",
+    7808513.43,
+    1020034.51
+   ],
+   [
+    "CC-ENG-APPS-1",
+    "Application Engineering - Programs",
+    6827403.67,
+    1373598.24
+   ],
+   [
+    "CC-ENG-DATA-0",
+    "Data Engineering - Opex",
+    7316180.52,
+    1211127.58
+   ],
+   [
+    "CC-ENG-DATA-1",
+    "Data Engineering - Programs",
+    7753759.52,
+    969852.29
+   ],
+   [
+    "CC-ENG-PLAT-0",
+    "Platform Engineering - Opex",
+    7748326.85,
+    1061852.51
+   ],
+   [
+    "CC-ENG-PLAT-1",
+    "Platform Engineering - Programs",
+    7110018.3,
+    671137.67
+   ],
+   [
+    "CC-EXEC-0",
+    "Executive - Opex",
+    7111058.95,
+    1150420.51
+   ],
+   [
+    "CC-EXEC-1",
+    "Executive - Programs",
+    7896063.9,
+    879299.06
+   ],
+   [
+    "CC-FIN-0",
+    "Finance - Opex",
+    6924817.82,
+    1176342.34
+   ],
+   [
+    "CC-FIN-1",
+    "Finance - Programs",
+    7560170.72,
+    1094829.65
+   ],
+   [
+    "CC-FIN-AR-0",
+    "Accounts Receivable - Opex",
+    7272416.96,
+    1045940.42
+   ],
+   [
+    "CC-FIN-AR-1",
+    "Accounts Receivable - Programs",
+    7210521.29,
+    1039684.01
+   ],
+   [
+    "CC-FIN-FPA-0",
+    "FP&A - Opex",
+    7483545.69,
+    905489.43
+   ],
+   [
+    "CC-FIN-FPA-1",
+    "FP&A - Programs",
+    7006569.75,
+    865942.12
+   ],
+   [
+    "CC-IT-0",
+    "IT & Security - Opex",
+    7551665.76,
+    782864.87
+   ],
+   [
+    "CC-IT-1",
+    "IT & Security - Programs",
+    7484489.57,
+    944125.8
+   ],
+   [
+    "CC-IT-SEC-0",
+    "Security Office - Opex",
+    7188818.42,
+    918217.88
+   ],
+   [
+    "CC-IT-SEC-1",
+    "Security Office - Programs",
+    7238090.13,
+    616681.39
+   ],
+   [
+    "CC-LEGAL-0",
+    "Legal - Opex",
+    6659053.21,
+    769346.75
+   ],
+   [
+    "CC-LEGAL-1",
+    "Legal - Programs",
+    7441478.36,
+    459182.51
+   ],
+   [
+    "CC-MKT-0",
+    "Marketing - Opex",
+    6833933.82,
+    900677.57
+   ],
+   [
+    "CC-MKT-1",
+    "Marketing - Programs",
+    7954723.49,
+    719359.16
+   ],
+   [
+    "CC-MKT-BRAND-0",
+    "Brand & Content - Opex",
+    7109574.1,
+    938023.23
+   ],
+   [
+    "CC-MKT-BRAND-1",
+    "Brand & Content - Programs",
+    8078216.3,
+    998957.75
+   ],
+   [
+    "CC-MKT-DG-0",
+    "Demand Generation - Opex",
+    7899356.99,
+    959590.0
+   ],
+   [
+    "CC-MKT-DG-1",
+    "Demand Generation - Programs",
+    6570615.45,
+    722717.61
+   ],
+   [
+    "CC-OPS-0",
+    "Operations - Opex",
+    7249088.58,
+    989819.97
+   ],
+   [
+    "CC-OPS-1",
+    "Operations - Programs",
+    7309476.84,
+    838232.95
+   ],
+   [
+    "CC-OPS-LOG-0",
+    "Logistics - Opex",
+    6737155.39,
+    627031.61
+   ],
+   [
+    "CC-OPS-LOG-1",
+    "Logistics - Programs",
+    7539789.52,
+    1126508.38
+   ],
+   [
+    "CC-OPS-PROC-0",
+    "Procurement - Opex",
+    8110234.81,
+    1280268.45
+   ],
+   [
+    "CC-OPS-PROC-1",
+    "Procurement - Programs",
+    7700540.79,
+    928757.67
+   ],
+   [
+    "CC-OPS-WH-0",
+    "Warehousing - Opex",
+    7050024.49,
+    939717.24
+   ],
+   [
+    "CC-OPS-WH-1",
+    "Warehousing - Programs",
+    7639848.47,
+    1016427.57
+   ],
+   [
+    "CC-PPL-0",
+    "People - Opex",
+    7581952.1,
+    713976.84
+   ],
+   [
+    "CC-PPL-1",
+    "People - Programs",
+    7855684.28,
+    869219.36
+   ],
+   [
+    "CC-PPL-TA-0",
+    "Talent Acquisition - Opex",
+    7493099.47,
+    976105.08
+   ],
+   [
+    "CC-PPL-TA-1",
+    "Talent Acquisition - Programs",
+    8083039.47,
+    756093.86
+   ],
+   [
+    "CC-PROD-0",
+    "Product - Opex",
+    7030343.96,
+    782847.74
+   ],
+   [
+    "CC-PROD-1",
+    "Product - Programs",
+    7299361.22,
+    873307.17
+   ],
+   [
+    "CC-PROD-DES-0",
+    "Product Design - Opex",
+    6709194.71,
+    1123566.31
+   ],
+   [
+    "CC-PROD-DES-1",
+    "Product Design - Programs",
+    6491211.97,
+    1063999.36
+   ],
+   [
+    "CC-SALES-0",
+    "Sales - Opex",
+    7332127.92,
+    1099982.13
+   ],
+   [
+    "CC-SALES-1",
+    "Sales - Programs",
+    7071144.2,
+    1091082.92
+   ],
+   [
+    "CC-SALES-APAC-0",
+    "Sales APAC - Opex",
+    7444408.18,
+    797740.39
+   ],
+   [
+    "CC-SALES-APAC-1",
+    "Sales APAC - Programs",
+    7284047.53,
+    1084124.31
+   ],
+   [
+    "CC-SALES-EMEA-0",
+    "Sales EMEA - Opex",
+    7527422.08,
+    818711.13
+   ],
+   [
+    "CC-SALES-EMEA-1",
+    "Sales EMEA - Programs",
+    7467457.57,
+    781128.81
+   ],
+   [
+    "CC-SALES-LATAM-0",
+    "Sales LATAM - Opex",
+    7411541.03,
+    968966.18
+   ],
+   [
+    "CC-SALES-LATAM-1",
+    "Sales LATAM - Programs",
+    6855274.22,
+    1302287.22
+   ],
+   [
+    "CC-SALES-NA-0",
+    "Sales North America - Opex",
+    6964755.13,
+    999195.39
+   ],
+   [
+    "CC-SALES-NA-1",
+    "Sales North America - Programs",
+    8183740.63,
+    589460.72
+   ],
+   [
+    "CC-SUP-0",
+    "Customer Support - Opex",
+    7725602.44,
+    732105.46
+   ],
+   [
+    "CC-SUP-1",
+    "Customer Support - Programs",
+    6738956.25,
+    507377.36
+   ],
+   [
+    "CC-SUP-T1-0",
+    "Support Tier 1 - Opex",
+    8345562.23,
+    1109866.79
+   ],
+   [
+    "CC-SUP-T1-1",
+    "Support Tier 1 - Programs",
+    8213867.13,
+    789591.71
+   ],
+   [
+    "CC-SUP-T2-0",
+    "Support Tier 2 - Opex",
+    7922018.56,
+    1144145.75
+   ],
+   [
+    "CC-SUP-T2-1",
+    "Support Tier 2 - Programs",
+    7518042.3,
+    1189683.8
+   ]
+  ],
+  "error": "Error executing tool database_readonly_batch",
+  "blocked": false,
+  "reason": null,
+  "review": null,
+  "columns": null,
+  "rows": []
+ },
+ "au_deletes_exports": {
+  "truth_columns": [
+   "username",
+   "action",
+   "events"
+  ],
+  "truth_rows": [
+   [
+    "svc-report-40",
+    "delete",
+    12.0
+   ],
+   [
+    "svc-billing-38",
+    "export",
+    11.0
+   ],
+   [
+    "svc-report-1",
+    "delete",
+    11.0
+   ],
+   [
+    "svc-sync-24",
+    "delete",
+    11.0
+   ],
+   [
+    "svc-sync-6",
+    "export",
+    11.0
+   ],
+   [
+    "svc-backup-15",
+    "delete",
+    10.0
+   ],
+   [
+    "svc-etl-22",
+    "delete",
+    10.0
+   ],
+   [
+    "svc-backup-17",
+    "export",
+    9.0
+   ],
+   [
+    "svc-backup-35",
+    "export",
+    9.0
+   ],
+   [
+    "svc-billing-28",
+    "delete",
+    9.0
+   ],
+   [
+    "svc-billing-28",
+    "export",
+    9.0
+   ],
+   [
+    "svc-billing-4",
+    "delete",
+    9.0
+   ],
+   [
+    "svc-billing-8",
+    "export",
+    9.0
+   ],
+   [
+    "svc-etl-34",
+    "delete",
+    9.0
+   ],
+   [
+    "svc-report-32",
+    "delete",
+    9.0
+   ],
+   [
+    "svc-sync-11",
+    "export",
+    9.0
+   ],
+   [
+    "svc-sync-16",
+    "delete",
+    9.0
+   ],
+   [
+    "svc-backup-14",
+    "export",
+    8.0
+   ],
+   [
+    "svc-backup-15",
+    "export",
+    8.0
+   ],
+   [
+    "svc-backup-19",
+    "export",
+    8.0
+   ],
+   [
+    "svc-backup-31",
+    "delete",
+    8.0
+   ],
+   [
+    "svc-billing-23",
+    "export",
+    8.0
+   ],
+   [
+    "svc-billing-38",
+    "delete",
+    8.0
+   ],
+   [
+    "svc-etl-27",
+    "delete",
+    8.0
+   ],
+   [
+    "svc-report-1",
+    "export",
+    8.0
+   ],
+   [
+    "svc-report-10",
+    "export",
+    8.0
+   ],
+   [
+    "svc-report-20",
+    "export",
+    8.0
+   ],
+   [
+    "svc-sync-11",
+    "delete",
+    8.0
+   ],
+   [
+    "svc-sync-2",
+    "export",
+    8.0
+   ],
+   [
+    "svc-sync-36",
+    "delete",
+    8.0
+   ],
+   [
+    "svc-backup-13",
+    "delete",
+    7.0
+   ],
+   [
+    "svc-backup-19",
+    "delete",
+    7.0
+   ],
+   [
+    "svc-backup-31",
+    "export",
+    7.0
+   ],
+   [
+    "svc-etl-39",
+    "delete",
+    7.0
+   ],
+   [
+    "svc-etl-5",
+    "delete",
+    7.0
+   ],
+   [
+    "svc-report-12",
+    "export",
+    7.0
+   ],
+   [
+    "svc-report-25",
+    "export",
+    7.0
+   ],
+   [
+    "svc-report-32",
+    "export",
+    7.0
+   ],
+   [
+    "svc-sync-3",
+    "delete",
+    7.0
+   ],
+   [
+    "svc-backup-13",
+    "export",
+    6.0
+   ],
+   [
+    "svc-billing-23",
+    "delete",
+    6.0
+   ],
+   [
+    "svc-billing-29",
+    "export",
+    6.0
+   ],
+   [
+    "svc-report-12",
+    "delete",
+    6.0
+   ],
+   [
+    "svc-sync-26",
+    "delete",
+    6.0
+   ],
+   [
+    "svc-sync-33",
+    "export",
+    6.0
+   ],
+   [
+    "svc-sync-36",
+    "export",
+    6.0
+   ],
+   [
+    "svc-sync-7",
+    "delete",
+    6.0
+   ],
+   [
+    "svc-sync-7",
+    "export",
+    6.0
+   ],
+   [
+    "svc-backup-17",
+    "delete",
+    5.0
+   ],
+   [
+    "svc-billing-29",
+    "delete",
+    5.0
+   ]
+  ],
+  "error": "Error executing tool database_readonly_batch: Query contains a blocked write or maintenance keyword.",
+  "blocked": false,
+  "reason": null,
+  "review": null,
+  "columns": null,
+  "rows": []
+ },
+ "au_salary_changes": {
+  "truth_columns": [
+   "change_id",
+   "record_pk",
+   "old_value",
+   "new_value",
+   "changed_by",
+   "change_source",
+   "changed_at"
+  ],
+  "truth_rows": [
+   [
+    313333.0,
+    2373.0,
+    64522.25,
+    57731.94,
+    1319.0,
+    "ui",
+    "2026-10-10T23:45:54.133687"
+   ],
+   [
+    389733.0,
+    3973.0,
+    87848.17,
+    41975.27,
+    null,
+    "import",
+    "2026-10-10T23:20:19.527142"
+   ],
+   [
+    637805.0,
+    306.0,
+    78512.15,
+    92141.35,
+    30.0,
+    "ui",
+    "2026-10-10T22:49:10.894636"
+   ],
+   [
+    79465.0,
+    2904.0,
+    21655.77,
+    60686.67,
+    null,
+    "import",
+    "2026-10-10T22:38:13.474481"
+   ],
+   [
+    323593.0,
+    1344.0,
+    15942.58,
+    85199.43,
+    3834.0,
+    "ui",
+    "2026-10-10T22:23:48.886030"
+   ],
+   [
+    86461.0,
+    3134.0,
+    26428.11,
+    9600.76,
+    null,
+    "import",
+    "2026-10-10T22:18:40.266619"
+   ],
+   [
+    206985.0,
+    2504.0,
+    94365.89,
+    75966.27,
+    null,
+    "import",
+    "2026-10-10T22:11:05.825797"
+   ],
+   [
+    527141.0,
+    350.0,
+    48883.73,
+    48431.84,
+    27470.0,
+    "api",
+    "2026-10-10T21:33:30.809400"
+   ],
+   [
+    238341.0,
+    3856.0,
+    79388.79,
+    28231.16,
+    null,
+    "sync",
+    "2026-10-10T20:01:28.534512"
+   ],
+   [
+    545805.0,
+    1258.0,
+    16717.5,
+    72012.42,
+    3424.0,
+    "ui",
+    "2026-10-10T19:40:54.403000"
+   ],
+   [
+    639385.0,
+    3161.0,
+    63022.07,
+    47990.67,
+    3348.0,
+    "ui",
+    "2026-10-10T18:50:22.791819"
+   ],
+   [
+    532249.0,
+    921.0,
+    81941.17,
+    31257.86,
+    1337.0,
+    "ui",
+    "2026-10-10T18:15:14.518739"
+   ],
+   [
+    130281.0,
+    1258.0,
+    82228.96,
+    71737.22,
+    18884.0,
+    "api",
+    "2026-10-10T18:07:32.520179"
+   ],
+   [
+    594945.0,
+    2238.0,
+    88117.51,
+    61993.43,
+    null,
+    "sync",
+    "2026-10-10T17:52:37.256629"
+   ],
+   [
+    793081.0,
+    2808.0,
+    55726.11,
+    68345.36,
+    null,
+    "sync",
+    "2026-10-10T17:47:20.614237"
+   ],
+   [
+    526505.0,
+    299.0,
+    79778.63,
+    58539.82,
+    2597.0,
+    "ui",
+    "2026-10-10T17:42:49.352166"
+   ],
+   [
+    273873.0,
+    3345.0,
+    27020.74,
+    10389.87,
+    null,
+    "sync",
+    "2026-10-10T17:26:34.523246"
+   ],
+   [
+    491949.0,
+    1170.0,
+    89023.3,
+    90525.49,
+    null,
+    "sync",
+    "2026-10-10T16:15:51.226750"
+   ],
+   [
+    35289.0,
+    3397.0,
+    61219.81,
+    91729.55,
+    null,
+    "import",
+    "2026-10-10T16:02:33.987291"
+   ],
+   [
+    172385.0,
+    3548.0,
+    35793.94,
+    97131.14,
+    3763.0,
+    "ui",
+    "2026-10-10T15:54:42.127699"
+   ],
+   [
+    278389.0,
+    3403.0,
+    21023.57,
+    96092.43,
+    3617.0,
+    "ui",
+    "2026-10-10T15:50:17.604589"
+   ],
+   [
+    42057.0,
+    1168.0,
+    98799.97,
+    55066.41,
+    3835.0,
+    "ui",
+    "2026-10-10T15:37:33.533347"
+   ],
+   [
+    726673.0,
+    733.0,
+    56804.08,
+    46499.28,
+    2208.0,
+    "ui",
+    "2026-10-10T14:52:49.811561"
+   ],
+   [
+    265233.0,
+    2728.0,
+    52627.28,
+    60516.41,
+    12095.0,
+    "api",
+    "2026-10-10T14:30:04.126190"
+   ],
+   [
+    503401.0,
+    2589.0,
+    55856.64,
+    52272.62,
+    2930.0,
+    "ui",
+    "2026-10-10T14:07:31.093560"
+   ],
+   [
+    320641.0,
+    2675.0,
+    63545.82,
+    10605.96,
+    24105.0,
+    "api",
+    "2026-10-10T13:53:14.572841"
+   ],
+   [
+    466069.0,
+    2963.0,
+    97261.17,
+    57323.3,
+    2109.0,
+    "ui",
+    "2026-10-10T13:23:14.654552"
+   ],
+   [
+    793625.0,
+    3163.0,
+    53387.93,
+    45791.33,
+    null,
+    "import",
+    "2026-10-10T13:14:14.768825"
+   ],
+   [
+    163965.0,
+    1746.0,
+    47175.18,
+    65537.63,
+    null,
+    "sync",
+    "2026-10-10T12:35:33.355675"
+   ],
+   [
+    497389.0,
+    3094.0,
+    99156.69,
+    84674.69,
+    10833.0,
+    "api",
+    "2026-10-10T12:18:49.156990"
+   ],
+   [
+    649085.0,
+    1328.0,
+    10265.28,
+    37030.92,
+    2628.0,
+    "ui",
+    "2026-10-10T12:05:02.190249"
+   ],
+   [
+    300437.0,
+    2177.0,
+    47364.34,
+    69379.21,
+    2352.0,
+    "ui",
+    "2026-10-10T11:53:21.406438"
+   ],
+   [
+    438713.0,
+    3530.0,
+    44755.55,
+    47517.91,
+    26868.0,
+    "api",
+    "2026-10-10T11:19:10.259734"
+   ],
+   [
+    279977.0,
+    2861.0,
+    19239.41,
+    19139.96,
+    null,
+    "sync",
+    "2026-10-10T10:56:05.088795"
+   ],
+   [
+    567741.0,
+    1523.0,
+    65159.2,
+    33072.72,
+    null,
+    "sync",
+    "2026-10-10T09:44:49.431574"
+   ],
+   [
+    607437.0,
+    3219.0,
+    4245.26,
+    33491.84,
+    null,
+    "import",
+    "2026-10-10T09:24:22.179174"
+   ],
+   [
+    85285.0,
+    259.0,
+    79924.64,
+    11762.05,
+    null,
+    "import",
+    "2026-10-10T09:22:51.516660"
+   ],
+   [
+    157369.0,
+    3176.0,
+    63593.23,
+    96153.62,
+    3603.0,
+    "ui",
+    "2026-10-10T09:16:19.242259"
+   ],
+   [
+    535725.0,
+    2406.0,
+    50789.85,
+    17537.52,
+    9960.0,
+    "api",
+    "2026-10-10T08:50:16.690047"
+   ],
+   [
+    733173.0,
+    33.0,
+    92310.57,
+    87236.05,
+    null,
+    "import",
+    "2026-10-10T08:36:34.875646"
+   ],
+   [
+    676777.0,
+    3839.0,
+    88144.47,
+    1685.25,
+    null,
+    "sync",
+    "2026-10-10T08:09:45.353605"
+   ],
+   [
+    445113.0,
+    2052.0,
+    42294.63,
+    14106.98,
+    594.0,
+    "ui",
+    "2026-10-10T07:54:45.311086"
+   ],
+   [
+    232057.0,
+    1466.0,
+    93321.85,
+    55162.1,
+    null,
+    "sync",
+    "2026-10-10T07:53:54.603866"
+   ],
+   [
+    309653.0,
+    3349.0,
+    21166.21,
+    38651.01,
+    12689.0,
+    "api",
+    "2026-10-10T06:27:58.865226"
+   ],
+   [
+    252365.0,
+    485.0,
+    15736.89,
+    52366.71,
+    null,
+    "import",
+    "2026-10-10T06:22:47.588054"
+   ],
+   [
+    509357.0,
+    3042.0,
+    14813.11,
+    65418.08,
+    null,
+    "sync",
+    "2026-10-10T05:48:48.366460"
+   ],
+   [
+    51209.0,
+    1062.0,
+    64448.7,
+    86888.13,
+    2417.0,
+    "ui",
+    "2026-10-10T05:37:38.000814"
+   ],
+   [
+    296917.0,
+    3877.0,
+    6839.72,
+    20716.7,
+    null,
+    "import",
+    "2026-10-10T05:30:53.272621"
+   ],
+   [
+    604973.0,
+    3355.0,
+    39171.66,
+    2878.24,
+    null,
+    "import",
+    "2026-10-10T05:21:51.696675"
+   ],
+   [
+    324737.0,
+    3147.0,
+    86524.63,
+    22099.59,
+    null,
+    "import",
+    "2026-10-10T05:14:10.591739"
+   ]
+  ],
+  "error": "Error executing tool database_readonly_batch",
+  "blocked": false,
+  "reason": null,
+  "review": null,
+  "columns": null,
+  "rows": []
+ },
+ "au_failed_logins": {
+  "truth_columns": [
+   "user_id",
+   "username",
+   "failed"
+  ],
+  "truth_rows": [
+   [
+    2110.0,
+    "staff.lindajones2110",
+    9.0
+   ],
+   [
+    1899.0,
+    "staff.jamesmartin1899",
+    8.0
+   ],
+   [
+    3798.0,
+    "staff.isabellaali3798",
+    7.0
+   ],
+   [
+    4001.0,
+    "user1.2",
+    7.0
+   ],
+   [
+    422.0,
+    "staff.richardnakamura422",
+    6.0
+   ],
+   [
+    844.0,
+    "staff.annathomas844",
+    5.0
+   ],
+   [
+    2532.0,
+    "staff.elizabethclark2532",
+    5.0
+   ],
+   [
+    2954.0,
+    "staff.zararodriguez2954",
+    5.0
+   ],
+   [
+    4009.0,
+    "user9.18",
+    5.0
+   ],
+   [
+    4853.0,
+    "user853.1706",
+    5.0
+   ],
+   [
+    1055.0,
+    "staff.isabellarossi1055",
+    4.0
+   ],
+   [
+    1266.0,
+    "staff.lijones1266",
+    4.0
+   ],
+   [
+    3857.0,
+    "staff.camilletanaka3857",
+    4.0
+   ],
+   [
+    4220.0,
+    "user220.440",
+    4.0
+   ],
+   [
+    4260.0,
+    "user260.520",
+    4.0
+   ],
+   [
+    5064.0,
+    "user1064.2128",
+    4.0
+   ],
+   [
+    58.0,
+    "staff.mateokim58",
+    3.0
+   ],
+   [
+    186.0,
+    "staff.oliviasingh186",
+    3.0
+   ],
+   [
+    222.0,
+    "staff.michaelali222",
+    3.0
+   ],
+   [
+    554.0,
+    "staff.giulianielsen554",
+    3.0
+   ]
+  ],
+  "error": "Error executing tool database_readonly_batch",
+  "blocked": false,
+  "reason": null,
+  "review": null,
+  "columns": null,
+  "rows": []
+ },
+ "amb_purchase_orders_late": {
+  "truth_columns": [
+   "supplier_id",
+   "supplier_name",
+   "late",
+   "received"
+  ],
+  "truth_rows": [
+   [
+    1.0,
+    "Allied Distribution 1",
+    489.0,
+    652.0
+   ],
+   [
+    2.0,
+    "Eastern Manufacturing 2",
+    253.0,
+    355.0
+   ],
+   [
+    3.0,
+    "Global Manufacturing 3",
+    243.0,
+    305.0
+   ],
+   [
+    4.0,
+    "Global Manufacturing 4",
+    226.0,
+    300.0
+   ],
+   [
+    6.0,
+    "United Supply 6",
+    187.0,
+    246.0
+   ],
+   [
+    5.0,
+    "Atlas Manufacturing 5",
+    177.0,
+    246.0
+   ],
+   [
+    10.0,
+    "Global Trading 10",
+    175.0,
+    214.0
+   ],
+   [
+    9.0,
+    "Nordic Wholesale 9",
+    172.0,
+    220.0
+   ],
+   [
+    8.0,
+    "Global Supply 8",
+    162.0,
+    226.0
+   ],
+   [
+    14.0,
+    "Nordic Supply 14",
+    157.0,
+    208.0
+   ],
+   [
+    7.0,
+    "Pioneer Wholesale 7",
+    145.0,
+    202.0
+   ],
+   [
+    12.0,
+    "Allied Wholesale 12",
+    139.0,
+    181.0
+   ],
+   [
+    18.0,
+    "Atlas Distribution 18",
+    139.0,
+    171.0
+   ],
+   [
+    11.0,
+    "Pacific Supply 11",
+    137.0,
+    199.0
+   ],
+   [
+    15.0,
+    "Global Trading 15",
+    132.0,
+    174.0
+   ],
+   [
+    16.0,
+    "Prime Components 16",
+    127.0,
+    173.0
+   ],
+   [
+    26.0,
+    "United Trading 26",
+    127.0,
+    171.0
+   ],
+   [
+    30.0,
+    "Nordic Distribution 30",
+    123.0,
+    153.0
+   ],
+   [
+    23.0,
+    "Pioneer Wholesale 23",
+    118.0,
+    155.0
+   ],
+   [
+    20.0,
+    "Global Components 20",
+    117.0,
+    154.0
+   ],
+   [
+    13.0,
+    "United Wholesale 13",
+    116.0,
+    163.0
+   ],
+   [
+    27.0,
+    "Global Distribution 27",
+    116.0,
+    144.0
+   ],
+   [
+    21.0,
+    "United Wholesale 21",
+    114.0,
+    156.0
+   ],
+   [
+    22.0,
+    "Prime Distribution 22",
+    110.0,
+    149.0
+   ],
+   [
+    41.0,
+    "Pioneer Trading 41",
+    108.0,
+    139.0
+   ],
+   [
+    25.0,
+    "Pacific Distribution 25",
+    107.0,
+    134.0
+   ],
+   [
+    46.0,
+    "Allied Components 46",
+    105.0,
+    131.0
+   ],
+   [
+    19.0,
+    "Eastern Manufacturing 19",
+    103.0,
+    150.0
+   ],
+   [
+    28.0,
+    "Pacific Components 28",
+    103.0,
+    139.0
+   ],
+   [
+    29.0,
+    "Atlas Wholesale 29",
+    103.0,
+    136.0
+   ],
+   [
+    24.0,
+    "Pioneer Wholesale 24",
+    102.0,
+    142.0
+   ],
+   [
+    53.0,
+    "Eastern Manufacturing 53",
+    102.0,
+    134.0
+   ],
+   [
+    57.0,
+    "Pioneer Wholesale 57",
+    102.0,
+    139.0
+   ],
+   [
+    17.0,
+    "United Components 17",
+    101.0,
+    147.0
+   ],
+   [
+    36.0,
+    "United Wholesale 36",
+    101.0,
+    127.0
+   ],
+   [
+    56.0,
+    "Eastern Components 56",
+    100.0,
+    127.0
+   ],
+   [
+    31.0,
+    "Nordic Components 31",
+    99.0,
+    138.0
+   ],
+   [
+    39.0,
+    "Global Manufacturing 39",
+    99.0,
+    130.0
+   ],
+   [
+    37.0,
+    "United Trading 37",
+    96.0,
+    123.0
+   ],
+   [
+    34.0,
+    "Allied Wholesale 34",
+    95.0,
+    118.0
+   ],
+   [
+    52.0,
+    "Prime Trading 52",
+    95.0,
+    135.0
+   ],
+   [
+    32.0,
+    "Metro Trading 32",
+    94.0,
+    133.0
+   ],
+   [
+    47.0,
+    "Pacific Trading 47",
+    94.0,
+    126.0
+   ],
+   [
+    50.0,
+    "United Manufacturing 50",
+    93.0,
+    127.0
+   ],
+   [
+    58.0,
+    "Allied Components 58",
+    93.0,
+    131.0
+   ],
+   [
+    33.0,
+    "Pioneer Manufacturing 33",
+    91.0,
+    122.0
+   ],
+   [
+    38.0,
+    "Pioneer Components 38",
+    91.0,
+    128.0
+   ],
+   [
+    40.0,
+    "Pioneer Components 40",
+    91.0,
+    124.0
+   ],
+   [
+    42.0,
+    "Global Trading 42",
+    90.0,
+    123.0
+   ],
+   [
+    54.0,
+    "Atlas Distribution 54",
+    90.0,
+    122.0
+   ]
+  ],
+  "error": null,
+  "blocked": false,
+  "reason": null,
+  "review": null,
+  "columns": [
+   "supplier_name",
+   "late",
+   "received"
+  ],
+  "rows": [
+   [
+    "Allied Distribution 1",
+    489.0,
+    652.0
+   ],
+   [
+    "Eastern Manufacturing 2",
+    253.0,
+    355.0
+   ],
+   [
+    "Global Manufacturing 3",
+    243.0,
+    305.0
+   ],
+   [
+    "Global Manufacturing 4",
+    226.0,
+    300.0
+   ],
+   [
+    "United Supply 6",
+    187.0,
+    246.0
+   ],
+   [
+    "Atlas Manufacturing 5",
+    177.0,
+    246.0
+   ],
+   [
+    "Global Trading 10",
+    175.0,
+    214.0
+   ],
+   [
+    "Nordic Wholesale 9",
+    172.0,
+    220.0
+   ],
+   [
+    "Global Supply 8",
+    162.0,
+    226.0
+   ],
+   [
+    "Nordic Supply 14",
+    157.0,
+    208.0
+   ],
+   [
+    "Pioneer Wholesale 7",
+    145.0,
+    202.0
+   ],
+   [
+    "Atlas Distribution 18",
+    139.0,
+    171.0
+   ],
+   [
+    "Allied Wholesale 12",
+    139.0,
+    181.0
+   ],
+   [
+    "Pacific Supply 11",
+    137.0,
+    199.0
+   ],
+   [
+    "Global Trading 15",
+    132.0,
+    174.0
+   ],
+   [
+    "United Trading 26",
+    127.0,
+    171.0
+   ],
+   [
+    "Prime Components 16",
+    127.0,
+    173.0
+   ],
+   [
+    "Nordic Distribution 30",
+    123.0,
+    153.0
+   ],
+   [
+    "Pioneer Wholesale 23",
+    118.0,
+    155.0
+   ],
+   [
+    "Global Components 20",
+    117.0,
+    154.0
+   ],
+   [
+    "United Wholesale 13",
+    116.0,
+    163.0
+   ],
+   [
+    "Global Distribution 27",
+    116.0,
+    144.0
+   ],
+   [
+    "United Wholesale 21",
+    114.0,
+    156.0
+   ],
+   [
+    "Prime Distribution 22",
+    110.0,
+    149.0
+   ],
+   [
+    "Pioneer Trading 41",
+    108.0,
+    139.0
+   ],
+   [
+    "Pacific Distribution 25",
+    107.0,
+    134.0
+   ],
+   [
+    "Allied Components 46",
+    105.0,
+    131.0
+   ],
+   [
+    "Pacific Components 28",
+    103.0,
+    139.0
+   ],
+   [
+    "Atlas Wholesale 29",
+    103.0,
+    136.0
+   ],
+   [
+    "Eastern Manufacturing 19",
+    103.0,
+    150.0
+   ],
+   [
+    "Pioneer Wholesale 57",
+    102.0,
+    139.0
+   ],
+   [
+    "Eastern Manufacturing 53",
+    102.0,
+    134.0
+   ],
+   [
+    "Pioneer Wholesale 24",
+    102.0,
+    142.0
+   ],
+   [
+    "United Components 17",
+    101.0,
+    147.0
+   ],
+   [
+    "United Wholesale 36",
+    101.0,
+    127.0
+   ],
+   [
+    "Eastern Components 56",
+    100.0,
+    127.0
+   ],
+   [
+    "Nordic Components 31",
+    99.0,
+    138.0
+   ],
+   [
+    "Global Manufacturing 39",
+    99.0,
+    130.0
+   ],
+   [
+    "United Trading 37",
+    96.0,
+    123.0
+   ],
+   [
+    "Prime Trading 52",
+    95.0,
+    135.0
+   ],
+   [
+    "Allied Wholesale 34",
+    95.0,
+    118.0
+   ],
+   [
+    "Metro Trading 32",
+    94.0,
+    133.0
+   ],
+   [
+    "Pacific Trading 47",
+    94.0,
+    126.0
+   ],
+   [
+    "Allied Components 58",
+    93.0,
+    131.0
+   ],
+   [
+    "United Manufacturing 50",
+    93.0,
+    127.0
+   ],
+   [
+    "Pioneer Components 40",
+    91.0,
+    124.0
+   ],
+   [
+    "Pioneer Manufacturing 33",
+    91.0,
+    122.0
+   ],
+   [
+    "Pioneer Components 38",
+    91.0,
+    128.0
+   ],
+   [
+    "Global Trading 42",
+    90.0,
+    123.0
+   ],
+   [
+    "Prime Wholesale 73",
+    90.0,
+    112.0
+   ]
+  ]
+ },
+ "amb_order_shipments": {
+  "truth_columns": [
+   "avg_days"
+  ],
+  "truth_rows": [
+   [
+    6.16
+   ]
+  ],
+  "error": "Error executing tool database_readonly_batch",
+  "blocked": false,
+  "reason": null,
+  "review": null,
+  "columns": null,
+  "rows": []
+ },
+ "amb_support_tier": {
+  "truth_columns": [
+   "tier_name",
+   "accounts"
+  ],
+  "truth_rows": [
+   [
+    "Bronze",
+    10987.0
+   ],
+   [
+    "Silver",
+    5466.0
+   ],
+   [
+    "Gold",
+    2433.0
+   ],
+   [
+    "Platinum",
+    1114.0
+   ]
+  ],
+  "error": null,
+  "blocked": false,
+  "reason": null,
+  "review": null,
+  "columns": [
+   "tier_name",
+   "accounts"
+  ],
+  "rows": [
+   [
+    "Bronze",
+    10987.0
+   ],
+   [
+    "Silver",
+    5466.0
+   ],
+   [
+    "Gold",
+    2433.0
+   ],
+   [
+    "Platinum",
+    1114.0
+   ]
+  ]
+ },
+ "lg_archive_2019_region": {
+  "truth_columns": [
+   "region_txt",
+   "net_revenue"
+  ],
+  "truth_rows": [
+   [
+    "NA",
+    132605839.62
+   ],
+   [
+    "Europe",
+    132319524.32
+   ],
+   [
+    "APAC",
+    131774801.23
+   ],
+   [
+    null,
+    131301076.37
+   ],
+   [
+    "LatAm",
+    131294403.3
+   ],
+   [
+    "EMEA",
+    130884311.38
+   ],
+   [
+    "N. America",
+    129843228.61
+   ]
+  ],
+  "error": null,
+  "blocked": false,
+  "reason": null,
+  "review": null,
+  "columns": [
+   "region_txt",
+   "net_revenue"
+  ],
+  "rows": [
+   [
+    "NA",
+    132605839.62
+   ],
+   [
+    "Europe",
+    132319524.32
+   ],
+   [
+    "APAC",
+    131774801.23
+   ],
+   [
+    null,
+    131301076.37
+   ],
+   [
+    "LatAm",
+    131294403.3
+   ],
+   [
+    "EMEA",
+    130884311.38
+   ],
+   [
+    "N. America",
+    129843228.61
+   ]
+  ]
+ },
+ "wd_employees_hires_2026": {
+  "truth_columns": [
+   "employee_id",
+   "first_name",
+   "last_name",
+   "job_title",
+   "dept_name",
+   "hire_dt"
+  ],
+  "truth_rows": [
+   [
+    610.0,
+    "Mary",
+    "Moore",
+    "Operations Manager",
+    "Warehousing",
+    "2026-01-03"
+   ],
+   [
+    3559.0,
+    "Barbara",
+    "Davis",
+    "Sales Development Rep",
+    "Sales EMEA",
+    "2026-01-03"
+   ],
+   [
+    3769.0,
+    "Ingrid",
+    "Murphy",
+    "Coordinator",
+    "IT & Security",
+    "2026-01-04"
+   ],
+   [
+    52.0,
+    "Fatima",
+    "Ali",
+    "Analyst",
+    "Legal",
+    "2026-01-05"
+   ],
+   [
+    658.0,
+    "Thomas",
+    "Santos",
+    "Analyst",
+    "FP&A",
+    "2026-01-05"
+   ],
+   [
+    3932.0,
+    "Liam",
+    "Rodriguez",
+    "Engineering Manager",
+    "Application Engineering",
+    "2026-01-06"
+   ],
+   [
+    3974.0,
+    "Liam",
+    "Anderson",
+    "Data Engineer",
+    "Platform Engineering",
+    "2026-01-06"
+   ],
+   [
+    2663.0,
+    "Yuki",
+    "Wilson",
+    "Support Specialist",
+    "Support Tier 1",
+    "2026-01-07"
+   ],
+   [
+    3355.0,
+    "Thomas",
+    "Ali",
+    "Coordinator",
+    "IT & Security",
+    "2026-01-07"
+   ],
+   [
+    3030.0,
+    "Ahmed",
+    "Mueller",
+    "Senior Software Engineer",
+    "Platform Engineering",
+    "2026-01-08"
+   ],
+   [
+    142.0,
+    "Jessica",
+    "Ali",
+    "Senior Analyst",
+    "Security Office",
+    "2026-01-10"
+   ],
+   [
+    151.0,
+    "Lucas",
+    "Lee",
+    "Engineering Manager",
+    "Platform Engineering",
+    "2026-01-11"
+   ],
+   [
+    2612.0,
+    "Aarav",
+    "Novak",
+    "SRE",
+    "Application Engineering",
+    "2026-01-11"
+   ],
+   [
+    2730.0,
+    "David",
+    "Tanaka",
+    "Senior Support Engineer",
+    "Support Tier 2",
+    "2026-01-12"
+   ],
+   [
+    3546.0,
+    "James",
+    "Zhang",
+    "Warehouse Associate",
+    "Procurement",
+    "2026-01-12"
+   ],
+   [
+    3187.0,
+    "Maria",
+    "Wilson",
+    "Engineering Manager",
+    "Engineering",
+    "2026-01-13"
+   ],
+   [
+    2371.0,
+    "Marco",
+    "Kowalski",
+    "Account Executive",
+    "Sales APAC",
+    "2026-01-15"
+   ],
+   [
+    63.0,
+    "Olivia",
+    "Kim",
+    "Sales Development Rep",
+    "Sales LATAM",
+    "2026-01-16"
+   ],
+   [
+    1362.0,
+    "Susan",
+    "Martin",
+    "Sales Manager",
+    "Sales LATAM",
+    "2026-01-16"
+   ],
+   [
+    2717.0,
+    "Li",
+    "Wilson",
+    "Support Specialist",
+    "Support Tier 1",
+    "2026-01-16"
+   ],
+   [
+    3739.0,
+    "Fatima",
+    "Anderson",
+    "Manager",
+    "Security Office",
+    "2026-01-16"
+   ],
+   [
+    3.0,
+    "Hiroshi",
+    "Williams",
+    "Head of Marketing",
+    "Marketing",
+    "2026-01-17"
+   ],
+   [
+    795.0,
+    "Jessica",
+    "Anderson",
+    "Account Executive",
+    "Sales EMEA",
+    "2026-01-18"
+   ],
+   [
+    3394.0,
+    "Camille",
+    "Jackson",
+    "SRE",
+    "Data Engineering",
+    "2026-01-18"
+   ],
+   [
+    2100.0,
+    "Susan",
+    "Wilson",
+    "Buyer",
+    "Warehousing",
+    "2026-01-19"
+   ],
+   [
+    1628.0,
+    "Hiroshi",
+    "Hernandez",
+    "Account Executive",
+    "Sales EMEA",
+    "2026-01-21"
+   ],
+   [
+    2191.0,
+    "Jennifer",
+    "Andersson",
+    "Support Team Lead",
+    "Support Tier 1",
+    "2026-01-21"
+   ],
+   [
+    3065.0,
+    "Michael",
+    "Davis",
+    "Buyer",
+    "Warehousing",
+    "2026-01-21"
+   ],
+   [
+    1254.0,
+    "John",
+    "Martin",
+    "Specialist",
+    "Brand & Content",
+    "2026-01-22"
+   ],
+   [
+    1632.0,
+    "Jennifer",
+    "Miller",
+    "Sales Development Rep",
+    "Sales LATAM",
+    "2026-01-22"
+   ],
+   [
+    1961.0,
+    "Richard",
+    "Schmidt",
+    "Sales Development Rep",
+    "Sales APAC",
+    "2026-01-22"
+   ],
+   [
+    2236.0,
+    "William",
+    "Lopez",
+    "Sales Manager",
+    "Sales",
+    "2026-01-23"
+   ],
+   [
+    2664.0,
+    "Barbara",
+    "Lopez",
+    "Support Specialist",
+    "Support Tier 1",
+    "2026-01-23"
+   ],
+   [
+    1545.0,
+    "Maria",
+    "Jones",
+    "Support Specialist",
+    "Support Tier 1",
+    "2026-01-25"
+   ],
+   [
+    850.0,
+    "Sofia",
+    "Taylor",
+    "Sales Development Rep",
+    "Sales APAC",
+    "2026-01-27"
+   ],
+   [
+    2216.0,
+    "Giulia",
+    "Moore",
+    "Senior Analyst",
+    "Brand & Content",
+    "2026-01-29"
+   ],
+   [
+    367.0,
+    "Isabella",
+    "Dubois",
+    "Warehouse Associate",
+    "Logistics",
+    "2026-01-30"
+   ],
+   [
+    2712.0,
+    "Thomas",
+    "Hernandez",
+    "Account Executive",
+    "Sales LATAM",
+    "2026-01-30"
+   ],
+   [
+    3334.0,
+    "James",
+    "Khan",
+    "SRE",
+    "Platform Engineering",
+    "2026-02-01"
+   ],
+   [
+    1529.0,
+    "Hiroshi",
+    "Sharma",
+    "Logistics Coordinator",
+    "Warehousing",
+    "2026-02-05"
+   ],
+   [
+    3966.0,
+    "Michael",
+    "Harris",
+    "Coordinator",
+    "Legal",
+    "2026-02-05"
+   ],
+   [
+    162.0,
+    "Wei",
+    "Thomas",
+    "SRE",
+    "Data Engineering",
+    "2026-02-06"
+   ],
+   [
+    1255.0,
+    "Richard",
+    "Hernandez",
+    "Analyst",
+    "Legal",
+    "2026-02-06"
+   ],
+   [
+    20.0,
+    "Anna",
+    "Miller",
+    "Head of Support Tier 1",
+    "Support Tier 1",
+    "2026-02-07"
+   ],
+   [
+    1560.0,
+    "Maria",
+    "Lopez",
+    "Logistics Coordinator",
+    "Procurement",
+    "2026-02-07"
+   ],
+   [
+    2849.0,
+    "Marco",
+    "Davis",
+    "Sales Manager",
+    "Sales EMEA",
+    "2026-02-07"
+   ],
+   [
+    492.0,
+    "Linda",
+    "Lopez",
+    "Data Engineer",
+    "Application Engineering",
+    "2026-02-08"
+   ],
+   [
+    516.0,
+    "Yuki",
+    "Schmidt",
+    "Software Engineer",
+    "Platform Engineering",
+    "2026-02-08"
+   ],
+   [
+    1004.0,
+    "Hiroshi",
+    "Smith",
+    "Sales Manager",
+    "Sales North America",
+    "2026-02-08"
+   ],
+   [
+    2182.0,
+    "Yuki",
+    "Johnson",
+    "Coordinator",
+    "Product",
+    "2026-02-08"
+   ],
+   [
+    2451.0,
+    "Emma",
+    "Moore",
+    "Coordinator",
+    "Product Design",
+    "2026-02-08"
+   ],
+   [
+    2718.0,
+    "Emma",
+    "Kowalski",
+    "SRE",
+    "Platform Engineering",
+    "2026-02-08"
+   ],
+   [
+    3674.0,
+    "David",
+    "Ali",
+    "Warehouse Associate",
+    "Warehousing",
+    "2026-02-08"
+   ],
+   [
+    2570.0,
+    "Ingrid",
+    "Sharma",
+    "Data Engineer",
+    "Application Engineering",
+    "2026-02-10"
+   ],
+   [
+    504.0,
+    "Robert",
+    "Kowalski",
+    "Support Team Lead",
+    "Support Tier 1",
+    "2026-02-12"
+   ],
+   [
+    3211.0,
+    "David",
+    "OBrien",
+    "Engineering Manager",
+    "Data Engineering",
+    "2026-02-12"
+   ],
+   [
+    2534.0,
+    "David",
+    "Martin",
+    "Sales Manager",
+    "Sales LATAM",
+    "2026-02-13"
+   ],
+   [
+    2639.0,
+    "Ingrid",
+    "Ali",
+    "Support Specialist",
+    "Support Tier 1",
+    "2026-02-13"
+   ],
+   [
+    258.0,
+    "Aarav",
+    "Nakamura",
+    "Senior Support Engineer",
+    "Support Tier 2",
+    "2026-02-16"
+   ],
+   [
+    616.0,
+    "Patricia",
+    "Hernandez",
+    "Software Engineer",
+    "Platform Engineering",
+    "2026-02-16"
+   ],
+   [
+    3109.0,
+    "Li",
+    "Rodriguez",
+    "Sales Development Rep",
+    "Sales EMEA",
+    "2026-02-16"
+   ],
+   [
+    1234.0,
+    "Joseph",
+    "Wang",
+    "SRE",
+    "Application Engineering",
+    "2026-02-17"
+   ],
+   [
+    3078.0,
+    "James",
+    "Khan",
+    "Account Executive",
+    "Sales",
+    "2026-02-18"
+   ],
+   [
+    349.0,
+    "Linda",
+    "Sharma",
+    "Logistics Coordinator",
+    "Operations",
+    "2026-02-19"
+   ],
+   [
+    3309.0,
+    "Lukas",
+    "Williams",
+    "Analyst",
+    "People",
+    "2026-02-20"
+   ],
+   [
+    3957.0,
+    "Emma",
+    "Williams",
+    "Sales Development Rep",
+    "Sales LATAM",
+    "2026-02-20"
+   ],
+   [
+    2898.0,
+    "Isabella",
+    "Murphy",
+    "Sales Manager",
+    "Sales APAC",
+    "2026-02-21"
+   ],
+   [
+    172.0,
+    "Carlos",
+    "Miller",
+    "Account Executive",
+    "Sales APAC",
+    "2026-02-22"
+   ],
+   [
+    1181.0,
+    "Ingrid",
+    "Lee",
+    "Account Executive",
+    "Sales LATAM",
+    "2026-02-22"
+   ],
+   [
+    2273.0,
+    "Marco",
+    "Martin",
+    "Support Specialist",
+    "Support Tier 2",
+    "2026-02-22"
+   ],
+   [
+    3185.0,
+    "Ahmed",
+    "Garcia",
+    "Analyst",
+    "Brand & Content",
+    "2026-02-22"
+   ],
+   [
+    231.0,
+    "Sarah",
+    "Taylor",
+    "Specialist",
+    "Product",
+    "2026-02-23"
+   ],
+   [
+    3292.0,
+    "Zara",
+    "Miller",
+    "Logistics Coordinator",
+    "Logistics",
+    "2026-02-25"
+   ],
+   [
+    856.0,
+    "Carlos",
+    "Zhang",
+    "Account Executive",
+    "Sales LATAM",
+    "2026-02-28"
+   ],
+   [
+    2894.0,
+    "James",
+    "Taylor",
+    "Specialist",
+    "Legal",
+    "2026-02-28"
+   ],
+   [
+    1463.0,
+    "John",
+    "Anderson",
+    "Manager",
+    "People",
+    "2026-03-01"
+   ],
+   [
+    2340.0,
+    "Lucas",
+    "Martinez",
+    "Analyst",
+    "Product",
+    "2026-03-01"
+   ],
+   [
+    3515.0,
+    "Yuki",
+    "Andersson",
+    "Buyer",
+    "Warehousing",
+    "2026-03-01"
+   ],
+   [
+    2397.0,
+    "James",
+    "Johnson",
+    "Support Specialist",
+    "Support Tier 2",
+    "2026-03-02"
+   ],
+   [
+    308.0,
+    "Chen",
+    "Martinez",
+    "Engineering Manager",
+    "Application Engineering",
+    "2026-03-03"
+   ],
+   [
+    1673.0,
+    "Jessica",
+    "Taylor",
+    "Sales Manager",
+    "Sales North America",
+    "2026-03-03"
+   ],
+   [
+    2164.0,
+    "Elizabeth",
+    "Hernandez",
+    "Senior Software Engineer",
+    "Data Engineering",
+    "2026-03-03"
+   ],
+   [
+    2910.0,
+    "Arjun",
+    "Davis",
+    "Account Executive",
+    "Sales APAC",
+    "2026-03-03"
+   ],
+   [
+    33.0,
+    "William",
+    "Clark",
+    "Account Executive",
+    "Sales APAC",
+    "2026-03-04"
+   ],
+   [
+    2886.0,
+    "Jennifer",
+    "Kowalski",
+    "Solutions Engineer",
+    "Sales North America",
+    "2026-03-04"
+   ],
+   [
+    3926.0,
+    "Linda",
+    "Martinez",
+    "Senior Analyst",
+    "Security Office",
+    "2026-03-04"
+   ],
+   [
+    2381.0,
+    "Lucas",
+    "Martin",
+    "Solutions Engineer",
+    "Sales APAC",
+    "2026-03-05"
+   ],
+   [
+    3963.0,
+    "Arjun",
+    "Patel",
+    "Logistics Coordinator",
+    "Warehousing",
+    "2026-03-05"
+   ],
+   [
+    352.0,
+    "Ahmed",
+    "Miller",
+    "Engineering Manager",
+    "Platform Engineering",
+    "2026-03-06"
+   ],
+   [
+    3104.0,
+    "Omar",
+    "Dubois",
+    "Support Specialist",
+    "Support Tier 2",
+    "2026-03-06"
+   ],
+   [
+    3935.0,
+    "John",
+    "Rodriguez",
+    "Support Specialist",
+    "Support Tier 2",
+    "2026-03-06"
+   ],
+   [
+    3938.0,
+    "Zara",
+    "Garcia",
+    "Operations Manager",
+    "Warehousing",
+    "2026-03-06"
+   ],
+   [
+    912.0,
+    "Jessica",
+    "Martinez",
+    "Warehouse Associate",
+    "Procurement",
+    "2026-03-07"
+   ],
+   [
+    2835.0,
+    "Linda",
+    "Smith",
+    "Analyst",
+    "People",
+    "2026-03-07"
+   ],
+   [
+    3257.0,
+    "Yuki",
+    "Silva",
+    "Sales Manager",
+    "Sales LATAM",
+    "2026-03-07"
+   ],
+   [
+    1772.0,
+    "Linda",
+    "Wang",
+    "Warehouse Associate",
+    "Logistics",
+    "2026-03-08"
+   ],
+   [
+    3892.0,
+    "Giulia",
+    "Nielsen",
+    "Account Executive",
+    "Sales APAC",
+    "2026-03-08"
+   ],
+   [
+    639.0,
+    "Carlos",
+    "Silva",
+    "Sales Manager",
+    "Sales LATAM",
+    "2026-03-09"
+   ],
+   [
+    871.0,
+    "John",
+    "Sharma",
+    "Support Team Lead",
+    "Support Tier 1",
+    "2026-03-09"
+   ],
+   [
+    1958.0,
+    "Hiroshi",
+    "Khan",
+    "Operations Manager",
+    "Warehousing",
+    "2026-03-09"
+   ],
+   [
+    3716.0,
+    "Jennifer",
+    "Nielsen",
+    "Staff Engineer",
+    "Application Engineering",
+    "2026-03-09"
+   ],
+   [
+    339.0,
+    "John",
+    "Martinez",
+    "Software Engineer",
+    "Platform Engineering",
+    "2026-03-10"
+   ],
+   [
+    1566.0,
+    "Jessica",
+    "OBrien",
+    "Support Team Lead",
+    "Support Tier 1",
+    "2026-03-10"
+   ],
+   [
+    3698.0,
+    "Patricia",
+    "Ali",
+    "Buyer",
+    "Logistics",
+    "2026-03-10"
+   ],
+   [
+    1250.0,
+    "Elizabeth",
+    "Kowalski",
+    "Senior Account Executive",
+    "Sales",
+    "2026-03-11"
+   ],
+   [
+    2426.0,
+    "Mary",
+    "Thomas",
+    "Warehouse Associate",
+    "Logistics",
+    "2026-03-11"
+   ],
+   [
+    3931.0,
+    "Sarah",
+    "Martin",
+    "Senior Account Executive",
+    "Sales APAC",
+    "2026-03-11"
+   ],
+   [
+    1418.0,
+    "Linda",
+    "Hernandez",
+    "Warehouse Associate",
+    "Procurement",
+    "2026-03-13"
+   ],
+   [
+    229.0,
+    "Susan",
+    "Wilson",
+    "Operations Manager",
+    "Logistics",
+    "2026-03-14"
+   ],
+   [
+    615.0,
+    "Sven",
+    "Garcia",
+    "Manager",
+    "Accounts Receivable",
+    "2026-03-14"
+   ],
+   [
+    728.0,
+    "Elizabeth",
+    "Garcia",
+    "Data Engineer",
+    "Application Engineering",
+    "2026-03-14"
+   ],
+   [
+    2185.0,
+    "Li",
+    "Tanaka",
+    "Logistics Coordinator",
+    "Logistics",
+    "2026-03-14"
+   ],
+   [
+    3372.0,
+    "Ingrid",
+    "Johnson",
+    "Coordinator",
+    "Product",
+    "2026-03-14"
+   ],
+   [
+    2504.0,
+    "Omar",
+    "Andersson",
+    "Senior Software Engineer",
+    "Data Engineering",
+    "2026-03-16"
+   ],
+   [
+    769.0,
+    "Robert",
+    "OBrien",
+    "Operations Manager",
+    "Warehousing",
+    "2026-03-17"
+   ],
+   [
+    1303.0,
+    "Thomas",
+    "Santos",
+    "Support Specialist",
+    "Support Tier 2",
+    "2026-03-17"
+   ],
+   [
+    1366.0,
+    "William",
+    "Miller",
+    "Data Engineer",
+    "Platform Engineering",
+    "2026-03-17"
+   ],
+   [
+    3754.0,
+    "Yuki",
+    "Jones",
+    "Solutions Engineer",
+    "Sales EMEA",
+    "2026-03-17"
+   ],
+   [
+    7.0,
+    "Elizabeth",
+    "Wang",
+    "Head of People",
+    "People",
+    "2026-03-18"
+   ],
+   [
+    2175.0,
+    "Giulia",
+    "Jones",
+    "Senior Analyst",
+    "Finance",
+    "2026-03-18"
+   ],
+   [
+    2294.0,
+    "John",
+    "Singh",
+    "Sales Manager",
+    "Sales LATAM",
+    "2026-03-18"
+   ],
+   [
+    2949.0,
+    "Liam",
+    "OBrien",
+    "Engineering Manager",
+    "Platform Engineering",
+    "2026-03-18"
+   ],
+   [
+    1065.0,
+    "Jennifer",
+    "Dubois",
+    "Support Team Lead",
+    "Support Tier 2",
+    "2026-03-19"
+   ],
+   [
+    1976.0,
+    "Ingrid",
+    "Zhang",
+    "Senior Analyst",
+    "Security Office",
+    "2026-03-20"
+   ],
+   [
+    330.0,
+    "Maria",
+    "Moore",
+    "Staff Engineer",
+    "Data Engineering",
+    "2026-03-21"
+   ],
+   [
+    816.0,
+    "Mateo",
+    "Patel",
+    "Software Engineer",
+    "Application Engineering",
+    "2026-03-21"
+   ],
+   [
+    2505.0,
+    "Marco",
+    "Rodriguez",
+    "SRE",
+    "Platform Engineering",
+    "2026-03-22"
+   ],
+   [
+    30.0,
+    "Camille",
+    "Davis",
+    "Head of Legal",
+    "Legal",
+    "2026-03-24"
+   ],
+   [
+    2987.0,
+    "Patricia",
+    "Johnson",
+    "Support Specialist",
+    "Support Tier 2",
+    "2026-03-24"
+   ],
+   [
+    157.0,
+    "Camille",
+    "Rodriguez",
+    "Manager",
+    "Talent Acquisition",
+    "2026-03-25"
+   ],
+   [
+    705.0,
+    "Sarah",
+    "Kowalski",
+    "Senior Account Executive",
+    "Sales North America",
+    "2026-03-25"
+   ],
+   [
+    3301.0,
+    "Arjun",
+    "Patel",
+    "Staff Engineer",
+    "Application Engineering",
+    "2026-03-25"
+   ],
+   [
+    2421.0,
+    "Marco",
+    "Clark",
+    "Software Engineer",
+    "Platform Engineering",
+    "2026-03-26"
+   ],
+   [
+    2900.0,
+    "James",
+    "Kowalski",
+    "Support Specialist",
+    "Support Tier 1",
+    "2026-03-26"
+   ],
+   [
+    1757.0,
+    "Anna",
+    "Garcia",
+    "Engineering Manager",
+    "Platform Engineering",
+    "2026-03-29"
+   ],
+   [
+    2600.0,
+    "Emma",
+    "Jackson",
+    "Coordinator",
+    "Legal",
+    "2026-03-29"
+   ],
+   [
+    3803.0,
+    "Li",
+    "Moore",
+    "Account Executive",
+    "Sales EMEA",
+    "2026-03-30"
+   ],
+   [
+    854.0,
+    "Thomas",
+    "Murphy",
+    "Solutions Engineer",
+    "Sales LATAM",
+    "2026-03-31"
+   ],
+   [
+    1003.0,
+    "James",
+    "White",
+    "Operations Manager",
+    "Procurement",
+    "2026-03-31"
+   ],
+   [
+    2915.0,
+    "Pierre",
+    "Lee",
+    "Sales Development Rep",
+    "Sales EMEA",
+    "2026-04-01"
+   ],
+   [
+    3838.0,
+    "Wei",
+    "Fischer",
+    "Staff Engineer",
+    "Application Engineering",
+    "2026-04-01"
+   ],
+   [
+    1110.0,
+    "Chen",
+    "Tanaka",
+    "Operations Manager",
+    "Logistics",
+    "2026-04-02"
+   ],
+   [
+    2406.0,
+    "Pierre",
+    "Schmidt",
+    "Senior Support Engineer",
+    "Support Tier 2",
+    "2026-04-02"
+   ],
+   [
+    2488.0,
+    "Sven",
+    "Lee",
+    "Solutions Engineer",
+    "Sales North America",
+    "2026-04-02"
+   ],
+   [
+    3972.0,
+    "Linda",
+    "Martinez",
+    "Account Executive",
+    "Sales APAC",
+    "2026-04-02"
+   ],
+   [
+    3321.0,
+    "Sofia",
+    "Dubois",
+    "Coordinator",
+    "People",
+    "2026-04-04"
+   ],
+   [
+    1678.0,
+    "Hiroshi",
+    "Lopez",
+    "Solutions Engineer",
+    "Sales APAC",
+    "2026-04-05"
+   ],
+   [
+    1909.0,
+    "Sven",
+    "Hernandez",
+    "Specialist",
+    "Demand Generation",
+    "2026-04-05"
+   ],
+   [
+    3874.0,
+    "Richard",
+    "Kowalski",
+    "Account Executive",
+    "Sales LATAM",
+    "2026-04-05"
+   ],
+   [
+    1876.0,
+    "Aarav",
+    "Fischer",
+    "Buyer",
+    "Logistics",
+    "2026-04-06"
+   ],
+   [
+    3151.0,
+    "Pierre",
+    "Schmidt",
+    "Operations Manager",
+    "Logistics",
+    "2026-04-06"
+   ],
+   [
+    3572.0,
+    "Jessica",
+    "Nakamura",
+    "Senior Account Executive",
+    "Sales North America",
+    "2026-04-07"
+   ],
+   [
+    3865.0,
+    "Isabella",
+    "Smith",
+    "SRE",
+    "Application Engineering",
+    "2026-04-07"
+   ],
+   [
+    2283.0,
+    "Ahmed",
+    "Andersson",
+    "Software Engineer",
+    "Data Engineering",
+    "2026-04-08"
+   ],
+   [
+    3842.0,
+    "Pierre",
+    "OBrien",
+    "Sales Development Rep",
+    "Sales EMEA",
+    "2026-04-09"
+   ],
+   [
+    540.0,
+    "Yuki",
+    "Johnson",
+    "Solutions Engineer",
+    "Sales EMEA",
+    "2026-04-10"
+   ],
+   [
+    1556.0,
+    "Linda",
+    "Rodriguez",
+    "Coordinator",
+    "FP&A",
+    "2026-04-13"
+   ],
+   [
+    958.0,
+    "Fatima",
+    "Dubois",
+    "Support Specialist",
+    "Support Tier 2",
+    "2026-04-14"
+   ],
+   [
+    1824.0,
+    "Zara",
+    "Williams",
+    "Manager",
+    "Demand Generation",
+    "2026-04-14"
+   ],
+   [
+    1966.0,
+    "Mateo",
+    "Wilson",
+    "Account Executive",
+    "Sales North America",
+    "2026-04-14"
+   ],
+   [
+    648.0,
+    "Arjun",
+    "Silva",
+    "Engineering Manager",
+    "Platform Engineering",
+    "2026-04-15"
+   ],
+   [
+    3917.0,
+    "Olivia",
+    "Wang",
+    "Operations Manager",
+    "Logistics",
+    "2026-04-15"
+   ],
+   [
+    3839.0,
+    "Sarah",
+    "Hernandez",
+    "Warehouse Associate",
+    "Procurement",
+    "2026-04-16"
+   ],
+   [
+    1629.0,
+    "Richard",
+    "Kim",
+    "SRE",
+    "Engineering",
+    "2026-04-18"
+   ],
+   [
+    2222.0,
+    "David",
+    "Thompson",
+    "Analyst",
+    "Security Office",
+    "2026-04-18"
+   ],
+   [
+    3196.0,
+    "Noah",
+    "Johnson",
+    "Solutions Engineer",
+    "Sales APAC",
+    "2026-04-18"
+   ],
+   [
+    606.0,
+    "Michael",
+    "Wilson",
+    "Account Executive",
+    "Sales LATAM",
+    "2026-04-19"
+   ],
+   [
+    818.0,
+    "Jessica",
+    "Wang",
+    "Support Specialist",
+    "Support Tier 1",
+    "2026-04-19"
+   ],
+   [
+    2702.0,
+    "William",
+    "Brown",
+    "Support Team Lead",
+    "Support Tier 2",
+    "2026-04-19"
+   ],
+   [
+    375.0,
+    "Li",
+    "Jones",
+    "Senior Analyst",
+    "Finance",
+    "2026-04-20"
+   ],
+   [
+    869.0,
+    "Olivia",
+    "Anderson",
+    "Solutions Engineer",
+    "Sales EMEA",
+    "2026-04-20"
+   ],
+   [
+    3097.0,
+    "Ingrid",
+    "Silva",
+    "Senior Analyst",
+    "Legal",
+    "2026-04-20"
+   ],
+   [
+    3706.0,
+    "Sven",
+    "Lopez",
+    "Sales Manager",
+    "Sales EMEA",
+    "2026-04-21"
+   ],
+   [
+    1819.0,
+    "Marco",
+    "Silva",
+    "Buyer",
+    "Warehousing",
+    "2026-04-22"
+   ],
+   [
+    1464.0,
+    "Wei",
+    "Wilson",
+    "Support Specialist",
+    "Support Tier 2",
+    "2026-04-23"
+   ],
+   [
+    1571.0,
+    "Richard",
+    "White",
+    "Account Executive",
+    "Sales APAC",
+    "2026-04-23"
+   ],
+   [
+    2268.0,
+    "Linda",
+    "Martin",
+    "Support Specialist",
+    "Support Tier 2",
+    "2026-04-23"
+   ],
+   [
+    2289.0,
+    "Li",
+    "Anderson",
+    "Data Engineer",
+    "Data Engineering",
+    "2026-04-23"
+   ],
+   [
+    935.0,
+    "Pierre",
+    "Lee",
+    "Logistics Coordinator",
+    "Warehousing",
+    "2026-04-26"
+   ],
+   [
+    1113.0,
+    "Lukas",
+    "Rossi",
+    "Engineering Manager",
+    "Application Engineering",
+    "2026-04-27"
+   ],
+   [
+    1935.0,
+    "John",
+    "Schmidt",
+    "Account Executive",
+    "Sales APAC",
+    "2026-04-27"
+   ],
+   [
+    1552.0,
+    "Hiroshi",
+    "Kowalski",
+    "Sales Manager",
+    "Sales LATAM",
+    "2026-04-28"
+   ],
+   [
+    1795.0,
+    "Sofia",
+    "Tanaka",
+    "Sales Manager",
+    "Sales APAC",
+    "2026-04-28"
+   ],
+   [
+    1225.0,
+    "Susan",
+    "Mueller",
+    "Software Engineer",
+    "Engineering",
+    "2026-04-29"
+   ],
+   [
+    3174.0,
+    "Isabella",
+    "Tanaka",
+    "Support Specialist",
+    "Support Tier 1",
+    "2026-04-29"
+   ],
+   [
+    1736.0,
+    "James",
+    "Dubois",
+    "Support Specialist",
+    "Support Tier 2",
+    "2026-04-30"
+   ],
+   [
+    3111.0,
+    "Lukas",
+    "Garcia",
+    "Support Specialist",
+    "Support Tier 2",
+    "2026-05-01"
+   ],
+   [
+    3113.0,
+    "Robert",
+    "Sharma",
+    "Warehouse Associate",
+    "Warehousing",
+    "2026-05-01"
+   ],
+   [
+    320.0,
+    "Anna",
+    "Lee",
+    "Account Executive",
+    "Sales LATAM",
+    "2026-05-02"
+   ],
+   [
+    723.0,
+    "Camille",
+    "Harris",
+    "Account Executive",
+    "Sales",
+    "2026-05-02"
+   ],
+   [
+    1102.0,
+    "Isabella",
+    "Williams",
+    "Warehouse Associate",
+    "Warehousing",
+    "2026-05-02"
+   ],
+   [
+    1158.0,
+    "Robert",
+    "Andersson",
+    "Senior Account Executive",
+    "Sales LATAM",
+    "2026-05-02"
+   ],
+   [
+    1936.0,
+    "Omar",
+    "Williams",
+    "Coordinator",
+    "Product Design",
+    "2026-05-02"
+   ],
+   [
+    2214.0,
+    "Patricia",
+    "Wilson",
+    "Specialist",
+    "FP&A",
+    "2026-05-03"
+   ],
+   [
+    164.0,
+    "Lukas",
+    "Mueller",
+    "Warehouse Associate",
+    "Procurement",
+    "2026-05-05"
+   ],
+   [
+    2865.0,
+    "Anna",
+    "OBrien",
+    "Senior Software Engineer",
+    "Application Engineering",
+    "2026-05-06"
+   ],
+   [
+    2867.0,
+    "Wei",
+    "Anderson",
+    "Support Specialist",
+    "Support Tier 2",
+    "2026-05-06"
+   ],
+   [
+    3449.0,
+    "Yuki",
+    "OBrien",
+    "Buyer",
+    "Logistics",
+    "2026-05-06"
+   ],
+   [
+    909.0,
+    "Marco",
+    "Lopez",
+    "Senior Support Engineer",
+    "Support Tier 1",
+    "2026-05-07"
+   ],
+   [
+    970.0,
+    "Olivia",
+    "Lee",
+    "Support Team Lead",
+    "Support Tier 2",
+    "2026-05-08"
+   ]
+  ],
+  "error": null,
+  "blocked": false,
+  "reason": null,
+  "review": null,
+  "columns": [
+   "employee_id",
+   "first_name",
+   "job_title",
+   "dept_name",
+   "hire_dt"
+  ],
+  "rows": [
+   [
+    610.0,
+    "Mary",
+    "Operations Manager",
+    "Warehousing",
+    "2026-01-03"
+   ],
+   [
+    3559.0,
+    "Barbara",
+    "Sales Development Rep",
+    "Sales EMEA",
+    "2026-01-03"
+   ],
+   [
+    3769.0,
+    "Ingrid",
+    "Coordinator",
+    "IT & Security",
+    "2026-01-04"
+   ],
+   [
+    52.0,
+    "Fatima",
+    "Analyst",
+    "Legal",
+    "2026-01-05"
+   ],
+   [
+    658.0,
+    "Thomas",
+    "Analyst",
+    "FP&A",
+    "2026-01-05"
+   ],
+   [
+    3932.0,
+    "Liam",
+    "Engineering Manager",
+    "Application Engineering",
+    "2026-01-06"
+   ],
+   [
+    3974.0,
+    "Liam",
+    "Data Engineer",
+    "Platform Engineering",
+    "2026-01-06"
+   ],
+   [
+    2663.0,
+    "Yuki",
+    "Support Specialist",
+    "Support Tier 1",
+    "2026-01-07"
+   ],
+   [
+    3355.0,
+    "Thomas",
+    "Coordinator",
+    "IT & Security",
+    "2026-01-07"
+   ],
+   [
+    3030.0,
+    "Ahmed",
+    "Senior Software Engineer",
+    "Platform Engineering",
+    "2026-01-08"
+   ],
+   [
+    142.0,
+    "Jessica",
+    "Senior Analyst",
+    "Security Office",
+    "2026-01-10"
+   ],
+   [
+    151.0,
+    "Lucas",
+    "Engineering Manager",
+    "Platform Engineering",
+    "2026-01-11"
+   ],
+   [
+    2612.0,
+    "Aarav",
+    "SRE",
+    "Application Engineering",
+    "2026-01-11"
+   ],
+   [
+    2730.0,
+    "David",
+    "Senior Support Engineer",
+    "Support Tier 2",
+    "2026-01-12"
+   ],
+   [
+    3546.0,
+    "James",
+    "Warehouse Associate",
+    "Procurement",
+    "2026-01-12"
+   ],
+   [
+    3187.0,
+    "Maria",
+    "Engineering Manager",
+    "Engineering",
+    "2026-01-13"
+   ],
+   [
+    2371.0,
+    "Marco",
+    "Account Executive",
+    "Sales APAC",
+    "2026-01-15"
+   ],
+   [
+    63.0,
+    "Olivia",
+    "Sales Development Rep",
+    "Sales LATAM",
+    "2026-01-16"
+   ],
+   [
+    1362.0,
+    "Susan",
+    "Sales Manager",
+    "Sales LATAM",
+    "2026-01-16"
+   ],
+   [
+    2717.0,
+    "Li",
+    "Support Specialist",
+    "Support Tier 1",
+    "2026-01-16"
+   ],
+   [
+    3739.0,
+    "Fatima",
+    "Manager",
+    "Security Office",
+    "2026-01-16"
+   ],
+   [
+    3.0,
+    "Hiroshi",
+    "Head of Marketing",
+    "Marketing",
+    "2026-01-17"
+   ],
+   [
+    795.0,
+    "Jessica",
+    "Account Executive",
+    "Sales EMEA",
+    "2026-01-18"
+   ],
+   [
+    3394.0,
+    "Camille",
+    "SRE",
+    "Data Engineering",
+    "2026-01-18"
+   ],
+   [
+    2100.0,
+    "Susan",
+    "Buyer",
+    "Warehousing",
+    "2026-01-19"
+   ],
+   [
+    1628.0,
+    "Hiroshi",
+    "Account Executive",
+    "Sales EMEA",
+    "2026-01-21"
+   ],
+   [
+    2191.0,
+    "Jennifer",
+    "Support Team Lead",
+    "Support Tier 1",
+    "2026-01-21"
+   ],
+   [
+    3065.0,
+    "Michael",
+    "Buyer",
+    "Warehousing",
+    "2026-01-21"
+   ],
+   [
+    1254.0,
+    "John",
+    "Specialist",
+    "Brand & Content",
+    "2026-01-22"
+   ],
+   [
+    1632.0,
+    "Jennifer",
+    "Sales Development Rep",
+    "Sales LATAM",
+    "2026-01-22"
+   ],
+   [
+    1961.0,
+    "Richard",
+    "Sales Development Rep",
+    "Sales APAC",
+    "2026-01-22"
+   ],
+   [
+    2236.0,
+    "William",
+    "Sales Manager",
+    "Sales",
+    "2026-01-23"
+   ],
+   [
+    2664.0,
+    "Barbara",
+    "Support Specialist",
+    "Support Tier 1",
+    "2026-01-23"
+   ],
+   [
+    1545.0,
+    "Maria",
+    "Support Specialist",
+    "Support Tier 1",
+    "2026-01-25"
+   ],
+   [
+    850.0,
+    "Sofia",
+    "Sales Development Rep",
+    "Sales APAC",
+    "2026-01-27"
+   ],
+   [
+    2216.0,
+    "Giulia",
+    "Senior Analyst",
+    "Brand & Content",
+    "2026-01-29"
+   ],
+   [
+    367.0,
+    "Isabella",
+    "Warehouse Associate",
+    "Logistics",
+    "2026-01-30"
+   ],
+   [
+    2712.0,
+    "Thomas",
+    "Account Executive",
+    "Sales LATAM",
+    "2026-01-30"
+   ],
+   [
+    3334.0,
+    "James",
+    "SRE",
+    "Platform Engineering",
+    "2026-02-01"
+   ],
+   [
+    1529.0,
+    "Hiroshi",
+    "Logistics Coordinator",
+    "Warehousing",
+    "2026-02-05"
+   ],
+   [
+    3966.0,
+    "Michael",
+    "Coordinator",
+    "Legal",
+    "2026-02-05"
+   ],
+   [
+    162.0,
+    "Wei",
+    "SRE",
+    "Data Engineering",
+    "2026-02-06"
+   ],
+   [
+    1255.0,
+    "Richard",
+    "Analyst",
+    "Legal",
+    "2026-02-06"
+   ],
+   [
+    20.0,
+    "Anna",
+    "Head of Support Tier 1",
+    "Support Tier 1",
+    "2026-02-07"
+   ],
+   [
+    1560.0,
+    "Maria",
+    "Logistics Coordinator",
+    "Procurement",
+    "2026-02-07"
+   ],
+   [
+    2849.0,
+    "Marco",
+    "Sales Manager",
+    "Sales EMEA",
+    "2026-02-07"
+   ],
+   [
+    492.0,
+    "Linda",
+    "Data Engineer",
+    "Application Engineering",
+    "2026-02-08"
+   ],
+   [
+    516.0,
+    "Yuki",
+    "Software Engineer",
+    "Platform Engineering",
+    "2026-02-08"
+   ],
+   [
+    1004.0,
+    "Hiroshi",
+    "Sales Manager",
+    "Sales North America",
+    "2026-02-08"
+   ],
+   [
+    2182.0,
+    "Yuki",
+    "Coordinator",
+    "Product",
+    "2026-02-08"
+   ],
+   [
+    2451.0,
+    "Emma",
+    "Coordinator",
+    "Product Design",
+    "2026-02-08"
+   ],
+   [
+    2718.0,
+    "Emma",
+    "SRE",
+    "Platform Engineering",
+    "2026-02-08"
+   ],
+   [
+    3674.0,
+    "David",
+    "Warehouse Associate",
+    "Warehousing",
+    "2026-02-08"
+   ],
+   [
+    2570.0,
+    "Ingrid",
+    "Data Engineer",
+    "Application Engineering",
+    "2026-02-10"
+   ],
+   [
+    504.0,
+    "Robert",
+    "Support Team Lead",
+    "Support Tier 1",
+    "2026-02-12"
+   ],
+   [
+    3211.0,
+    "David",
+    "Engineering Manager",
+    "Data Engineering",
+    "2026-02-12"
+   ],
+   [
+    2534.0,
+    "David",
+    "Sales Manager",
+    "Sales LATAM",
+    "2026-02-13"
+   ],
+   [
+    2639.0,
+    "Ingrid",
+    "Support Specialist",
+    "Support Tier 1",
+    "2026-02-13"
+   ],
+   [
+    258.0,
+    "Aarav",
+    "Senior Support Engineer",
+    "Support Tier 2",
+    "2026-02-16"
+   ],
+   [
+    616.0,
+    "Patricia",
+    "Software Engineer",
+    "Platform Engineering",
+    "2026-02-16"
+   ],
+   [
+    3109.0,
+    "Li",
+    "Sales Development Rep",
+    "Sales EMEA",
+    "2026-02-16"
+   ],
+   [
+    1234.0,
+    "Joseph",
+    "SRE",
+    "Application Engineering",
+    "2026-02-17"
+   ],
+   [
+    3078.0,
+    "James",
+    "Account Executive",
+    "Sales",
+    "2026-02-18"
+   ],
+   [
+    349.0,
+    "Linda",
+    "Logistics Coordinator",
+    "Operations",
+    "2026-02-19"
+   ],
+   [
+    3309.0,
+    "Lukas",
+    "Analyst",
+    "People",
+    "2026-02-20"
+   ],
+   [
+    3957.0,
+    "Emma",
+    "Sales Development Rep",
+    "Sales LATAM",
+    "2026-02-20"
+   ],
+   [
+    2898.0,
+    "Isabella",
+    "Sales Manager",
+    "Sales APAC",
+    "2026-02-21"
+   ],
+   [
+    172.0,
+    "Carlos",
+    "Account Executive",
+    "Sales APAC",
+    "2026-02-22"
+   ],
+   [
+    1181.0,
+    "Ingrid",
+    "Account Executive",
+    "Sales LATAM",
+    "2026-02-22"
+   ],
+   [
+    2273.0,
+    "Marco",
+    "Support Specialist",
+    "Support Tier 2",
+    "2026-02-22"
+   ],
+   [
+    3185.0,
+    "Ahmed",
+    "Analyst",
+    "Brand & Content",
+    "2026-02-22"
+   ],
+   [
+    231.0,
+    "Sarah",
+    "Specialist",
+    "Product",
+    "2026-02-23"
+   ],
+   [
+    3292.0,
+    "Zara",
+    "Logistics Coordinator",
+    "Logistics",
+    "2026-02-25"
+   ],
+   [
+    856.0,
+    "Carlos",
+    "Account Executive",
+    "Sales LATAM",
+    "2026-02-28"
+   ],
+   [
+    2894.0,
+    "James",
+    "Specialist",
+    "Legal",
+    "2026-02-28"
+   ],
+   [
+    1463.0,
+    "John",
+    "Manager",
+    "People",
+    "2026-03-01"
+   ],
+   [
+    2340.0,
+    "Lucas",
+    "Analyst",
+    "Product",
+    "2026-03-01"
+   ],
+   [
+    3515.0,
+    "Yuki",
+    "Buyer",
+    "Warehousing",
+    "2026-03-01"
+   ],
+   [
+    2397.0,
+    "James",
+    "Support Specialist",
+    "Support Tier 2",
+    "2026-03-02"
+   ],
+   [
+    308.0,
+    "Chen",
+    "Engineering Manager",
+    "Application Engineering",
+    "2026-03-03"
+   ],
+   [
+    1673.0,
+    "Jessica",
+    "Sales Manager",
+    "Sales North America",
+    "2026-03-03"
+   ],
+   [
+    2164.0,
+    "Elizabeth",
+    "Senior Software Engineer",
+    "Data Engineering",
+    "2026-03-03"
+   ],
+   [
+    2910.0,
+    "Arjun",
+    "Account Executive",
+    "Sales APAC",
+    "2026-03-03"
+   ],
+   [
+    33.0,
+    "William",
+    "Account Executive",
+    "Sales APAC",
+    "2026-03-04"
+   ],
+   [
+    2886.0,
+    "Jennifer",
+    "Solutions Engineer",
+    "Sales North America",
+    "2026-03-04"
+   ],
+   [
+    3926.0,
+    "Linda",
+    "Senior Analyst",
+    "Security Office",
+    "2026-03-04"
+   ],
+   [
+    2381.0,
+    "Lucas",
+    "Solutions Engineer",
+    "Sales APAC",
+    "2026-03-05"
+   ],
+   [
+    3963.0,
+    "Arjun",
+    "Logistics Coordinator",
+    "Warehousing",
+    "2026-03-05"
+   ],
+   [
+    352.0,
+    "Ahmed",
+    "Engineering Manager",
+    "Platform Engineering",
+    "2026-03-06"
+   ],
+   [
+    3104.0,
+    "Omar",
+    "Support Specialist",
+    "Support Tier 2",
+    "2026-03-06"
+   ],
+   [
+    3935.0,
+    "John",
+    "Support Specialist",
+    "Support Tier 2",
+    "2026-03-06"
+   ],
+   [
+    3938.0,
+    "Zara",
+    "Operations Manager",
+    "Warehousing",
+    "2026-03-06"
+   ],
+   [
+    912.0,
+    "Jessica",
+    "Warehouse Associate",
+    "Procurement",
+    "2026-03-07"
+   ],
+   [
+    2835.0,
+    "Linda",
+    "Analyst",
+    "People",
+    "2026-03-07"
+   ],
+   [
+    3257.0,
+    "Yuki",
+    "Sales Manager",
+    "Sales LATAM",
+    "2026-03-07"
+   ],
+   [
+    1772.0,
+    "Linda",
+    "Warehouse Associate",
+    "Logistics",
+    "2026-03-08"
+   ],
+   [
+    3892.0,
+    "Giulia",
+    "Account Executive",
+    "Sales APAC",
+    "2026-03-08"
+   ],
+   [
+    639.0,
+    "Carlos",
+    "Sales Manager",
+    "Sales LATAM",
+    "2026-03-09"
+   ],
+   [
+    871.0,
+    "John",
+    "Support Team Lead",
+    "Support Tier 1",
+    "2026-03-09"
+   ],
+   [
+    1958.0,
+    "Hiroshi",
+    "Operations Manager",
+    "Warehousing",
+    "2026-03-09"
+   ],
+   [
+    3716.0,
+    "Jennifer",
+    "Staff Engineer",
+    "Application Engineering",
+    "2026-03-09"
+   ],
+   [
+    339.0,
+    "John",
+    "Software Engineer",
+    "Platform Engineering",
+    "2026-03-10"
+   ],
+   [
+    1566.0,
+    "Jessica",
+    "Support Team Lead",
+    "Support Tier 1",
+    "2026-03-10"
+   ],
+   [
+    3698.0,
+    "Patricia",
+    "Buyer",
+    "Logistics",
+    "2026-03-10"
+   ],
+   [
+    1250.0,
+    "Elizabeth",
+    "Senior Account Executive",
+    "Sales",
+    "2026-03-11"
+   ],
+   [
+    2426.0,
+    "Mary",
+    "Warehouse Associate",
+    "Logistics",
+    "2026-03-11"
+   ],
+   [
+    3931.0,
+    "Sarah",
+    "Senior Account Executive",
+    "Sales APAC",
+    "2026-03-11"
+   ],
+   [
+    1418.0,
+    "Linda",
+    "Warehouse Associate",
+    "Procurement",
+    "2026-03-13"
+   ],
+   [
+    229.0,
+    "Susan",
+    "Operations Manager",
+    "Logistics",
+    "2026-03-14"
+   ],
+   [
+    615.0,
+    "Sven",
+    "Manager",
+    "Accounts Receivable",
+    "2026-03-14"
+   ],
+   [
+    728.0,
+    "Elizabeth",
+    "Data Engineer",
+    "Application Engineering",
+    "2026-03-14"
+   ],
+   [
+    2185.0,
+    "Li",
+    "Logistics Coordinator",
+    "Logistics",
+    "2026-03-14"
+   ],
+   [
+    3372.0,
+    "Ingrid",
+    "Coordinator",
+    "Product",
+    "2026-03-14"
+   ],
+   [
+    2504.0,
+    "Omar",
+    "Senior Software Engineer",
+    "Data Engineering",
+    "2026-03-16"
+   ],
+   [
+    769.0,
+    "Robert",
+    "Operations Manager",
+    "Warehousing",
+    "2026-03-17"
+   ],
+   [
+    1303.0,
+    "Thomas",
+    "Support Specialist",
+    "Support Tier 2",
+    "2026-03-17"
+   ],
+   [
+    1366.0,
+    "William",
+    "Data Engineer",
+    "Platform Engineering",
+    "2026-03-17"
+   ],
+   [
+    3754.0,
+    "Yuki",
+    "Solutions Engineer",
+    "Sales EMEA",
+    "2026-03-17"
+   ],
+   [
+    7.0,
+    "Elizabeth",
+    "Head of People",
+    "People",
+    "2026-03-18"
+   ],
+   [
+    2175.0,
+    "Giulia",
+    "Senior Analyst",
+    "Finance",
+    "2026-03-18"
+   ],
+   [
+    2294.0,
+    "John",
+    "Sales Manager",
+    "Sales LATAM",
+    "2026-03-18"
+   ],
+   [
+    2949.0,
+    "Liam",
+    "Engineering Manager",
+    "Platform Engineering",
+    "2026-03-18"
+   ],
+   [
+    1065.0,
+    "Jennifer",
+    "Support Team Lead",
+    "Support Tier 2",
+    "2026-03-19"
+   ],
+   [
+    1976.0,
+    "Ingrid",
+    "Senior Analyst",
+    "Security Office",
+    "2026-03-20"
+   ],
+   [
+    330.0,
+    "Maria",
+    "Staff Engineer",
+    "Data Engineering",
+    "2026-03-21"
+   ],
+   [
+    816.0,
+    "Mateo",
+    "Software Engineer",
+    "Application Engineering",
+    "2026-03-21"
+   ],
+   [
+    2505.0,
+    "Marco",
+    "SRE",
+    "Platform Engineering",
+    "2026-03-22"
+   ],
+   [
+    30.0,
+    "Camille",
+    "Head of Legal",
+    "Legal",
+    "2026-03-24"
+   ],
+   [
+    2987.0,
+    "Patricia",
+    "Support Specialist",
+    "Support Tier 2",
+    "2026-03-24"
+   ],
+   [
+    157.0,
+    "Camille",
+    "Manager",
+    "Talent Acquisition",
+    "2026-03-25"
+   ],
+   [
+    705.0,
+    "Sarah",
+    "Senior Account Executive",
+    "Sales North America",
+    "2026-03-25"
+   ],
+   [
+    3301.0,
+    "Arjun",
+    "Staff Engineer",
+    "Application Engineering",
+    "2026-03-25"
+   ],
+   [
+    2421.0,
+    "Marco",
+    "Software Engineer",
+    "Platform Engineering",
+    "2026-03-26"
+   ],
+   [
+    2900.0,
+    "James",
+    "Support Specialist",
+    "Support Tier 1",
+    "2026-03-26"
+   ],
+   [
+    1757.0,
+    "Anna",
+    "Engineering Manager",
+    "Platform Engineering",
+    "2026-03-29"
+   ],
+   [
+    2600.0,
+    "Emma",
+    "Coordinator",
+    "Legal",
+    "2026-03-29"
+   ],
+   [
+    3803.0,
+    "Li",
+    "Account Executive",
+    "Sales EMEA",
+    "2026-03-30"
+   ],
+   [
+    854.0,
+    "Thomas",
+    "Solutions Engineer",
+    "Sales LATAM",
+    "2026-03-31"
+   ],
+   [
+    1003.0,
+    "James",
+    "Operations Manager",
+    "Procurement",
+    "2026-03-31"
+   ],
+   [
+    2915.0,
+    "Pierre",
+    "Sales Development Rep",
+    "Sales EMEA",
+    "2026-04-01"
+   ],
+   [
+    3838.0,
+    "Wei",
+    "Staff Engineer",
+    "Application Engineering",
+    "2026-04-01"
+   ],
+   [
+    1110.0,
+    "Chen",
+    "Operations Manager",
+    "Logistics",
+    "2026-04-02"
+   ],
+   [
+    2406.0,
+    "Pierre",
+    "Senior Support Engineer",
+    "Support Tier 2",
+    "2026-04-02"
+   ],
+   [
+    2488.0,
+    "Sven",
+    "Solutions Engineer",
+    "Sales North America",
+    "2026-04-02"
+   ],
+   [
+    3972.0,
+    "Linda",
+    "Account Executive",
+    "Sales APAC",
+    "2026-04-02"
+   ],
+   [
+    3321.0,
+    "Sofia",
+    "Coordinator",
+    "People",
+    "2026-04-04"
+   ],
+   [
+    1678.0,
+    "Hiroshi",
+    "Solutions Engineer",
+    "Sales APAC",
+    "2026-04-05"
+   ],
+   [
+    1909.0,
+    "Sven",
+    "Specialist",
+    "Demand Generation",
+    "2026-04-05"
+   ],
+   [
+    3874.0,
+    "Richard",
+    "Account Executive",
+    "Sales LATAM",
+    "2026-04-05"
+   ],
+   [
+    1876.0,
+    "Aarav",
+    "Buyer",
+    "Logistics",
+    "2026-04-06"
+   ],
+   [
+    3151.0,
+    "Pierre",
+    "Operations Manager",
+    "Logistics",
+    "2026-04-06"
+   ],
+   [
+    3572.0,
+    "Jessica",
+    "Senior Account Executive",
+    "Sales North America",
+    "2026-04-07"
+   ],
+   [
+    3865.0,
+    "Isabella",
+    "SRE",
+    "Application Engineering",
+    "2026-04-07"
+   ],
+   [
+    2283.0,
+    "Ahmed",
+    "Software Engineer",
+    "Data Engineering",
+    "2026-04-08"
+   ],
+   [
+    3842.0,
+    "Pierre",
+    "Sales Development Rep",
+    "Sales EMEA",
+    "2026-04-09"
+   ],
+   [
+    540.0,
+    "Yuki",
+    "Solutions Engineer",
+    "Sales EMEA",
+    "2026-04-10"
+   ],
+   [
+    1556.0,
+    "Linda",
+    "Coordinator",
+    "FP&A",
+    "2026-04-13"
+   ],
+   [
+    958.0,
+    "Fatima",
+    "Support Specialist",
+    "Support Tier 2",
+    "2026-04-14"
+   ],
+   [
+    1824.0,
+    "Zara",
+    "Manager",
+    "Demand Generation",
+    "2026-04-14"
+   ],
+   [
+    1966.0,
+    "Mateo",
+    "Account Executive",
+    "Sales North America",
+    "2026-04-14"
+   ],
+   [
+    648.0,
+    "Arjun",
+    "Engineering Manager",
+    "Platform Engineering",
+    "2026-04-15"
+   ],
+   [
+    3917.0,
+    "Olivia",
+    "Operations Manager",
+    "Logistics",
+    "2026-04-15"
+   ],
+   [
+    3839.0,
+    "Sarah",
+    "Warehouse Associate",
+    "Procurement",
+    "2026-04-16"
+   ],
+   [
+    1629.0,
+    "Richard",
+    "SRE",
+    "Engineering",
+    "2026-04-18"
+   ],
+   [
+    2222.0,
+    "David",
+    "Analyst",
+    "Security Office",
+    "2026-04-18"
+   ],
+   [
+    3196.0,
+    "Noah",
+    "Solutions Engineer",
+    "Sales APAC",
+    "2026-04-18"
+   ],
+   [
+    606.0,
+    "Michael",
+    "Account Executive",
+    "Sales LATAM",
+    "2026-04-19"
+   ],
+   [
+    818.0,
+    "Jessica",
+    "Support Specialist",
+    "Support Tier 1",
+    "2026-04-19"
+   ],
+   [
+    2702.0,
+    "William",
+    "Support Team Lead",
+    "Support Tier 2",
+    "2026-04-19"
+   ],
+   [
+    375.0,
+    "Li",
+    "Senior Analyst",
+    "Finance",
+    "2026-04-20"
+   ],
+   [
+    869.0,
+    "Olivia",
+    "Solutions Engineer",
+    "Sales EMEA",
+    "2026-04-20"
+   ],
+   [
+    3097.0,
+    "Ingrid",
+    "Senior Analyst",
+    "Legal",
+    "2026-04-20"
+   ],
+   [
+    3706.0,
+    "Sven",
+    "Sales Manager",
+    "Sales EMEA",
+    "2026-04-21"
+   ],
+   [
+    1819.0,
+    "Marco",
+    "Buyer",
+    "Warehousing",
+    "2026-04-22"
+   ],
+   [
+    1464.0,
+    "Wei",
+    "Support Specialist",
+    "Support Tier 2",
+    "2026-04-23"
+   ],
+   [
+    1571.0,
+    "Richard",
+    "Account Executive",
+    "Sales APAC",
+    "2026-04-23"
+   ],
+   [
+    2268.0,
+    "Linda",
+    "Support Specialist",
+    "Support Tier 2",
+    "2026-04-23"
+   ],
+   [
+    2289.0,
+    "Li",
+    "Data Engineer",
+    "Data Engineering",
+    "2026-04-23"
+   ],
+   [
+    935.0,
+    "Pierre",
+    "Logistics Coordinator",
+    "Warehousing",
+    "2026-04-26"
+   ],
+   [
+    1113.0,
+    "Lukas",
+    "Engineering Manager",
+    "Application Engineering",
+    "2026-04-27"
+   ],
+   [
+    1935.0,
+    "John",
+    "Account Executive",
+    "Sales APAC",
+    "2026-04-27"
+   ],
+   [
+    1552.0,
+    "Hiroshi",
+    "Sales Manager",
+    "Sales LATAM",
+    "2026-04-28"
+   ],
+   [
+    1795.0,
+    "Sofia",
+    "Sales Manager",
+    "Sales APAC",
+    "2026-04-28"
+   ],
+   [
+    1225.0,
+    "Susan",
+    "Software Engineer",
+    "Engineering",
+    "2026-04-29"
+   ],
+   [
+    3174.0,
+    "Isabella",
+    "Support Specialist",
+    "Support Tier 1",
+    "2026-04-29"
+   ],
+   [
+    1736.0,
+    "James",
+    "Support Specialist",
+    "Support Tier 2",
+    "2026-04-30"
+   ],
+   [
+    3111.0,
+    "Lukas",
+    "Support Specialist",
+    "Support Tier 2",
+    "2026-05-01"
+   ],
+   [
+    3113.0,
+    "Robert",
+    "Warehouse Associate",
+    "Warehousing",
+    "2026-05-01"
+   ],
+   [
+    320.0,
+    "Anna",
+    "Account Executive",
+    "Sales LATAM",
+    "2026-05-02"
+   ],
+   [
+    723.0,
+    "Camille",
+    "Account Executive",
+    "Sales",
+    "2026-05-02"
+   ],
+   [
+    1102.0,
+    "Isabella",
+    "Warehouse Associate",
+    "Warehousing",
+    "2026-05-02"
+   ],
+   [
+    1158.0,
+    "Robert",
+    "Senior Account Executive",
+    "Sales LATAM",
+    "2026-05-02"
+   ],
+   [
+    1936.0,
+    "Omar",
+    "Coordinator",
+    "Product Design",
+    "2026-05-02"
+   ],
+   [
+    2214.0,
+    "Patricia",
+    "Specialist",
+    "FP&A",
+    "2026-05-03"
+   ],
+   [
+    164.0,
+    "Lukas",
+    "Warehouse Associate",
+    "Procurement",
+    "2026-05-05"
+   ],
+   [
+    2865.0,
+    "Anna",
+    "Senior Software Engineer",
+    "Application Engineering",
+    "2026-05-06"
+   ],
+   [
+    2867.0,
+    "Wei",
+    "Support Specialist",
+    "Support Tier 2",
+    "2026-05-06"
+   ],
+   [
+    3449.0,
+    "Yuki",
+    "Buyer",
+    "Logistics",
+    "2026-05-06"
+   ],
+   [
+    909.0,
+    "Marco",
+    "Senior Support Engineer",
+    "Support Tier 1",
+    "2026-05-07"
+   ],
+   [
+    970.0,
+    "Olivia",
+    "Support Team Lead",
+    "Support Tier 2",
+    "2026-05-08"
+   ]
+  ]
+ },
+ "wd_products_margin": {
+  "truth_columns": [
+   "product_id",
+   "sku",
+   "product_name",
+   "list_price",
+   "unit_cost",
+   "margin"
+  ],
+  "truth_rows": [
+   [
+    13046.0,
+    "SKU-013046",
+    "Ultra Cleaner 13046",
+    4926.67,
+    2269.31,
+    2657.36
+   ],
+   [
+    2889.0,
+    "SKU-002889",
+    "Ultra Cleaner 2889",
+    4887.95,
+    2246.05,
+    2641.9
+   ],
+   [
+    1883.0,
+    "SKU-001883",
+    "Pro Switch 1883",
+    4909.24,
+    2267.89,
+    2641.35
+   ],
+   [
+    13284.0,
+    "SKU-013284",
+    "Ultra Drill 13284",
+    4873.81,
+    2255.69,
+    2618.12
+   ],
+   [
+    4115.0,
+    "SKU-004115",
+    "Lite Router 4115",
+    4945.05,
+    2332.65,
+    2612.4
+   ],
+   [
+    17070.0,
+    "SKU-017070",
+    "Smart Cable 17070",
+    4988.64,
+    2377.73,
+    2610.91
+   ],
+   [
+    10747.0,
+    "SKU-010747",
+    "Pro Chair 10747",
+    4814.32,
+    2210.28,
+    2604.04
+   ],
+   [
+    19876.0,
+    "SKU-019876",
+    "Compact Glove 19876",
+    4961.38,
+    2360.77,
+    2600.61
+   ],
+   [
+    9116.0,
+    "SKU-009116",
+    "Max Router 9116",
+    4770.34,
+    2171.08,
+    2599.26
+   ],
+   [
+    7846.0,
+    "SKU-007846",
+    "Smart Cable 7846",
+    4799.71,
+    2205.35,
+    2594.36
+   ],
+   [
+    11085.0,
+    "SKU-011085",
+    "Prime Battery 11085",
+    4814.83,
+    2239.0,
+    2575.83
+   ],
+   [
+    11731.0,
+    "SKU-011731",
+    "Max Desk 11731",
+    4816.61,
+    2257.23,
+    2559.38
+   ],
+   [
+    8611.0,
+    "SKU-008611",
+    "Eco Router 8611",
+    4761.4,
+    2202.73,
+    2558.67
+   ],
+   [
+    8926.0,
+    "SKU-008926",
+    "Compact Battery 8926",
+    4895.01,
+    2338.68,
+    2556.33
+   ],
+   [
+    5110.0,
+    "SKU-005110",
+    "Ultra Chair 5110",
+    4700.2,
+    2151.85,
+    2548.35
+   ],
+   [
+    7479.0,
+    "SKU-007479",
+    "Ultra Drill 7479",
+    4913.44,
+    2365.35,
+    2548.09
+   ],
+   [
+    13119.0,
+    "SKU-013119",
+    "Heavy-Duty Widget 13119",
+    4638.86,
+    2093.32,
+    2545.54
+   ],
+   [
+    24410.0,
+    "SKU-024410",
+    "Prime Sensor 24410",
+    4850.34,
+    2311.02,
+    2539.32
+   ],
+   [
+    8694.0,
+    "SKU-008694",
+    "Lite Widget 8694",
+    4911.78,
+    2373.02,
+    2538.76
+   ],
+   [
+    7674.0,
+    "SKU-007674",
+    "Compact Scanner 7674",
+    4684.41,
+    2149.07,
+    2535.34
+   ]
+  ],
+  "error": null,
+  "blocked": false,
+  "reason": null,
+  "review": null,
+  "columns": [
+   "product_id",
+   "sku",
+   "product_name",
+   "list_price",
+   "unit_cost",
+   "margin"
+  ],
+  "rows": [
+   [
+    13046.0,
+    "SKU-013046",
+    "Ultra Cleaner 13046",
+    4926.67,
+    2269.31,
+    2657.36
+   ],
+   [
+    2889.0,
+    "SKU-002889",
+    "Ultra Cleaner 2889",
+    4887.95,
+    2246.05,
+    2641.9
+   ],
+   [
+    1883.0,
+    "SKU-001883",
+    "Pro Switch 1883",
+    4909.24,
+    2267.89,
+    2641.35
+   ],
+   [
+    13284.0,
+    "SKU-013284",
+    "Ultra Drill 13284",
+    4873.81,
+    2255.69,
+    2618.12
+   ],
+   [
+    4115.0,
+    "SKU-004115",
+    "Lite Router 4115",
+    4945.05,
+    2332.65,
+    2612.4
+   ],
+   [
+    17070.0,
+    "SKU-017070",
+    "Smart Cable 17070",
+    4988.64,
+    2377.73,
+    2610.91
+   ],
+   [
+    10747.0,
+    "SKU-010747",
+    "Pro Chair 10747",
+    4814.32,
+    2210.28,
+    2604.04
+   ],
+   [
+    19876.0,
+    "SKU-019876",
+    "Compact Glove 19876",
+    4961.38,
+    2360.77,
+    2600.61
+   ],
+   [
+    9116.0,
+    "SKU-009116",
+    "Max Router 9116",
+    4770.34,
+    2171.08,
+    2599.26
+   ],
+   [
+    7846.0,
+    "SKU-007846",
+    "Smart Cable 7846",
+    4799.71,
+    2205.35,
+    2594.36
+   ],
+   [
+    11085.0,
+    "SKU-011085",
+    "Prime Battery 11085",
+    4814.83,
+    2239.0,
+    2575.83
+   ],
+   [
+    11731.0,
+    "SKU-011731",
+    "Max Desk 11731",
+    4816.61,
+    2257.23,
+    2559.38
+   ],
+   [
+    8611.0,
+    "SKU-008611",
+    "Eco Router 8611",
+    4761.4,
+    2202.73,
+    2558.67
+   ],
+   [
+    8926.0,
+    "SKU-008926",
+    "Compact Battery 8926",
+    4895.01,
+    2338.68,
+    2556.33
+   ],
+   [
+    5110.0,
+    "SKU-005110",
+    "Ultra Chair 5110",
+    4700.2,
+    2151.85,
+    2548.35
+   ],
+   [
+    7479.0,
+    "SKU-007479",
+    "Ultra Drill 7479",
+    4913.44,
+    2365.35,
+    2548.09
+   ],
+   [
+    13119.0,
+    "SKU-013119",
+    "Heavy-Duty Widget 13119",
+    4638.86,
+    2093.32,
+    2545.54
+   ],
+   [
+    24410.0,
+    "SKU-024410",
+    "Prime Sensor 24410",
+    4850.34,
+    2311.02,
+    2539.32
+   ],
+   [
+    8694.0,
+    "SKU-008694",
+    "Lite Widget 8694",
+    4911.78,
+    2373.02,
+    2538.76
+   ],
+   [
+    7674.0,
+    "SKU-007674",
+    "Compact Scanner 7674",
+    4684.41,
+    2149.07,
+    2535.34
+   ]
+  ]
+ },
+ "vg_whats_low_stock": {
+  "truth_columns": [
+   "sku",
+   "product_name",
+   "warehouse_code",
+   "available",
+   "reorder_point"
+  ],
+  "truth_rows": [
+   [
+    "SKU-000330",
+    "Heavy-Duty Drill 330",
+    "WH-TOR",
+    0.0,
+    200.0
+   ],
+   [
+    "SKU-019431",
+    "Compact Router 19431",
+    "WH-LON",
+    1.0,
+    200.0
+   ],
+   [
+    "SKU-016431",
+    "Heavy-Duty Battery 16431",
+    "WH-TOR",
+    1.0,
+    199.0
+   ],
+   [
+    "SKU-011479",
+    "Heavy-Duty Battery 11479",
+    "WH-SAO",
+    0.0,
+    198.0
+   ],
+   [
+    "SKU-021329",
+    "Pro Label 21329",
+    "WH-LON",
+    1.0,
+    199.0
+   ],
+   [
+    "SKU-016778",
+    "Ultra Glove 16778",
+    "WH-CHI",
+    3.0,
+    200.0
+   ],
+   [
+    "SKU-022967",
+    "Compact Desk 22967",
+    "WH-DAL",
+    3.0,
+    200.0
+   ],
+   [
+    "SKU-007865",
+    "Heavy-Duty Switch 7865",
+    "WH-AMS",
+    0.0,
+    196.0
+   ],
+   [
+    "SKU-006020",
+    "Lite Widget 6020",
+    "WH-CHI",
+    5.0,
+    200.0
+   ],
+   [
+    "SKU-002375",
+    "Compact Box 2375",
+    "WH-TOR",
+    0.0,
+    195.0
+   ],
+   [
+    "SKU-004273",
+    "Compact Box 4273",
+    "WH-AMS",
+    1.0,
+    196.0
+   ],
+   [
+    "SKU-007881",
+    "Eco Battery 7881",
+    "WH-LON",
+    4.0,
+    199.0
+   ],
+   [
+    "SKU-008439",
+    "Max Desk 8439",
+    "WH-SIN",
+    0.0,
+    195.0
+   ],
+   [
+    "SKU-023803",
+    "Classic Battery 23803",
+    "WH-SIN",
+    2.0,
+    197.0
+   ],
+   [
+    "SKU-013749",
+    "Smart Cleaner 13749",
+    "WH-TOR",
+    2.0,
+    196.0
+   ],
+   [
+    "SKU-003258",
+    "Compact Router 3258",
+    "WH-MEX",
+    6.0,
+    200.0
+   ],
+   [
+    "SKU-019251",
+    "Heavy-Duty Widget 19251",
+    "WH-MEX",
+    3.0,
+    197.0
+   ],
+   [
+    "SKU-000126",
+    "Eco Monitor 126",
+    "WH-LON",
+    6.0,
+    200.0
+   ],
+   [
+    "SKU-017091",
+    "Ultra Label 17091",
+    "WH-LON",
+    4.0,
+    198.0
+   ],
+   [
+    "SKU-006441",
+    "Pro Switch 6441",
+    "WH-CHI",
+    7.0,
+    200.0
+   ],
+   [
+    "SKU-013773",
+    "Eco Sensor 13773",
+    "WH-CHI",
+    7.0,
+    200.0
+   ],
+   [
+    "SKU-024032",
+    "Smart Monitor 24032",
+    "WH-DAL",
+    0.0,
+    193.0
+   ],
+   [
+    "SKU-011188",
+    "Pro Label 11188",
+    "WH-NJ",
+    3.0,
+    196.0
+   ],
+   [
+    "SKU-021065",
+    "Prime Desk 21065",
+    "WH-NJ",
+    5.0,
+    198.0
+   ],
+   [
+    "SKU-003661",
+    "Lite Router 3661",
+    "WH-SAO",
+    0.0,
+    193.0
+   ],
+   [
+    "SKU-019227",
+    "Lite Glove 19227",
+    "WH-LON",
+    1.0,
+    194.0
+   ],
+   [
+    "SKU-023122",
+    "Classic Cable 23122",
+    "WH-PAR",
+    2.0,
+    195.0
+   ],
+   [
+    "SKU-020623",
+    "Lite Desk 20623",
+    "WH-SIN",
+    4.0,
+    197.0
+   ],
+   [
+    "SKU-002649",
+    "Lite Monitor 2649",
+    "WH-CHI",
+    4.0,
+    196.0
+   ],
+   [
+    "SKU-008211",
+    "Ultra Switch 8211",
+    "WH-CHI",
+    8.0,
+    200.0
+   ],
+   [
+    "SKU-005912",
+    "Prime Widget 5912",
+    "WH-PAR",
+    5.0,
+    197.0
+   ],
+   [
+    "SKU-011607",
+    "Smart Chair 11607",
+    "WH-PAR",
+    6.0,
+    198.0
+   ],
+   [
+    "SKU-021305",
+    "Lite Sensor 21305",
+    "WH-PAR",
+    0.0,
+    192.0
+   ],
+   [
+    "SKU-024231",
+    "Lite Glove 24231",
+    "WH-DAL",
+    0.0,
+    191.0
+   ],
+   [
+    "SKU-001274",
+    "Smart Battery 1274",
+    "WH-NJ",
+    4.0,
+    195.0
+   ],
+   [
+    "SKU-020894",
+    "Pro Switch 20894",
+    "WH-NJ",
+    5.0,
+    196.0
+   ],
+   [
+    "SKU-007831",
+    "Heavy-Duty Chair 7831",
+    "WH-TOR",
+    6.0,
+    197.0
+   ],
+   [
+    "SKU-012736",
+    "Pro Router 12736",
+    "WH-SAO",
+    4.0,
+    195.0
+   ],
+   [
+    "SKU-006647",
+    "Classic Sensor 6647",
+    "WH-AMS",
+    9.0,
+    200.0
+   ],
+   [
+    "SKU-020114",
+    "Ultra Glove 20114",
+    "WH-LON",
+    7.0,
+    198.0
+   ],
+   [
+    "SKU-006285",
+    "Max Desk 6285",
+    "WH-SIN",
+    7.0,
+    198.0
+   ],
+   [
+    "SKU-015396",
+    "Smart Chair 15396",
+    "WH-SIN",
+    5.0,
+    196.0
+   ],
+   [
+    "SKU-023022",
+    "Prime Widget 23022",
+    "WH-SIN",
+    9.0,
+    200.0
+   ],
+   [
+    "SKU-007714",
+    "Max Cable 7714",
+    "WH-CHI",
+    1.0,
+    191.0
+   ],
+   [
+    "SKU-002443",
+    "Classic Box 2443",
+    "WH-DAL",
+    1.0,
+    191.0
+   ],
+   [
+    "SKU-003643",
+    "Max Cleaner 3643",
+    "WH-NJ",
+    2.0,
+    192.0
+   ],
+   [
+    "SKU-007068",
+    "Prime Widget 7068",
+    "WH-NJ",
+    10.0,
+    200.0
+   ],
+   [
+    "SKU-024897",
+    "Pro Sensor 24897",
+    "WH-NJ",
+    2.0,
+    192.0
+   ],
+   [
+    "SKU-002766",
+    "Compact Sensor 2766",
+    "WH-AMS",
+    6.0,
+    196.0
+   ],
+   [
+    "SKU-005176",
+    "Eco Router 5176",
+    "WH-LON",
+    3.0,
+    193.0
+   ]
+  ],
+  "error": null,
+  "blocked": false,
+  "reason": null,
+  "review": null,
+  "columns": [
+   "sku",
+   "warehouse_id",
+   "qty_on_hand",
+   "qty_on_order",
+   "reorder_point"
+  ],
+  "rows": [
+   [
+    "SKU-000330",
+    6.0,
+    0.0,
+    0.0,
+    200.0
+   ],
+   [
+    "SKU-019431",
+    11.0,
+    1.0,
+    0.0,
+    200.0
+   ],
+   [
+    "SKU-016431",
+    6.0,
+    1.0,
+    0.0,
+    199.0
+   ],
+   [
+    "SKU-021329",
+    11.0,
+    1.0,
+    33.0,
+    199.0
+   ],
+   [
+    "SKU-011479",
+    8.0,
+    0.0,
+    0.0,
+    198.0
+   ],
+   [
+    "SKU-022967",
+    2.0,
+    3.0,
+    0.0,
+    200.0
+   ],
+   [
+    "SKU-007865",
+    10.0,
+    0.0,
+    48.0,
+    196.0
+   ],
+   [
+    "SKU-016778",
+    1.0,
+    4.0,
+    370.0,
+    200.0
+   ],
+   [
+    "SKU-004273",
+    10.0,
+    1.0,
+    0.0,
+    196.0
+   ],
+   [
+    "SKU-023803",
+    19.0,
+    2.0,
+    0.0,
+    197.0
+   ],
+   [
+    "SKU-002375",
+    6.0,
+    0.0,
+    49.0,
+    195.0
+   ],
+   [
+    "SKU-007881",
+    11.0,
+    4.0,
+    0.0,
+    199.0
+   ],
+   [
+    "SKU-008439",
+    19.0,
+    0.0,
+    0.0,
+    195.0
+   ],
+   [
+    "SKU-017091",
+    11.0,
+    4.0,
+    0.0,
+    198.0
+   ],
+   [
+    "SKU-013749",
+    6.0,
+    2.0,
+    176.0,
+    196.0
+   ],
+   [
+    "SKU-019251",
+    7.0,
+    3.0,
+    0.0,
+    197.0
+   ],
+   [
+    "SKU-006020",
+    1.0,
+    6.0,
+    266.0,
+    200.0
+   ],
+   [
+    "SKU-011188",
+    3.0,
+    3.0,
+    0.0,
+    196.0
+   ],
+   [
+    "SKU-020623",
+    19.0,
+    4.0,
+    0.0,
+    197.0
+   ],
+   [
+    "SKU-024032",
+    2.0,
+    0.0,
+    0.0,
+    193.0
+   ],
+   [
+    "SKU-003258",
+    7.0,
+    7.0,
+    0.0,
+    200.0
+   ],
+   [
+    "SKU-013773",
+    1.0,
+    7.0,
+    0.0,
+    200.0
+   ],
+   [
+    "SKU-019227",
+    11.0,
+    1.0,
+    0.0,
+    194.0
+   ],
+   [
+    "SKU-021065",
+    3.0,
+    5.0,
+    0.0,
+    198.0
+   ],
+   [
+    "SKU-003661",
+    8.0,
+    0.0,
+    0.0,
+    193.0
+   ],
+   [
+    "SKU-023122",
+    14.0,
+    2.0,
+    0.0,
+    195.0
+   ],
+   [
+    "SKU-021305",
+    14.0,
+    0.0,
+    0.0,
+    192.0
+   ],
+   [
+    "SKU-008211",
+    1.0,
+    8.0,
+    0.0,
+    200.0
+   ],
+   [
+    "SKU-000126",
+    11.0,
+    8.0,
+    0.0,
+    200.0
+   ],
+   [
+    "SKU-002649",
+    1.0,
+    4.0,
+    0.0,
+    196.0
+   ],
+   [
+    "SKU-011607",
+    14.0,
+    6.0,
+    0.0,
+    198.0
+   ],
+   [
+    "SKU-005912",
+    14.0,
+    5.0,
+    0.0,
+    197.0
+   ],
+   [
+    "SKU-006441",
+    1.0,
+    8.0,
+    0.0,
+    200.0
+   ],
+   [
+    "SKU-012736",
+    8.0,
+    4.0,
+    0.0,
+    195.0
+   ],
+   [
+    "SKU-020894",
+    3.0,
+    5.0,
+    0.0,
+    196.0
+   ],
+   [
+    "SKU-024231",
+    2.0,
+    0.0,
+    0.0,
+    191.0
+   ],
+   [
+    "SKU-015396",
+    19.0,
+    5.0,
+    0.0,
+    196.0
+   ],
+   [
+    "SKU-024769",
+    14.0,
+    3.0,
+    0.0,
+    193.0
+   ],
+   [
+    "SKU-001274",
+    3.0,
+    5.0,
+    0.0,
+    195.0
+   ],
+   [
+    "SKU-003643",
+    3.0,
+    2.0,
+    0.0,
+    192.0
+   ],
+   [
+    "SKU-020114",
+    11.0,
+    8.0,
+    0.0,
+    198.0
+   ],
+   [
+    "SKU-004052",
+    19.0,
+    2.0,
+    0.0,
+    192.0
+   ],
+   [
+    "SKU-006285",
+    19.0,
+    8.0,
+    185.0,
+    198.0
+   ],
+   [
+    "SKU-002443",
+    2.0,
+    1.0,
+    0.0,
+    191.0
+   ],
+   [
+    "SKU-005176",
+    11.0,
+    3.0,
+    0.0,
+    193.0
+   ],
+   [
+    "SKU-005626",
+    14.0,
+    2.0,
+    0.0,
+    192.0
+   ],
+   [
+    "SKU-007714",
+    1.0,
+    1.0,
+    0.0,
+    191.0
+   ],
+   [
+    "SKU-002766",
+    10.0,
+    6.0,
+    0.0,
+    196.0
+   ],
+   [
+    "SKU-007068",
+    3.0,
+    10.0,
+    131.0,
+    200.0
+   ],
+   [
+    "SKU-024897",
+    3.0,
+    2.0,
+    0.0,
+    192.0
+   ]
+  ]
+ },
+ "vg_who_owes": {
+  "truth_columns": [
+   "cust_id",
+   "customer_name",
+   "outstanding"
+  ],
+  "truth_rows": [
+   [
+    17.0,
+    "Umbrella Holdings",
+    57531853.61
+   ],
+   [
+    63.0,
+    "Tailspin Media",
+    47702523.27
+   ],
+   [
+    20.0,
+    "Acme Labs",
+    46541077.21
+   ],
+   [
+    47.0,
+    "Nakatomi Labs",
+    41842843.01
+   ],
+   [
+    982.0,
+    "Wayne Pharma",
+    40996055.55
+   ],
+   [
+    28.0,
+    "Cyberdyne Pharma",
+    37762209.27
+   ],
+   [
+    50.0,
+    "Apex Health",
+    33881870.61
+   ],
+   [
+    165.0,
+    "Apex Health",
+    33011492.14
+   ],
+   [
+    311.0,
+    "Wonka Logistics",
+    30176450.68
+   ],
+   [
+    49.0,
+    "Zenith Motors",
+    28734699.52
+   ],
+   [
+    484.0,
+    "Globex Industries",
+    28160799.1
+   ],
+   [
+    25813.0,
+    "Northwind Analytics - EU Branch",
+    27536129.28
+   ],
+   [
+    27.0,
+    "Proseware Retail",
+    27226313.96
+   ],
+   [
+    188.0,
+    "Proseware Holdings",
+    24757706.61
+   ],
+   [
+    1.0,
+    "Pied Piper Pharma",
+    24739737.52
+   ],
+   [
+    8967.0,
+    "Apex Analytics",
+    24450018.12
+   ],
+   [
+    894.0,
+    "Wayne Holdings",
+    24397610.45
+   ],
+   [
+    6277.0,
+    "Aperture Logistics",
+    24367318.49
+   ],
+   [
+    1295.0,
+    "Vandelay Pharma",
+    23159949.32
+   ],
+   [
+    24549.0,
+    "Proseware Industries - Subsidiary",
+    22778653.71
+   ]
+  ]
+ },
+ "vg_churn": {
+  "truth_columns": [
+   "cancel_reason",
+   "cancelled"
+  ],
+  "truth_rows": [
+   [
+    "switched_competitor",
+    907.0
+   ],
+   [
+    "no_longer_needed",
+    863.0
+   ],
+   [
+    null,
+    860.0
+   ],
+   [
+    "company_closed",
+    852.0
+   ],
+   [
+    "too_expensive",
+    819.0
+   ],
+   [
+    "missing_feature",
+    817.0
+   ]
+  ]
+ }
+}

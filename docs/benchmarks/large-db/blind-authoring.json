@@ -1,0 +1,703 @@
+{
+ "summary": {
+  "tasks": 28,
+  "verdicts": {
+   "correct": 13,
+   "partially_correct": 2,
+   "wrong": 8,
+   "tablefox_missing_context": 4,
+   "policy_refusal": 1
+  },
+  "failure_causes": {
+   "missing_column": 8,
+   "wrong_table_ambiguity": 1,
+   "missing_table_and_columns": 1,
+   "policy_refusal": 1,
+   "guard_false_positive_and_missing_column": 1,
+   "missing_table": 3
+  },
+  "by_category": {
+   "aggregate_time": {
+    "wrong": 2,
+    "policy_refusal": 1
+   },
+   "audit_log": {
+    "wrong": 3
+   },
+   "cross_schema_ambiguity": {
+    "correct": 2,
+    "tablefox_missing_context": 1
+   },
+   "join_2hop": {
+    "wrong": 1,
+    "correct": 2
+   },
+   "join_multihop": {
+    "correct": 2,
+    "wrong": 1,
+    "tablefox_missing_context": 1
+   },
+   "legacy_no_fk": {
+    "correct": 1
+   },
+   "single_table_exact": {
+    "correct": 2
+   },
+   "synonym_abbreviation": {
+    "correct": 2,
+    "partially_correct": 1,
+    "wrong": 1
+   },
+   "vague_business": {
+    "partially_correct": 1,
+    "tablefox_missing_context": 2
+   },
+   "wide_table": {
+    "correct": 2
+   }
+  },
+  "method": "Contexts were saved (blind-contexts.json) and SQL written (blind-attempts.json) before any ground truth was written or the schema dump was read. One attempt per task, two calls only (task_context then readonly_batch), no retries. Caveat: the author had read the database hand-over note before authoring, so some guesses may be contaminated; guesses are listed per task."
+ },
+ "attempts": [
+  {
+   "task": "st_kb_articles",
+   "category": "single_table_exact",
+   "question": "Show the 20 most viewed knowledge base articles",
+   "pack": [
+    "table:support.kb_articles",
+    "table:analytics.page_views",
+    "table:analytics.web_sessions",
+    "table:hr.employees",
+    "table:public.countries"
+   ],
+   "attempt_sql": "select article_id, title, view_count from support.kb_articles order by view_count desc limit 20",
+   "guessed": [
+    "title",
+    "view_count"
+   ],
+   "outcome": "20 rows",
+   "tablefox_message": null,
+   "verdict": "correct",
+   "failure_cause": null,
+   "note": "Pack listed only article_id/author_employee_id; guessed title and view_count happened to exist.",
+   "ground_truth_sql": "select article_id, title, view_count from support.kb_articles order by view_count desc, article_id limit 20"
+  },
+  {
+   "task": "st_promo_codes",
+   "category": "single_table_exact",
+   "question": "Which promo codes give the biggest discount?",
+   "pack": [
+    "table:sales.promo_codes",
+    "table:sales.orders",
+    "table:inventory.item_aliases",
+    "table:inventory.products",
+    "table:public.countries"
+   ],
+   "attempt_sql": "select promo_code, discount_pct from sales.promo_codes order by discount_pct desc limit 20",
+   "guessed": [],
+   "outcome": "20 rows",
+   "tablefox_message": null,
+   "verdict": "correct",
+   "failure_cause": null,
+   "note": "Top 20 are all 40% ties; different tie order, same answer.",
+   "ground_truth_sql": "select promo_code, discount_pct from sales.promo_codes order by discount_pct desc, promo_code limit 20"
+  },
+  {
+   "task": "syn_clients_region",
+   "category": "synonym_abbreviation",
+   "question": "How many clients do we have in each region?",
+   "pack": [
+    "table:public.regions",
+    "table:crm.accounts",
+    "table:public.tbl_cust_legacy",
+    "table:finance.gl_entries",
+    "table:crm.contacts",
+    "table:sales.customers",
+    "table:public.currencies"
+   ],
+   "attempt_sql": "select r.region_code, count(*) as clients from crm.accounts a join public.regions r on r.region_id = a.region_id group by r.region_code order by clients desc",
+   "guessed": [],
+   "outcome": "5 rows",
+   "tablefox_message": null,
+   "verdict": "correct",
+   "failure_cause": null,
+   "note": "",
+   "ground_truth_sql": "select r.region_code, count(*) as clients from crm.accounts a join public.regions r on r.region_id = a.region_id group by r.region_code order by clients desc"
+  },
+  {
+   "task": "syn_staff_per_dept",
+   "category": "synonym_abbreviation",
+   "question": "How many staff are in each department?",
+   "pack": [
+    "table:hr.departments",
+    "table:hr.employees",
+    "table:ops.login_events",
+    "table:finance.gl_entries",
+    "table:hr.teams",
+    "table:sales.customers",
+    "table:finance.cost_centers",
+    "table:ops.app_users",
+    "table:public.currencies"
+   ],
+   "attempt_sql": "select d.dept_code, count(e.employee_id) as staff from hr.departments d left join hr.employees e on e.department_id = d.department_id group by d.dept_code order by staff desc",
+   "guessed": [],
+   "outcome": "30 rows",
+   "tablefox_message": null,
+   "verdict": "partially_correct",
+   "failure_cause": "missing_column",
+   "note": "Pack had no term_dt/is_active, so terminated staff were counted (and dept_code instead of dept_name).",
+   "ground_truth_sql": "select d.dept_name, count(*) as staff from hr.employees e join hr.departments d on d.department_id = e.department_id where e.term_dt is null group by d.dept_name order by staff desc, d.dept_name"
+  },
+  {
+   "task": "syn_qty_sold",
+   "category": "synonym_abbreviation",
+   "question": "Which SKUs have the highest total qty ordered?",
+   "pack": [
+    "table:ops.order_lines",
+    "table:ops.orders",
+    "table:inventory.products",
+    "table:inventory.product_suppliers",
+    "table:inventory.stock_levels",
+    "table:sales.quotes",
+    "table:hr.employees"
+   ],
+   "attempt_sql": "select p.sku, sum(ol.qty_ordered) as total_qty from ops.order_lines ol join inventory.products p on p.product_id = ol.product_id group by p.sku order by total_qty desc limit 20",
+   "guessed": [],
+   "outcome": "20 rows",
+   "tablefox_message": null,
+   "verdict": "wrong",
+   "failure_cause": "wrong_table_ambiguity",
+   "note": "sales.order_items was not in the pack; ops.order_lines.qty_ordered (purchase orders) was, and was used.",
+   "ground_truth_sql": "select p.sku, sum(oi.qty) as total_qty from sales.order_items oi join inventory.products p on p.product_id = oi.product_id group by p.sku order by total_qty desc, p.sku limit 20"
+  },
+  {
+   "task": "syn_opp_amt",
+   "category": "synonym_abbreviation",
+   "question": "What is the total opp amt by stage?",
+   "pack": [
+    "table:sales.quotes",
+    "table:crm.opportunities",
+    "table:sales.orders",
+    "table:finance.invoices",
+    "table:finance.gl_entries",
+    "table:crm.activities",
+    "table:public.currencies"
+   ],
+   "attempt_sql": "select stage, sum(amt) as total_amt, count(*) as opps from crm.opportunities group by stage order by total_amt desc",
+   "guessed": [],
+   "outcome": "6 rows",
+   "tablefox_message": null,
+   "verdict": "correct",
+   "failure_cause": null,
+   "note": "",
+   "ground_truth_sql": "select stage, sum(amt) as total_amt, count(*) as opps from crm.opportunities group by stage order by total_amt desc"
+  },
+  {
+   "task": "j2_tickets_by_tier",
+   "category": "join_2hop",
+   "question": "Average ticket resolution time in hours by support tier",
+   "pack": [
+    "table:support.tiers",
+    "view:support.v_open_tickets",
+    "table:support.tickets",
+    "table:support.ticket_messages",
+    "table:crm.accounts",
+    "table:support.sla_breaches"
+   ],
+   "attempt_sql": "select t.tier_name, round(avg(extract(epoch from (tk.resolved_at - tk.created_at)) / 3600)::numeric, 1) as avg_hours from support.tickets tk join support.tiers t on t.tier_id = tk.tier_id where tk.resolved_at is not null group by t.tier_name order by avg_hours",
+   "guessed": [
+    "created_at",
+    "resolved_at"
+   ],
+   "outcome": "error",
+   "tablefox_message": "Error executing tool database_readonly_batch",
+   "verdict": "wrong",
+   "failure_cause": "missing_column",
+   "note": "Pack omitted opened_at/resolved_at; guessed created_at failed. TableFox returned only 'Error executing tool', no PostgreSQL message to self-correct from.",
+   "ground_truth_sql": "select t.tier_name, round(avg(extract(epoch from (tk.resolved_at - tk.opened_at)) / 3600)::numeric, 1) as avg_hours from support.tickets tk join support.tiers t on t.tier_id = tk.tier_id where tk.resolved_at is not null group by t.tier_name order by avg_hours"
+  },
+  {
+   "task": "j2_mrr_by_plan",
+   "category": "join_2hop",
+   "question": "Total MRR of active subscriptions by plan",
+   "pack": [
+    "view:finance.v_mrr_by_plan",
+    "table:finance.subscriptions",
+    "table:finance.subscription_events",
+    "table:finance.plans"
+   ],
+   "attempt_sql": "select plan_code, plan_name, active_subscriptions, mrr_usd from finance.v_mrr_by_plan order by mrr_usd desc",
+   "guessed": [],
+   "outcome": "8 rows",
+   "tablefox_message": null,
+   "verdict": "correct",
+   "failure_cause": null,
+   "note": "Used finance.v_mrr_by_plan from the pack.",
+   "ground_truth_sql": "select p.plan_code, p.plan_name, count(*) as active_subscriptions, sum(s.mrr_amt) as mrr_usd from finance.subscriptions s join finance.plans p on p.plan_id = s.plan_id where s.status in ('active', 'past_due') group by p.plan_code, p.plan_name order by mrr_usd desc"
+  },
+  {
+   "task": "j2_campaign_leads",
+   "category": "join_2hop",
+   "question": "Leads per marketing campaign and how many of them converted",
+   "pack": [
+    "table:crm.leads",
+    "table:marketing.campaigns",
+    "table:marketing.campaign_members",
+    "table:marketing.email_events",
+    "table:analytics.web_sessions",
+    "table:public.countries"
+   ],
+   "attempt_sql": "select c.campaign_id, c.campaign_name, count(l.lead_id) as leads, count(l.converted_account_id) as converted from marketing.campaigns c join crm.leads l on l.campaign_id = c.campaign_id group by c.campaign_id, c.campaign_name order by leads desc limit 50",
+   "guessed": [],
+   "outcome": "50 rows",
+   "tablefox_message": null,
+   "verdict": "correct",
+   "failure_cause": null,
+   "note": "",
+   "ground_truth_sql": "select c.campaign_id, c.campaign_name, count(l.lead_id) as leads, count(l.converted_account_id) as converted from marketing.campaigns c join crm.leads l on l.campaign_id = c.campaign_id group by c.campaign_id, c.campaign_name order by leads desc, c.campaign_id limit 50"
+  },
+  {
+   "task": "mh_invoice_region",
+   "category": "join_multihop",
+   "question": "Total invoiced amount by sales region for invoices issued in 2026-Q3",
+   "pack": [
+    "table:finance.invoices",
+    "view:sales.v_order_summary",
+    "table:public.regions",
+    "table:sales.quotes",
+    "table:sales.orders"
+   ],
+   "attempt_sql": "select v.region_code, sum(i.total_amt) as invoiced from finance.invoices i join sales.v_order_summary v on v.order_id = i.order_id where i.issued_dt >= '2026-07-01' and i.issued_dt < '2026-10-01' group by v.region_code order by invoiced desc",
+   "guessed": [
+    "v_order_summary.order_id"
+   ],
+   "outcome": "5 rows",
+   "tablefox_message": null,
+   "verdict": "correct",
+   "failure_cause": null,
+   "note": "Joined invoices to sales.v_order_summary; guessed view.order_id existed.",
+   "ground_truth_sql": "select r.region_code, sum(i.total_amt) as invoiced from finance.invoices i join sales.customers c on c.cust_id = i.cust_id join crm.accounts a on a.account_id = c.account_id join public.regions r on r.region_id = a.region_id where i.issued_dt >= '2026-07-01' and i.issued_dt < '2026-10-01' group by r.region_code order by invoiced desc"
+  },
+  {
+   "task": "mh_return_rate_category",
+   "category": "join_multihop",
+   "question": "Return rate by top-level product category",
+   "pack": [
+    "table:sales.returns",
+    "table:public.fx_rates",
+    "table:inventory.products",
+    "table:inventory.stock_levels",
+    "table:inventory.product_categories",
+    "table:inventory.item_aliases",
+    "table:public.currencies",
+    "table:sales.order_items"
+   ],
+   "attempt_sql": "select tc.category_name, count(r.return_id) as returns, count(*) as items, round(count(r.return_id)::numeric / count(*), 4) as return_rate from sales.order_items oi join inventory.products p on p.product_id = oi.product_id join inventory.product_categories c on c.category_id = p.category_id join inventory.product_categories tc on tc.category_id = coalesce(c.parent_id, c.category_id) left join sales.returns r on r.order_item_id = oi.order_item_id group by tc.category_name order by return_rate desc",
+   "guessed": [],
+   "outcome": "12 rows",
+   "tablefox_message": null,
+   "verdict": "correct",
+   "failure_cause": null,
+   "note": "",
+   "ground_truth_sql": "select tc.category_name, count(r.return_id) as returns, count(*) as items, round(count(r.return_id)::numeric / count(*), 4) as return_rate from sales.order_items oi join inventory.products p on p.product_id = oi.product_id join inventory.product_categories c on c.category_id = p.category_id join inventory.product_categories tc on tc.category_id = coalesce(c.parent_id, c.category_id) left join sales.returns r on r.order_item_id = oi.order_item_id group by tc.category_name order by return_rate desc"
+  },
+  {
+   "task": "mh_api_failures_region",
+   "category": "join_multihop",
+   "question": "Failed API requests on 2026-10-10 broken down by the customer account's region",
+   "pack": [
+    "table:ops.api_request_log",
+    "table:finance.chart_of_accounts",
+    "table:public.regions",
+    "table:ops.api_keys",
+    "table:sales.customers",
+    "table:crm.accounts",
+    "table:finance.gl_entries",
+    "table:public.currencies"
+   ],
+   "attempt_sql": "select r.region_code, count(*) as failed from ops.api_request_log l join ops.api_keys k on k.api_key_id = l.api_key_id join crm.accounts a on a.account_id = k.account_id join public.regions r on r.region_id = a.region_id where l.status_code >= 400 and l.created_at >= '2026-10-10' and l.created_at < '2026-10-11' group by r.region_code order by failed desc",
+   "guessed": [
+    "status_code",
+    "created_at"
+   ],
+   "outcome": "error",
+   "tablefox_message": "Error executing tool database_readonly_batch",
+   "verdict": "wrong",
+   "failure_cause": "missing_column",
+   "note": "Pack listed only api_key_id/request_id for api_request_log; guessed created_at (real: requested_at) failed with an opaque error.",
+   "ground_truth_sql": "select r.region_code, count(*) as failed from ops.api_request_log l join ops.api_keys k on k.api_key_id = l.api_key_id join crm.accounts a on a.account_id = k.account_id join public.regions r on r.region_id = a.region_id where l.status_code >= 400 and l.requested_at >= '2026-10-10' and l.requested_at < '2026-10-11' group by r.region_code order by failed desc"
+  },
+  {
+   "task": "mh_payments_tier",
+   "category": "join_multihop",
+   "question": "Total settled payments received in September 2026 per account tier",
+   "pack": [
+    "table:finance.payments",
+    "table:crm.accounts",
+    "table:support.tiers",
+    "table:finance.chart_of_accounts",
+    "view:sales.v_order_summary",
+    "table:ops.orders",
+    "table:finance.gl_entries",
+    "table:hr.employees",
+    "table:public.currencies"
+   ],
+   "attempt_sql": "select v.tier, sum(p.amount) as paid from finance.payments p join finance.invoices i on i.invoice_id = p.invoice_id join sales.v_order_summary v on v.order_id = i.order_id where p.status = 'settled' and p.paid_at >= '2026-09-01' and p.paid_at < '2026-10-01' group by v.tier order by paid desc",
+   "guessed": [
+    "finance.invoices (absent from pack)",
+    "v_order_summary.order_id",
+    "amount",
+    "paid_at",
+    "status value 'settled'"
+   ],
+   "outcome": "error",
+   "tablefox_message": "Error executing tool database_readonly_batch",
+   "verdict": "tablefox_missing_context",
+   "failure_cause": "missing_table_and_columns",
+   "note": "finance.invoices and sales.customers absent; payments amount/date columns absent; query failed.",
+   "ground_truth_sql": "select a.tier, sum(p.amt) as paid from finance.payments p join finance.invoices i on i.invoice_id = p.invoice_id join sales.customers c on c.cust_id = i.cust_id join crm.accounts a on a.account_id = c.account_id where p.status = 'settled' and p.paid_dt >= '2026-09-01' and p.paid_dt < '2026-10-01' group by a.tier order by paid desc"
+  },
+  {
+   "task": "agg_top_customers_q3_emea",
+   "category": "aggregate_time",
+   "question": "Top 10 customers by revenue in USD in 2026-Q3 in the EMEA region",
+   "pack": [
+    "table:public.regions",
+    "materialized_view:analytics.mv_monthly_revenue",
+    "table:sales.customers",
+    "view:sales.v_order_summary",
+    "table:sales.orders_archive_2019",
+    "view:finance.v_mrr_by_plan",
+    "table:crm.accounts",
+    "table:finance.subscriptions"
+   ],
+   "attempt_sql": "select customer_name, sum(total_usd) as revenue_usd from sales.v_order_summary where region_code = 'EMEA' and order_date >= '2026-07-01' and order_date < '2026-10-01' group by customer_name order by revenue_usd desc limit 10",
+   "guessed": [
+    "order_date"
+   ],
+   "outcome": "error",
+   "tablefox_message": "Error executing tool database_readonly_batch",
+   "verdict": "wrong",
+   "failure_cause": "missing_column",
+   "note": "View order_dt not listed in this pack; guessed order_date failed. sales.orders also missing from pack.",
+   "ground_truth_sql": "select c.cust_id, c.customer_name, sum(o.total_usd) as revenue_usd from sales.orders o join sales.customers c on c.cust_id = o.cust_id join crm.accounts a on a.account_id = c.account_id join public.regions r on r.region_id = a.region_id where r.region_code = 'EMEA' and o.order_dt >= '2026-07-01' and o.order_dt < '2026-10-01' and o.status not in ('cancelled', 'draft') group by c.cust_id, c.customer_name order by revenue_usd desc, c.cust_id limit 10"
+  },
+  {
+   "task": "agg_monthly_orders",
+   "category": "aggregate_time",
+   "question": "Monthly order count and USD revenue for 2025",
+   "pack": [
+    "materialized_view:analytics.mv_monthly_revenue",
+    "table:sales.orders",
+    "view:sales.v_order_summary",
+    "table:finance.subscriptions",
+    "table:ops.orders",
+    "table:crm.accounts",
+    "table:hr.employees"
+   ],
+   "attempt_sql": "select date_trunc('month', order_dt) as month, count(*) as orders, sum(total_usd) as revenue_usd from sales.orders where order_dt >= '2025-01-01' and order_dt < '2026-01-01' group by 1 order by 1",
+   "guessed": [],
+   "outcome": "blocked",
+   "tablefox_message": "Query requires approval because it is outside the low-risk policy.",
+   "verdict": "policy_refusal",
+   "failure_cause": "policy_refusal",
+   "note": "SQL identical in meaning to ground truth, refused: EXPLAIN estimated 336,516 rows for a 12-row GROUP BY date_trunc result (row limit 100,000).",
+   "ground_truth_sql": "select date_trunc('month', order_dt) as month, count(*) as orders, sum(total_usd) as revenue_usd from sales.orders where order_dt >= '2025-01-01' and order_dt < '2026-01-01' group by 1 order by 1"
+  },
+  {
+   "task": "agg_gl_q2",
+   "category": "aggregate_time",
+   "question": "GL expense by cost center versus budget for 2026-Q2",
+   "pack": [
+    "table:finance.budgets",
+    "table:finance.cost_centers",
+    "table:finance.gl_entries",
+    "table:hr.departments",
+    "table:finance.chart_of_accounts"
+   ],
+   "attempt_sql": "with a as (select g.cost_center_id, sum(g.amount) as actual from finance.gl_entries g join finance.chart_of_accounts c on c.gl_account_id = g.gl_account_id where c.account_type = 'expense' and g.entry_date >= '2026-04-01' and g.entry_date < '2026-07-01' group by g.cost_center_id), b as (select b.cost_center_id, sum(b.budget_amt) as budget from finance.budgets b join finance.chart_of_accounts c on c.gl_account_id = b.gl_account_id where c.account_type = 'expense' and b.fiscal_month >= '2026-04-01' and b.fiscal_month < '2026-07-01' group by b.cost_center_id) select cc.cc_code, a.actual, b.budget from finance.cost_centers cc left join a on a.cost_center_id = cc.cost_center_id left join b on b.cost_center_id = cc.cost_center_id order by cc.cc_code",
+   "guessed": [
+    "amount",
+    "entry_date"
+   ],
+   "outcome": "error",
+   "tablefox_message": "Error executing tool database_readonly_batch",
+   "verdict": "wrong",
+   "failure_cause": "missing_column",
+   "note": "Pack omitted debit_amt/credit_amt/entry_dt for gl_entries; guessed amount/entry_date failed.",
+   "ground_truth_sql": "with actual as (select g.cost_center_id, sum(g.debit_amt - g.credit_amt) as actual from finance.gl_entries g join finance.chart_of_accounts ca on ca.gl_account_id = g.gl_account_id where ca.account_type = 'expense' and g.entry_dt >= '2026-04-01' and g.entry_dt < '2026-07-01' group by g.cost_center_id), budget as (select b.cost_center_id, sum(b.budget_amt) as budget from finance.budgets b join finance.chart_of_accounts ca on ca.gl_account_id = b.gl_account_id where ca.account_type = 'expense' and b.fiscal_month >= '2026-04-01' and b.fiscal_month < '2026-07-01' group by b.cost_center_id) select cc.cc_code, cc.cc_name, actual.actual, budget.budget from finance.cost_centers cc left join actual on actual.cost_center_id = cc.cost_center_id left join budget on budget.cost_center_id = cc.cost_center_id order by cc.cc_code"
+  },
+  {
+   "task": "au_deletes_exports",
+   "category": "audit_log",
+   "question": "Who deleted or exported data according to the audit log between 2026-10-04 and 2026-10-10?",
+   "pack": [
+    "table:public.audit_log",
+    "table:ops.api_request_log",
+    "table:ops.orders",
+    "table:hr.employees",
+    "table:ops.api_keys",
+    "table:ops.app_users"
+   ],
+   "attempt_sql": "select u.username, a.action, count(*) as events from public.audit_log a join ops.app_users u on u.user_id = a.actor_user_id where a.action in ('delete', 'export') and a.created_at >= '2026-10-04' and a.created_at < '2026-10-11' group by u.username, a.action order by events desc limit 50",
+   "guessed": [
+    "action",
+    "created_at"
+   ],
+   "outcome": "error",
+   "tablefox_message": "Error executing tool database_readonly_batch: Query contains a blocked write or maintenance keyword.",
+   "verdict": "wrong",
+   "failure_cause": "guard_false_positive_and_missing_column",
+   "note": "Refused by the keyword guard because the string literal 'delete' matches the DELETE keyword; also guessed created_at (real: occurred_at) and action was not in the pack.",
+   "ground_truth_sql": "select u.username, a.action, count(*) as events from public.audit_log a join ops.app_users u on u.user_id = a.actor_user_id where (a.action like 'delet%' or a.action = 'export') and a.occurred_at >= '2026-10-04' and a.occurred_at < '2026-10-11' group by u.username, a.action order by events desc, u.username, a.action limit 50"
+  },
+  {
+   "task": "au_salary_changes",
+   "category": "audit_log",
+   "question": "Changes to the employees salary field in the change history since 2026-07-12",
+   "pack": [
+    "table:hr.employees",
+    "table:public.change_history",
+    "table:crm.accounts"
+   ],
+   "attempt_sql": "select change_id, record_id, old_value, new_value, changed_at from public.change_history where table_name = 'employees' and column_name = 'salary_amt' and changed_at >= '2026-07-12' order by changed_at desc limit 50",
+   "guessed": [
+    "table_name",
+    "column_name",
+    "old_value",
+    "new_value",
+    "changed_at",
+    "record_id"
+   ],
+   "outcome": "error",
+   "tablefox_message": "Error executing tool database_readonly_batch",
+   "verdict": "wrong",
+   "failure_cause": "missing_column",
+   "note": "Pack listed only change_id for public.change_history; guessed column names failed and table_name values are schema-qualified ('hr.employees').",
+   "ground_truth_sql": "select change_id, record_pk, old_value, new_value, changed_by, change_source, changed_at from public.change_history where table_name = 'hr.employees' and column_name = 'salary_amt' and changed_at >= '2026-07-12' order by changed_at desc, change_id desc limit 50"
+  },
+  {
+   "task": "au_failed_logins",
+   "category": "audit_log",
+   "question": "Users with the most failed logins between 2026-09-11 and 2026-10-10",
+   "pack": [
+    "table:ops.login_events",
+    "table:ops.app_users",
+    "table:ops.api_request_log",
+    "table:analytics.feature_usage",
+    "table:crm.accounts",
+    "table:ops.api_keys"
+   ],
+   "attempt_sql": "select u.user_id, u.username, count(*) as failed from ops.login_events e join ops.app_users u on u.user_id = e.user_id where e.success = false and e.created_at >= '2026-09-11' and e.created_at < '2026-10-11' group by u.user_id, u.username order by failed desc limit 20",
+   "guessed": [
+    "success",
+    "created_at"
+   ],
+   "outcome": "error",
+   "tablefox_message": "Error executing tool database_readonly_batch",
+   "verdict": "wrong",
+   "failure_cause": "missing_column",
+   "note": "Pack omitted success/event_ts; guessed created_at failed.",
+   "ground_truth_sql": "select u.user_id, u.username, count(*) as failed from ops.login_events e join ops.app_users u on u.user_id = e.user_id where not e.success and e.event_ts >= '2026-09-11' and e.event_ts < '2026-10-11' group by u.user_id, u.username order by failed desc, u.user_id limit 20"
+  },
+  {
+   "task": "amb_purchase_orders_late",
+   "category": "cross_schema_ambiguity",
+   "question": "Purchase orders received later than expected, per supplier",
+   "pack": [
+    "table:ops.orders",
+    "table:sales.orders",
+    "table:inventory.product_suppliers",
+    "table:inventory.suppliers",
+    "table:hr.employees"
+   ],
+   "attempt_sql": "select s.supplier_name, count(*) filter (where o.received_dt > o.expected_dt) as late, count(o.received_dt) as received from ops.orders o join inventory.suppliers s on s.supplier_id = o.supplier_id group by s.supplier_name order by late desc limit 50",
+   "guessed": [],
+   "outcome": "50 rows",
+   "tablefox_message": null,
+   "verdict": "correct",
+   "failure_cause": null,
+   "note": "Correctly chose ops.orders (purchase orders) over sales.orders.",
+   "ground_truth_sql": "select s.supplier_id, s.supplier_name, count(*) filter (where o.received_dt > o.expected_dt) as late, count(o.received_dt) as received from ops.orders o join inventory.suppliers s on s.supplier_id = o.supplier_id group by s.supplier_id, s.supplier_name order by late desc, s.supplier_id limit 50"
+  },
+  {
+   "task": "amb_order_shipments",
+   "category": "cross_schema_ambiguity",
+   "question": "Average days from sales order date to delivery for orders placed in 2026",
+   "pack": [
+    "table:sales.orders",
+    "table:ops.orders",
+    "table:sales.orders_archive_2019",
+    "view:sales.v_order_summary",
+    "table:sales.order_items",
+    "table:marketing.email_events",
+    "table:hr.employees",
+    "table:marketing.campaigns"
+   ],
+   "attempt_sql": "select round(avg(delivered_at::date - order_dt::date), 2) as avg_days from sales.orders where order_dt >= '2026-01-01' and order_dt < '2027-01-01' and delivered_at is not null",
+   "guessed": [
+    "sales.orders.delivered_at (ops.shipments absent from pack)"
+   ],
+   "outcome": "error",
+   "tablefox_message": "Error executing tool database_readonly_batch",
+   "verdict": "tablefox_missing_context",
+   "failure_cause": "missing_table",
+   "note": "ops.shipments absent from pack; guessed sales.orders.delivered_at (real column: delivered_dt) failed.",
+   "ground_truth_sql": "select round(avg(extract(epoch from (s.delivered_at - o.order_dt)) / 86400)::numeric, 2) as avg_days from ops.shipments s join sales.orders o on o.order_id = s.sales_order_id where o.order_dt >= '2026-01-01' and o.order_dt < '2027-01-01' and s.delivered_at is not null"
+  },
+  {
+   "task": "amb_support_tier",
+   "category": "cross_schema_ambiguity",
+   "question": "How many client accounts are on each support tier?",
+   "pack": [
+    "table:crm.accounts",
+    "table:support.tiers",
+    "table:crm.contacts",
+    "table:finance.chart_of_accounts",
+    "view:support.v_open_tickets",
+    "table:support.agents",
+    "table:finance.gl_entries",
+    "table:public.currencies"
+   ],
+   "attempt_sql": "select t.tier_name, count(a.account_id) as accounts from crm.accounts a join support.tiers t on t.tier_id = a.support_tier_id group by t.tier_name order by accounts desc",
+   "guessed": [],
+   "outcome": "4 rows",
+   "tablefox_message": null,
+   "verdict": "correct",
+   "failure_cause": null,
+   "note": "",
+   "ground_truth_sql": "select t.tier_name, count(*) as accounts from crm.accounts a join support.tiers t on t.tier_id = a.support_tier_id group by t.tier_name order by accounts desc"
+  },
+  {
+   "task": "lg_archive_2019_region",
+   "category": "legacy_no_fk",
+   "question": "Total net revenue in the 2019 order archive per region",
+   "pack": [
+    "table:sales.orders_archive_2019",
+    "materialized_view:analytics.mv_monthly_revenue",
+    "view:sales.v_order_summary",
+    "table:public.regions",
+    "table:ops.orders",
+    "table:finance.invoices",
+    "table:public.currencies",
+    "table:sales.customers"
+   ],
+   "attempt_sql": "select region_txt, sum(net) as net_revenue from sales.orders_archive_2019 group by region_txt order by net_revenue desc",
+   "guessed": [],
+   "outcome": "7 rows",
+   "tablefox_message": null,
+   "verdict": "correct",
+   "failure_cause": null,
+   "note": "",
+   "ground_truth_sql": "select region_txt, sum(net) as net_revenue from sales.orders_archive_2019 group by region_txt order by net_revenue desc"
+  },
+  {
+   "task": "wd_employees_hires_2026",
+   "category": "wide_table",
+   "question": "Employees hired in 2026 with their job title and department name",
+   "pack": [
+    "table:hr.employees",
+    "table:hr.departments",
+    "view:hr.v_employee_directory",
+    "table:crm.contacts",
+    "table:hr.teams",
+    "table:crm.accounts"
+   ],
+   "attempt_sql": "select e.employee_id, e.first_name, e.job_title, d.dept_name, e.hire_dt from hr.employees e join hr.departments d on d.department_id = e.department_id where e.hire_dt >= '2026-01-01' order by e.hire_dt, e.employee_id limit 200",
+   "guessed": [],
+   "outcome": "200 rows",
+   "tablefox_message": null,
+   "verdict": "correct",
+   "failure_cause": null,
+   "note": "Same 200 rows; last_name not selected (not in pack) - cosmetic.",
+   "ground_truth_sql": "select e.employee_id, e.first_name, e.last_name, e.job_title, d.dept_name, e.hire_dt from hr.employees e join hr.departments d on d.department_id = e.department_id where e.hire_dt >= '2026-01-01' and e.hire_dt < '2027-01-01' order by e.hire_dt, e.employee_id limit 200"
+  },
+  {
+   "task": "wd_products_margin",
+   "category": "wide_table",
+   "question": "Which products have the highest margin between list price and unit cost?",
+   "pack": [
+    "table:inventory.products",
+    "table:sales.order_items",
+    "table:ops.order_lines",
+    "table:sales.price_list_items",
+    "table:inventory.product_suppliers",
+    "table:inventory.item_aliases"
+   ],
+   "attempt_sql": "select product_id, sku, product_name, list_price, unit_cost, list_price - unit_cost as margin from inventory.products order by margin desc limit 20",
+   "guessed": [],
+   "outcome": "20 rows",
+   "tablefox_message": null,
+   "verdict": "correct",
+   "failure_cause": null,
+   "note": "",
+   "ground_truth_sql": "select product_id, sku, product_name, list_price, unit_cost, list_price - unit_cost as margin from inventory.products order by margin desc, product_id limit 20"
+  },
+  {
+   "task": "vg_whats_low_stock",
+   "category": "vague_business",
+   "question": "What are we running low on?",
+   "pack": [
+    "table:inventory.stock_levels",
+    "table:hr.payroll",
+    "table:crm.accounts",
+    "table:hr.employees",
+    "table:inventory.products",
+    "table:public.countries"
+   ],
+   "attempt_sql": "select p.sku, s.warehouse_id, s.qty_on_hand, s.qty_on_order, s.reorder_point from inventory.stock_levels s join inventory.products p on p.product_id = s.product_id where s.qty_on_hand < s.reorder_point order by s.reorder_point - s.qty_on_hand desc limit 50",
+   "guessed": [
+    "reorder_point"
+   ],
+   "outcome": "50 rows",
+   "tablefox_message": null,
+   "verdict": "partially_correct",
+   "failure_cause": "missing_column",
+   "note": "Pack omitted qty_reserved and reorder_point; guessed reorder_point existed but available stock ignored reservations, so the ranking differs; warehouse shown as id.",
+   "ground_truth_sql": "select p.sku, p.product_name, w.warehouse_code, s.qty_on_hand - s.qty_reserved as available, s.reorder_point from inventory.stock_levels s join inventory.products p on p.product_id = s.product_id join inventory.warehouses w on w.warehouse_id = s.warehouse_id where s.qty_on_hand - s.qty_reserved < s.reorder_point order by s.reorder_point - (s.qty_on_hand - s.qty_reserved) desc, s.warehouse_id, s.product_id limit 50"
+  },
+  {
+   "task": "vg_who_owes",
+   "category": "vague_business",
+   "question": "Who owes us money?",
+   "pack": [
+    "table:analytics.web_sessions",
+    "table:marketing.campaigns",
+    "table:finance.gl_entries",
+    "table:marketing.newsletter_subscribers",
+    "table:public.fx_rates",
+    "table:public.change_history",
+    "table:crm.leads",
+    "table:public.countries",
+    "table:public.currencies"
+   ],
+   "attempt_sql": null,
+   "guessed": [],
+   "outcome": "no_sql",
+   "tablefox_message": null,
+   "verdict": "tablefox_missing_context",
+   "failure_cause": "missing_table",
+   "note": "'us' was expanded to 'utm source'; no invoice or payment table returned.",
+   "ground_truth_sql": "select c.cust_id, c.customer_name, sum(i.total_amt) as outstanding from finance.invoices i join sales.customers c on c.cust_id = i.cust_id where i.status in ('open', 'overdue') group by c.cust_id, c.customer_name order by outstanding desc, c.cust_id limit 20"
+  },
+  {
+   "task": "vg_churn",
+   "category": "vague_business",
+   "question": "Why are customers leaving?",
+   "pack": [
+    "table:sales.customers",
+    "table:hr.time_off",
+    "table:crm.accounts",
+    "table:hr.employees"
+   ],
+   "attempt_sql": null,
+   "guessed": [],
+   "outcome": "no_sql",
+   "tablefox_message": null,
+   "verdict": "tablefox_missing_context",
+   "failure_cause": "missing_table",
+   "note": "'leaving' fuzzy-matched hr.time_off leave; finance.subscriptions not returned.",
+   "ground_truth_sql": "select cancel_reason, count(*) as cancelled from finance.subscriptions where status = 'cancelled' group by cancel_reason order by cancelled desc"
+  }
+ ]
+}

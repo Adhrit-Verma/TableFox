@@ -1,0 +1,3634 @@
+{
+  "summary": {
+    "tasks": 70,
+    "repeats": 3,
+    "tablefox": {
+      "warm_median_ms": 88.68,
+      "warm_p95_ms": 412.0,
+      "cold_median_ms": 317.34,
+      "mean_tokens": 1613.3,
+      "mean_context_tokens": 873
+    },
+    "conventional": {
+      "median_ms": 310.4,
+      "p95_ms": 761.96,
+      "mean_tokens": 2492.6
+    },
+    "recall": {
+      "passed": 0,
+      "total": 70,
+      "misses": {
+        "st_regions": [
+          "public.regions"
+        ],
+        "st_carriers": [
+          "ops.carriers"
+        ],
+        "st_warehouses": [
+          "inventory.warehouses"
+        ],
+        "st_plans": [
+          "finance.plans"
+        ],
+        "st_kb_articles": [
+          "support.kb_articles"
+        ],
+        "st_promo_codes": [
+          "sales.promo_codes"
+        ],
+        "st_currencies": [
+          "public.currencies"
+        ],
+        "syn_clients_region": [
+          "crm.accounts",
+          "public.regions"
+        ],
+        "syn_staff_per_dept": [
+          "hr.departments",
+          "hr.employees"
+        ],
+        "syn_sku_lookup": [
+          "inventory.products"
+        ],
+        "syn_qty_sold": [
+          "inventory.products",
+          "sales.order_items"
+        ],
+        "syn_item_code": [
+          "inventory.item_aliases",
+          "inventory.products"
+        ],
+        "syn_opp_amt": [
+          "crm.opportunities"
+        ],
+        "syn_headcount_country": [
+          "hr.employees"
+        ],
+        "j2_tickets_by_tier": [
+          "support.tickets",
+          "support.tiers"
+        ],
+        "j2_shipments_per_carrier": [
+          "ops.carriers",
+          "ops.shipments"
+        ],
+        "j2_mrr_by_plan": [
+          "finance.plans",
+          "finance.subscriptions"
+        ],
+        "j2_contacts_per_account": [
+          "crm.accounts",
+          "crm.contacts"
+        ],
+        "j2_campaign_leads": [
+          "crm.leads",
+          "marketing.campaigns"
+        ],
+        "j2_dept_cost_centers": [
+          "finance.cost_centers",
+          "hr.departments"
+        ],
+        "j2_supplier_products": [
+          "inventory.product_suppliers",
+          "inventory.suppliers"
+        ],
+        "mh_invoice_region": [
+          "crm.accounts",
+          "finance.invoices",
+          "public.regions",
+          "sales.customers"
+        ],
+        "mh_invoice_units_category": [
+          "finance.invoice_lines",
+          "finance.invoices",
+          "inventory.product_categories",
+          "inventory.products",
+          "sales.order_items"
+        ],
+        "mh_return_rate_category": [
+          "inventory.product_categories",
+          "inventory.products",
+          "sales.order_items",
+          "sales.returns"
+        ],
+        "mh_tickets_agent_department": [
+          "hr.departments",
+          "hr.employees",
+          "support.agents",
+          "support.tickets"
+        ],
+        "mh_api_failures_region": [
+          "crm.accounts",
+          "ops.api_keys",
+          "ops.api_request_log",
+          "public.regions"
+        ],
+        "mh_payments_tier": [
+          "crm.accounts",
+          "finance.invoices",
+          "finance.payments",
+          "sales.customers"
+        ],
+        "mh_campaign_order_revenue": [
+          "crm.leads",
+          "crm.opportunities",
+          "marketing.campaigns",
+          "sales.orders",
+          "sales.quotes"
+        ],
+        "agg_monthly_orders": [
+          "sales.orders"
+        ],
+        "agg_top_customers_q3_emea": [
+          "crm.accounts",
+          "public.regions",
+          "sales.customers",
+          "sales.orders"
+        ],
+        "agg_failed_api_yesterday": [
+          "ops.api_request_log"
+        ],
+        "agg_pageviews_daily": [
+          "analytics.page_views"
+        ],
+        "agg_gl_q2": [
+          "finance.budgets",
+          "finance.chart_of_accounts",
+          "finance.cost_centers",
+          "finance.gl_entries"
+        ],
+        "agg_stock_movements": [
+          "inventory.stock_movements"
+        ],
+        "agg_email_ctr": [
+          "marketing.campaigns",
+          "marketing.email_events"
+        ],
+        "au_deletes_exports": [
+          "ops.app_users",
+          "public.audit_log"
+        ],
+        "au_salary_changes": [
+          "public.change_history"
+        ],
+        "au_failed_logins": [
+          "ops.app_users",
+          "ops.login_events"
+        ],
+        "au_bruteforce_ips": [
+          "ops.login_events"
+        ],
+        "au_subscription_cancels": [
+          "finance.subscription_events",
+          "finance.subscriptions"
+        ],
+        "au_critical_audit": [
+          "public.audit_log"
+        ],
+        "au_api_keys_failed_yesterday": [
+          "ops.api_keys",
+          "ops.api_request_log"
+        ],
+        "amb_purchase_orders_late": [
+          "inventory.suppliers",
+          "ops.orders"
+        ],
+        "amb_po_qty_warehouse": [
+          "inventory.warehouses",
+          "ops.order_lines",
+          "ops.orders"
+        ],
+        "amb_sales_order_status": [
+          "sales.orders"
+        ],
+        "amb_gl_expense_accounts": [
+          "finance.chart_of_accounts"
+        ],
+        "amb_support_tier": [
+          "crm.accounts",
+          "support.tiers"
+        ],
+        "amb_login_account_types": [
+          "ops.app_users"
+        ],
+        "amb_order_shipments": [
+          "ops.shipments",
+          "sales.orders"
+        ],
+        "lg_legacy_country": [
+          "public.tbl_cust_legacy"
+        ],
+        "lg_archive_2019_region": [
+          "sales.orders_archive_2019"
+        ],
+        "lg_newsletter_country": [
+          "marketing.newsletter_subscribers"
+        ],
+        "lg_app_settings": [
+          "public.app_settings"
+        ],
+        "lg_archive_customer": [
+          "sales.customers",
+          "sales.orders_archive_2019"
+        ],
+        "lg_change_history_ui": [
+          "hr.employees",
+          "public.change_history"
+        ],
+        "lg_legacy_migrated": [
+          "public.tbl_cust_legacy"
+        ],
+        "wd_employees_hires_2026": [
+          "hr.departments",
+          "hr.employees"
+        ],
+        "wd_accounts_strategic": [
+          "crm.accounts"
+        ],
+        "wd_products_margin": [
+          "inventory.products"
+        ],
+        "wd_orders_channel_q3": [
+          "sales.orders"
+        ],
+        "wd_manager_other_dept": [
+          "hr.employees"
+        ],
+        "wd_terminations_year": [
+          "hr.employees"
+        ],
+        "wd_hazmat_products": [
+          "inventory.products"
+        ],
+        "vg_best_customers": [
+          "sales.customers",
+          "sales.orders"
+        ],
+        "vg_whats_low_stock": [
+          "inventory.products",
+          "inventory.stock_levels",
+          "inventory.warehouses"
+        ],
+        "vg_complaints": [
+          "crm.accounts",
+          "support.tickets"
+        ],
+        "vg_sales_trend": [
+          "sales.orders"
+        ],
+        "vg_who_owes": [
+          "finance.invoices",
+          "sales.customers"
+        ],
+        "vg_churn": [
+          "finance.subscriptions"
+        ],
+        "vg_top_sellers": [
+          "hr.employees",
+          "sales.orders"
+        ]
+      }
+    },
+    "answers_match": {
+      "passed": 59,
+      "total": 70
+    }
+  },
+  "tablefox_runs": [
+    [
+      {
+        "task": "st_regions",
+        "category": "single_table_exact",
+        "cold": true,
+        "elapsed_ms": 347.11,
+        "tokens": 876,
+        "context_tokens": 564,
+        "recall_ok": false,
+        "missing": [
+          "public.regions"
+        ],
+        "row_count": 5
+      },
+      {
+        "task": "st_carriers",
+        "category": "single_table_exact",
+        "cold": false,
+        "elapsed_ms": 15.65,
+        "tokens": 675,
+        "context_tokens": 180,
+        "recall_ok": false,
+        "missing": [
+          "ops.carriers"
+        ],
+        "row_count": 12
+      },
+      {
+        "task": "st_warehouses",
+        "category": "single_table_exact",
+        "cold": false,
+        "elapsed_ms": 28.06,
+        "tokens": 1634,
+        "context_tokens": 573,
+        "recall_ok": false,
+        "missing": [
+          "inventory.warehouses"
+        ],
+        "row_count": 24
+      },
+      {
+        "task": "st_plans",
+        "category": "single_table_exact",
+        "cold": false,
+        "elapsed_ms": 30.61,
+        "tokens": 1412,
+        "context_tokens": 923,
+        "recall_ok": false,
+        "missing": [
+          "finance.plans"
+        ],
+        "row_count": 8
+      },
+      {
+        "task": "st_kb_articles",
+        "category": "single_table_exact",
+        "cold": false,
+        "elapsed_ms": 24.06,
+        "tokens": 1586,
+        "context_tokens": 759,
+        "recall_ok": false,
+        "missing": [
+          "support.kb_articles"
+        ],
+        "row_count": 20
+      },
+      {
+        "task": "st_promo_codes",
+        "category": "single_table_exact",
+        "cold": false,
+        "elapsed_ms": 25.13,
+        "tokens": 1342,
+        "context_tokens": 805,
+        "recall_ok": false,
+        "missing": [
+          "sales.promo_codes"
+        ],
+        "row_count": 20
+      },
+      {
+        "task": "st_currencies",
+        "category": "single_table_exact",
+        "cold": false,
+        "elapsed_ms": 21.64,
+        "tokens": 1177,
+        "context_tokens": 580,
+        "recall_ok": false,
+        "missing": [
+          "public.currencies"
+        ],
+        "row_count": 14
+      },
+      {
+        "task": "syn_clients_region",
+        "category": "synonym_abbreviation",
+        "cold": false,
+        "elapsed_ms": 72.4,
+        "tokens": 1117,
+        "context_tokens": 927,
+        "recall_ok": false,
+        "missing": [
+          "crm.accounts",
+          "public.regions"
+        ],
+        "row_count": 5
+      },
+      {
+        "task": "syn_staff_per_dept",
+        "category": "synonym_abbreviation",
+        "cold": false,
+        "elapsed_ms": 75.09,
+        "tokens": 2139,
+        "context_tokens": 1390,
+        "recall_ok": false,
+        "missing": [
+          "hr.departments",
+          "hr.employees"
+        ],
+        "row_count": 30
+      },
+      {
+        "task": "syn_sku_lookup",
+        "category": "synonym_abbreviation",
+        "cold": false,
+        "elapsed_ms": 27.79,
+        "tokens": 1048,
+        "context_tokens": 895,
+        "recall_ok": false,
+        "missing": [
+          "inventory.products"
+        ],
+        "row_count": 1
+      },
+      {
+        "task": "syn_qty_sold",
+        "category": "synonym_abbreviation",
+        "cold": false,
+        "elapsed_ms": 852.94,
+        "tokens": 1685,
+        "context_tokens": 1154,
+        "recall_ok": false,
+        "missing": [
+          "inventory.products",
+          "sales.order_items"
+        ],
+        "row_count": 20
+      },
+      {
+        "task": "syn_item_code",
+        "category": "synonym_abbreviation",
+        "cold": false,
+        "elapsed_ms": 59.88,
+        "tokens": 1135,
+        "context_tokens": 959,
+        "recall_ok": false,
+        "missing": [
+          "inventory.item_aliases",
+          "inventory.products"
+        ],
+        "row_count": 1
+      },
+      {
+        "task": "syn_opp_amt",
+        "category": "synonym_abbreviation",
+        "cold": false,
+        "elapsed_ms": 64.08,
+        "tokens": 1448,
+        "context_tokens": 1152,
+        "recall_ok": false,
+        "missing": [
+          "crm.opportunities"
+        ],
+        "row_count": 6
+      },
+      {
+        "task": "syn_headcount_country",
+        "category": "synonym_abbreviation",
+        "cold": false,
+        "elapsed_ms": 26.78,
+        "tokens": 1598,
+        "context_tokens": 1326,
+        "recall_ok": false,
+        "missing": [
+          "hr.employees"
+        ],
+        "row_count": 10
+      },
+      {
+        "task": "j2_tickets_by_tier",
+        "category": "join_2hop",
+        "cold": false,
+        "elapsed_ms": 241.12,
+        "tokens": 1120,
+        "context_tokens": 940,
+        "recall_ok": false,
+        "missing": [
+          "support.tickets",
+          "support.tiers"
+        ],
+        "row_count": 4
+      },
+      {
+        "task": "j2_shipments_per_carrier",
+        "category": "join_2hop",
+        "cold": false,
+        "elapsed_ms": 228.62,
+        "tokens": 594,
+        "context_tokens": 259,
+        "recall_ok": false,
+        "missing": [
+          "ops.carriers",
+          "ops.shipments"
+        ],
+        "row_count": 11
+      },
+      {
+        "task": "j2_mrr_by_plan",
+        "category": "join_2hop",
+        "cold": false,
+        "elapsed_ms": 71.28,
+        "tokens": 1025,
+        "context_tokens": 595,
+        "recall_ok": false,
+        "missing": [
+          "finance.plans",
+          "finance.subscriptions"
+        ],
+        "row_count": 8
+      },
+      {
+        "task": "j2_contacts_per_account",
+        "category": "join_2hop",
+        "cold": false,
+        "elapsed_ms": 88.45,
+        "tokens": 1097,
+        "context_tokens": 715,
+        "recall_ok": false,
+        "missing": [
+          "crm.accounts",
+          "crm.contacts"
+        ],
+        "row_count": 10
+      },
+      {
+        "task": "j2_campaign_leads",
+        "category": "join_2hop",
+        "cold": false,
+        "elapsed_ms": 122.91,
+        "tokens": 2770,
+        "context_tokens": 904,
+        "recall_ok": false,
+        "missing": [
+          "crm.leads",
+          "marketing.campaigns"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "j2_dept_cost_centers",
+        "category": "join_2hop",
+        "cold": false,
+        "elapsed_ms": 42.47,
+        "tokens": 3036,
+        "context_tokens": 787,
+        "recall_ok": false,
+        "missing": [
+          "finance.cost_centers",
+          "hr.departments"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "j2_supplier_products",
+        "category": "join_2hop",
+        "cold": false,
+        "elapsed_ms": 95.78,
+        "tokens": 1472,
+        "context_tokens": 760,
+        "recall_ok": false,
+        "missing": [
+          "inventory.product_suppliers",
+          "inventory.suppliers"
+        ],
+        "row_count": 20
+      },
+      {
+        "task": "mh_invoice_region",
+        "category": "join_multihop",
+        "cold": false,
+        "elapsed_ms": 206.24,
+        "tokens": 976,
+        "context_tokens": 757,
+        "recall_ok": false,
+        "missing": [
+          "crm.accounts",
+          "finance.invoices",
+          "public.regions",
+          "sales.customers"
+        ],
+        "row_count": 5
+      },
+      {
+        "task": "mh_invoice_units_category",
+        "category": "join_multihop",
+        "cold": false,
+        "elapsed_ms": 376.97,
+        "tokens": 1310,
+        "context_tokens": 951,
+        "recall_ok": false,
+        "missing": [
+          "finance.invoice_lines",
+          "finance.invoices",
+          "inventory.product_categories",
+          "inventory.products",
+          "sales.order_items"
+        ],
+        "row_count": 12
+      },
+      {
+        "task": "mh_return_rate_category",
+        "category": "join_multihop",
+        "cold": false,
+        "elapsed_ms": 1169.56,
+        "tokens": 1663,
+        "context_tokens": 1119,
+        "recall_ok": false,
+        "missing": [
+          "inventory.product_categories",
+          "inventory.products",
+          "sales.order_items",
+          "sales.returns"
+        ],
+        "row_count": 12
+      },
+      {
+        "task": "mh_tickets_agent_department",
+        "category": "join_multihop",
+        "cold": false,
+        "elapsed_ms": 143.23,
+        "tokens": 1307,
+        "context_tokens": 1133,
+        "recall_ok": false,
+        "missing": [
+          "hr.departments",
+          "hr.employees",
+          "support.agents",
+          "support.tickets"
+        ],
+        "row_count": 3
+      },
+      {
+        "task": "mh_api_failures_region",
+        "category": "join_multihop",
+        "cold": false,
+        "elapsed_ms": 226.85,
+        "tokens": 1387,
+        "context_tokens": 1197,
+        "recall_ok": false,
+        "missing": [
+          "crm.accounts",
+          "ops.api_keys",
+          "ops.api_request_log",
+          "public.regions"
+        ],
+        "row_count": 5
+      },
+      {
+        "task": "mh_payments_tier",
+        "category": "join_multihop",
+        "cold": false,
+        "elapsed_ms": 361.8,
+        "tokens": 1628,
+        "context_tokens": 1434,
+        "recall_ok": false,
+        "missing": [
+          "crm.accounts",
+          "finance.invoices",
+          "finance.payments",
+          "sales.customers"
+        ],
+        "row_count": 4
+      },
+      {
+        "task": "mh_campaign_order_revenue",
+        "category": "join_multihop",
+        "cold": false,
+        "elapsed_ms": 225.81,
+        "tokens": 1537,
+        "context_tokens": 1072,
+        "recall_ok": false,
+        "missing": [
+          "crm.leads",
+          "crm.opportunities",
+          "marketing.campaigns",
+          "sales.orders",
+          "sales.quotes"
+        ],
+        "row_count": 10
+      },
+      {
+        "task": "agg_monthly_orders",
+        "category": "aggregate_time",
+        "cold": false,
+        "elapsed_ms": 20.59,
+        "tokens": 1343,
+        "context_tokens": 1199,
+        "recall_ok": false,
+        "missing": [
+          "sales.orders"
+        ],
+        "row_count": 0
+      },
+      {
+        "task": "agg_top_customers_q3_emea",
+        "category": "aggregate_time",
+        "cold": false,
+        "elapsed_ms": 179.68,
+        "tokens": 1498,
+        "context_tokens": 1059,
+        "recall_ok": false,
+        "missing": [
+          "crm.accounts",
+          "public.regions",
+          "sales.customers",
+          "sales.orders"
+        ],
+        "row_count": 10
+      },
+      {
+        "task": "agg_failed_api_yesterday",
+        "category": "aggregate_time",
+        "cold": false,
+        "elapsed_ms": 187.01,
+        "tokens": 354,
+        "context_tokens": 249,
+        "recall_ok": false,
+        "missing": [
+          "ops.api_request_log"
+        ],
+        "row_count": 1
+      },
+      {
+        "task": "agg_pageviews_daily",
+        "category": "aggregate_time",
+        "cold": false,
+        "elapsed_ms": 155.65,
+        "tokens": 938,
+        "context_tokens": 201,
+        "recall_ok": false,
+        "missing": [
+          "analytics.page_views"
+        ],
+        "row_count": 30
+      },
+      {
+        "task": "agg_gl_q2",
+        "category": "aggregate_time",
+        "cold": false,
+        "elapsed_ms": 178.04,
+        "tokens": 3475,
+        "context_tokens": 793,
+        "recall_ok": false,
+        "missing": [
+          "finance.budgets",
+          "finance.chart_of_accounts",
+          "finance.cost_centers",
+          "finance.gl_entries"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "agg_stock_movements",
+        "category": "aggregate_time",
+        "cold": false,
+        "elapsed_ms": 178.68,
+        "tokens": 798,
+        "context_tokens": 527,
+        "recall_ok": false,
+        "missing": [
+          "inventory.stock_movements"
+        ],
+        "row_count": 6
+      },
+      {
+        "task": "agg_email_ctr",
+        "category": "aggregate_time",
+        "cold": false,
+        "elapsed_ms": 328.29,
+        "tokens": 2522,
+        "context_tokens": 1529,
+        "recall_ok": false,
+        "missing": [
+          "marketing.campaigns",
+          "marketing.email_events"
+        ],
+        "row_count": 20
+      },
+      {
+        "task": "au_deletes_exports",
+        "category": "audit_log",
+        "cold": false,
+        "elapsed_ms": 190.86,
+        "tokens": 2501,
+        "context_tokens": 940,
+        "recall_ok": false,
+        "missing": [
+          "ops.app_users",
+          "public.audit_log"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "au_salary_changes",
+        "category": "audit_log",
+        "cold": false,
+        "elapsed_ms": 143.63,
+        "tokens": 4030,
+        "context_tokens": 477,
+        "recall_ok": false,
+        "missing": [
+          "public.change_history"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "au_failed_logins",
+        "category": "audit_log",
+        "cold": false,
+        "elapsed_ms": 164.87,
+        "tokens": 1567,
+        "context_tokens": 882,
+        "recall_ok": false,
+        "missing": [
+          "ops.app_users",
+          "ops.login_events"
+        ],
+        "row_count": 20
+      },
+      {
+        "task": "au_bruteforce_ips",
+        "category": "audit_log",
+        "cold": false,
+        "elapsed_ms": 181.03,
+        "tokens": 838,
+        "context_tokens": 682,
+        "recall_ok": false,
+        "missing": [
+          "ops.login_events"
+        ],
+        "row_count": 0
+      },
+      {
+        "task": "au_subscription_cancels",
+        "category": "audit_log",
+        "cold": false,
+        "elapsed_ms": 79.4,
+        "tokens": 1948,
+        "context_tokens": 1710,
+        "recall_ok": false,
+        "missing": [
+          "finance.subscription_events",
+          "finance.subscriptions"
+        ],
+        "row_count": 6
+      },
+      {
+        "task": "au_critical_audit",
+        "category": "audit_log",
+        "cold": false,
+        "elapsed_ms": 184.55,
+        "tokens": 1831,
+        "context_tokens": 1651,
+        "recall_ok": false,
+        "missing": [
+          "public.audit_log"
+        ],
+        "row_count": 4
+      },
+      {
+        "task": "au_api_keys_failed_yesterday",
+        "category": "audit_log",
+        "cold": false,
+        "elapsed_ms": 237.77,
+        "tokens": 447,
+        "context_tokens": 267,
+        "recall_ok": false,
+        "missing": [
+          "ops.api_keys",
+          "ops.api_request_log"
+        ],
+        "row_count": 0
+      },
+      {
+        "task": "amb_purchase_orders_late",
+        "category": "cross_schema_ambiguity",
+        "cold": false,
+        "elapsed_ms": 86.99,
+        "tokens": 2769,
+        "context_tokens": 894,
+        "recall_ok": false,
+        "missing": [
+          "inventory.suppliers",
+          "ops.orders"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "amb_po_qty_warehouse",
+        "category": "cross_schema_ambiguity",
+        "cold": false,
+        "elapsed_ms": 208.53,
+        "tokens": 1577,
+        "context_tokens": 994,
+        "recall_ok": false,
+        "missing": [
+          "inventory.warehouses",
+          "ops.order_lines",
+          "ops.orders"
+        ],
+        "row_count": 23
+      },
+      {
+        "task": "amb_sales_order_status",
+        "category": "cross_schema_ambiguity",
+        "cold": false,
+        "elapsed_ms": 191.52,
+        "tokens": 1296,
+        "context_tokens": 1035,
+        "recall_ok": false,
+        "missing": [
+          "sales.orders"
+        ],
+        "row_count": 8
+      },
+      {
+        "task": "amb_gl_expense_accounts",
+        "category": "cross_schema_ambiguity",
+        "cold": false,
+        "elapsed_ms": 19.34,
+        "tokens": 2328,
+        "context_tokens": 715,
+        "recall_ok": false,
+        "missing": [
+          "finance.chart_of_accounts"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "amb_support_tier",
+        "category": "cross_schema_ambiguity",
+        "cold": false,
+        "elapsed_ms": 52.1,
+        "tokens": 1270,
+        "context_tokens": 1097,
+        "recall_ok": false,
+        "missing": [
+          "crm.accounts",
+          "support.tiers"
+        ],
+        "row_count": 4
+      },
+      {
+        "task": "amb_login_account_types",
+        "category": "cross_schema_ambiguity",
+        "cold": false,
+        "elapsed_ms": 33.42,
+        "tokens": 1196,
+        "context_tokens": 1040,
+        "recall_ok": false,
+        "missing": [
+          "ops.app_users"
+        ],
+        "row_count": 3
+      },
+      {
+        "task": "amb_order_shipments",
+        "category": "cross_schema_ambiguity",
+        "cold": false,
+        "elapsed_ms": 412.0,
+        "tokens": 1300,
+        "context_tokens": 1200,
+        "recall_ok": false,
+        "missing": [
+          "ops.shipments",
+          "sales.orders"
+        ],
+        "row_count": 1
+      },
+      {
+        "task": "lg_legacy_country",
+        "category": "legacy_no_fk",
+        "cold": false,
+        "elapsed_ms": 32.46,
+        "tokens": 842,
+        "context_tokens": 580,
+        "recall_ok": false,
+        "missing": [
+          "public.tbl_cust_legacy"
+        ],
+        "row_count": 9
+      },
+      {
+        "task": "lg_archive_2019_region",
+        "category": "legacy_no_fk",
+        "cold": false,
+        "elapsed_ms": 95.55,
+        "tokens": 1333,
+        "context_tokens": 1063,
+        "recall_ok": false,
+        "missing": [
+          "sales.orders_archive_2019"
+        ],
+        "row_count": 7
+      },
+      {
+        "task": "lg_newsletter_country",
+        "category": "legacy_no_fk",
+        "cold": false,
+        "elapsed_ms": 51.49,
+        "tokens": 348,
+        "context_tokens": 116,
+        "recall_ok": false,
+        "missing": [
+          "marketing.newsletter_subscribers"
+        ],
+        "row_count": 7
+      },
+      {
+        "task": "lg_app_settings",
+        "category": "legacy_no_fk",
+        "cold": false,
+        "elapsed_ms": 16.72,
+        "tokens": 4132,
+        "context_tokens": 164,
+        "recall_ok": false,
+        "missing": [
+          "public.app_settings"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "lg_archive_customer",
+        "category": "legacy_no_fk",
+        "cold": false,
+        "elapsed_ms": 43.74,
+        "tokens": 1125,
+        "context_tokens": 980,
+        "recall_ok": false,
+        "missing": [
+          "sales.customers",
+          "sales.orders_archive_2019"
+        ],
+        "row_count": 0
+      },
+      {
+        "task": "lg_change_history_ui",
+        "category": "legacy_no_fk",
+        "cold": false,
+        "elapsed_ms": 49.62,
+        "tokens": 1098,
+        "context_tokens": 953,
+        "recall_ok": false,
+        "missing": [
+          "hr.employees",
+          "public.change_history"
+        ],
+        "row_count": 0
+      },
+      {
+        "task": "lg_legacy_migrated",
+        "category": "legacy_no_fk",
+        "cold": false,
+        "elapsed_ms": 26.14,
+        "tokens": 916,
+        "context_tokens": 804,
+        "recall_ok": false,
+        "missing": [
+          "public.tbl_cust_legacy"
+        ],
+        "row_count": 1
+      },
+      {
+        "task": "wd_employees_hires_2026",
+        "category": "wide_table",
+        "cold": false,
+        "elapsed_ms": 59.23,
+        "tokens": 4236,
+        "context_tokens": 1056,
+        "recall_ok": false,
+        "missing": [
+          "hr.departments",
+          "hr.employees"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "wd_accounts_strategic",
+        "category": "wide_table",
+        "cold": false,
+        "elapsed_ms": 38.12,
+        "tokens": 3697,
+        "context_tokens": 1315,
+        "recall_ok": false,
+        "missing": [
+          "crm.accounts"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "wd_products_margin",
+        "category": "wide_table",
+        "cold": false,
+        "elapsed_ms": 52.91,
+        "tokens": 2239,
+        "context_tokens": 891,
+        "recall_ok": false,
+        "missing": [
+          "inventory.products"
+        ],
+        "row_count": 20
+      },
+      {
+        "task": "wd_orders_channel_q3",
+        "category": "wide_table",
+        "cold": false,
+        "elapsed_ms": 117.77,
+        "tokens": 1316,
+        "context_tokens": 1058,
+        "recall_ok": false,
+        "missing": [
+          "sales.orders"
+        ],
+        "row_count": 5
+      },
+      {
+        "task": "wd_manager_other_dept",
+        "category": "wide_table",
+        "cold": false,
+        "elapsed_ms": 30.0,
+        "tokens": 1026,
+        "context_tokens": 927,
+        "recall_ok": false,
+        "missing": [
+          "hr.employees"
+        ],
+        "row_count": 1
+      },
+      {
+        "task": "wd_terminations_year",
+        "category": "wide_table",
+        "cold": false,
+        "elapsed_ms": 26.4,
+        "tokens": 866,
+        "context_tokens": 579,
+        "recall_ok": false,
+        "missing": [
+          "hr.employees"
+        ],
+        "row_count": 12
+      },
+      {
+        "task": "wd_hazmat_products",
+        "category": "wide_table",
+        "cold": false,
+        "elapsed_ms": 18.49,
+        "tokens": 2839,
+        "context_tokens": 309,
+        "recall_ok": false,
+        "missing": [
+          "inventory.products"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "vg_best_customers",
+        "category": "vague_business",
+        "cold": false,
+        "elapsed_ms": 1024.54,
+        "tokens": 1035,
+        "context_tokens": 598,
+        "recall_ok": false,
+        "missing": [
+          "sales.customers",
+          "sales.orders"
+        ],
+        "row_count": 10
+      },
+      {
+        "task": "vg_whats_low_stock",
+        "category": "vague_business",
+        "cold": false,
+        "elapsed_ms": 144.82,
+        "tokens": 3467,
+        "context_tokens": 1009,
+        "recall_ok": false,
+        "missing": [
+          "inventory.products",
+          "inventory.stock_levels",
+          "inventory.warehouses"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "vg_complaints",
+        "category": "vague_business",
+        "cold": false,
+        "elapsed_ms": 171.89,
+        "tokens": 950,
+        "context_tokens": 569,
+        "recall_ok": false,
+        "missing": [
+          "crm.accounts",
+          "support.tickets"
+        ],
+        "row_count": 10
+      },
+      {
+        "task": "vg_sales_trend",
+        "category": "vague_business",
+        "cold": false,
+        "elapsed_ms": 27.36,
+        "tokens": 1805,
+        "context_tokens": 1663,
+        "recall_ok": false,
+        "missing": [
+          "sales.orders"
+        ],
+        "row_count": 0
+      },
+      {
+        "task": "vg_who_owes",
+        "category": "vague_business",
+        "cold": false,
+        "elapsed_ms": 399.2,
+        "tokens": 1994,
+        "context_tokens": 1199,
+        "recall_ok": false,
+        "missing": [
+          "finance.invoices",
+          "sales.customers"
+        ],
+        "row_count": 20
+      },
+      {
+        "task": "vg_churn",
+        "category": "vague_business",
+        "cold": false,
+        "elapsed_ms": 23.39,
+        "tokens": 987,
+        "context_tokens": 759,
+        "recall_ok": false,
+        "missing": [
+          "finance.subscriptions"
+        ],
+        "row_count": 6
+      },
+      {
+        "task": "vg_top_sellers",
+        "category": "vague_business",
+        "cold": false,
+        "elapsed_ms": 274.94,
+        "tokens": 1057,
+        "context_tokens": 567,
+        "recall_ok": false,
+        "missing": [
+          "hr.employees",
+          "sales.orders"
+        ],
+        "row_count": 10
+      }
+    ],
+    [
+      {
+        "task": "st_regions",
+        "category": "single_table_exact",
+        "cold": true,
+        "elapsed_ms": 309.82,
+        "tokens": 876,
+        "context_tokens": 564,
+        "recall_ok": false,
+        "missing": [
+          "public.regions"
+        ],
+        "row_count": 5
+      },
+      {
+        "task": "st_carriers",
+        "category": "single_table_exact",
+        "cold": false,
+        "elapsed_ms": 16.41,
+        "tokens": 675,
+        "context_tokens": 180,
+        "recall_ok": false,
+        "missing": [
+          "ops.carriers"
+        ],
+        "row_count": 12
+      },
+      {
+        "task": "st_warehouses",
+        "category": "single_table_exact",
+        "cold": false,
+        "elapsed_ms": 26.05,
+        "tokens": 1634,
+        "context_tokens": 573,
+        "recall_ok": false,
+        "missing": [
+          "inventory.warehouses"
+        ],
+        "row_count": 24
+      },
+      {
+        "task": "st_plans",
+        "category": "single_table_exact",
+        "cold": false,
+        "elapsed_ms": 24.43,
+        "tokens": 1412,
+        "context_tokens": 923,
+        "recall_ok": false,
+        "missing": [
+          "finance.plans"
+        ],
+        "row_count": 8
+      },
+      {
+        "task": "st_kb_articles",
+        "category": "single_table_exact",
+        "cold": false,
+        "elapsed_ms": 24.47,
+        "tokens": 1586,
+        "context_tokens": 759,
+        "recall_ok": false,
+        "missing": [
+          "support.kb_articles"
+        ],
+        "row_count": 20
+      },
+      {
+        "task": "st_promo_codes",
+        "category": "single_table_exact",
+        "cold": false,
+        "elapsed_ms": 25.1,
+        "tokens": 1342,
+        "context_tokens": 805,
+        "recall_ok": false,
+        "missing": [
+          "sales.promo_codes"
+        ],
+        "row_count": 20
+      },
+      {
+        "task": "st_currencies",
+        "category": "single_table_exact",
+        "cold": false,
+        "elapsed_ms": 16.25,
+        "tokens": 1177,
+        "context_tokens": 580,
+        "recall_ok": false,
+        "missing": [
+          "public.currencies"
+        ],
+        "row_count": 14
+      },
+      {
+        "task": "syn_clients_region",
+        "category": "synonym_abbreviation",
+        "cold": false,
+        "elapsed_ms": 74.0,
+        "tokens": 1117,
+        "context_tokens": 927,
+        "recall_ok": false,
+        "missing": [
+          "crm.accounts",
+          "public.regions"
+        ],
+        "row_count": 5
+      },
+      {
+        "task": "syn_staff_per_dept",
+        "category": "synonym_abbreviation",
+        "cold": false,
+        "elapsed_ms": 61.1,
+        "tokens": 2139,
+        "context_tokens": 1390,
+        "recall_ok": false,
+        "missing": [
+          "hr.departments",
+          "hr.employees"
+        ],
+        "row_count": 30
+      },
+      {
+        "task": "syn_sku_lookup",
+        "category": "synonym_abbreviation",
+        "cold": false,
+        "elapsed_ms": 27.36,
+        "tokens": 1048,
+        "context_tokens": 895,
+        "recall_ok": false,
+        "missing": [
+          "inventory.products"
+        ],
+        "row_count": 1
+      },
+      {
+        "task": "syn_qty_sold",
+        "category": "synonym_abbreviation",
+        "cold": false,
+        "elapsed_ms": 865.32,
+        "tokens": 1685,
+        "context_tokens": 1154,
+        "recall_ok": false,
+        "missing": [
+          "inventory.products",
+          "sales.order_items"
+        ],
+        "row_count": 20
+      },
+      {
+        "task": "syn_item_code",
+        "category": "synonym_abbreviation",
+        "cold": false,
+        "elapsed_ms": 48.21,
+        "tokens": 1135,
+        "context_tokens": 959,
+        "recall_ok": false,
+        "missing": [
+          "inventory.item_aliases",
+          "inventory.products"
+        ],
+        "row_count": 1
+      },
+      {
+        "task": "syn_opp_amt",
+        "category": "synonym_abbreviation",
+        "cold": false,
+        "elapsed_ms": 40.92,
+        "tokens": 1448,
+        "context_tokens": 1152,
+        "recall_ok": false,
+        "missing": [
+          "crm.opportunities"
+        ],
+        "row_count": 6
+      },
+      {
+        "task": "syn_headcount_country",
+        "category": "synonym_abbreviation",
+        "cold": false,
+        "elapsed_ms": 22.81,
+        "tokens": 1598,
+        "context_tokens": 1326,
+        "recall_ok": false,
+        "missing": [
+          "hr.employees"
+        ],
+        "row_count": 10
+      },
+      {
+        "task": "j2_tickets_by_tier",
+        "category": "join_2hop",
+        "cold": false,
+        "elapsed_ms": 223.11,
+        "tokens": 1120,
+        "context_tokens": 940,
+        "recall_ok": false,
+        "missing": [
+          "support.tickets",
+          "support.tiers"
+        ],
+        "row_count": 4
+      },
+      {
+        "task": "j2_shipments_per_carrier",
+        "category": "join_2hop",
+        "cold": false,
+        "elapsed_ms": 219.76,
+        "tokens": 594,
+        "context_tokens": 259,
+        "recall_ok": false,
+        "missing": [
+          "ops.carriers",
+          "ops.shipments"
+        ],
+        "row_count": 11
+      },
+      {
+        "task": "j2_mrr_by_plan",
+        "category": "join_2hop",
+        "cold": false,
+        "elapsed_ms": 58.3,
+        "tokens": 1025,
+        "context_tokens": 595,
+        "recall_ok": false,
+        "missing": [
+          "finance.plans",
+          "finance.subscriptions"
+        ],
+        "row_count": 8
+      },
+      {
+        "task": "j2_contacts_per_account",
+        "category": "join_2hop",
+        "cold": false,
+        "elapsed_ms": 93.76,
+        "tokens": 1097,
+        "context_tokens": 715,
+        "recall_ok": false,
+        "missing": [
+          "crm.accounts",
+          "crm.contacts"
+        ],
+        "row_count": 10
+      },
+      {
+        "task": "j2_campaign_leads",
+        "category": "join_2hop",
+        "cold": false,
+        "elapsed_ms": 119.38,
+        "tokens": 2770,
+        "context_tokens": 904,
+        "recall_ok": false,
+        "missing": [
+          "crm.leads",
+          "marketing.campaigns"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "j2_dept_cost_centers",
+        "category": "join_2hop",
+        "cold": false,
+        "elapsed_ms": 42.73,
+        "tokens": 3036,
+        "context_tokens": 787,
+        "recall_ok": false,
+        "missing": [
+          "finance.cost_centers",
+          "hr.departments"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "j2_supplier_products",
+        "category": "join_2hop",
+        "cold": false,
+        "elapsed_ms": 88.52,
+        "tokens": 1472,
+        "context_tokens": 760,
+        "recall_ok": false,
+        "missing": [
+          "inventory.product_suppliers",
+          "inventory.suppliers"
+        ],
+        "row_count": 20
+      },
+      {
+        "task": "mh_invoice_region",
+        "category": "join_multihop",
+        "cold": false,
+        "elapsed_ms": 181.89,
+        "tokens": 976,
+        "context_tokens": 757,
+        "recall_ok": false,
+        "missing": [
+          "crm.accounts",
+          "finance.invoices",
+          "public.regions",
+          "sales.customers"
+        ],
+        "row_count": 5
+      },
+      {
+        "task": "mh_invoice_units_category",
+        "category": "join_multihop",
+        "cold": false,
+        "elapsed_ms": 345.54,
+        "tokens": 1310,
+        "context_tokens": 951,
+        "recall_ok": false,
+        "missing": [
+          "finance.invoice_lines",
+          "finance.invoices",
+          "inventory.product_categories",
+          "inventory.products",
+          "sales.order_items"
+        ],
+        "row_count": 12
+      },
+      {
+        "task": "mh_return_rate_category",
+        "category": "join_multihop",
+        "cold": false,
+        "elapsed_ms": 1140.85,
+        "tokens": 1663,
+        "context_tokens": 1119,
+        "recall_ok": false,
+        "missing": [
+          "inventory.product_categories",
+          "inventory.products",
+          "sales.order_items",
+          "sales.returns"
+        ],
+        "row_count": 12
+      },
+      {
+        "task": "mh_tickets_agent_department",
+        "category": "join_multihop",
+        "cold": false,
+        "elapsed_ms": 172.02,
+        "tokens": 1307,
+        "context_tokens": 1133,
+        "recall_ok": false,
+        "missing": [
+          "hr.departments",
+          "hr.employees",
+          "support.agents",
+          "support.tickets"
+        ],
+        "row_count": 3
+      },
+      {
+        "task": "mh_api_failures_region",
+        "category": "join_multihop",
+        "cold": false,
+        "elapsed_ms": 237.6,
+        "tokens": 1387,
+        "context_tokens": 1197,
+        "recall_ok": false,
+        "missing": [
+          "crm.accounts",
+          "ops.api_keys",
+          "ops.api_request_log",
+          "public.regions"
+        ],
+        "row_count": 5
+      },
+      {
+        "task": "mh_payments_tier",
+        "category": "join_multihop",
+        "cold": false,
+        "elapsed_ms": 292.06,
+        "tokens": 1628,
+        "context_tokens": 1434,
+        "recall_ok": false,
+        "missing": [
+          "crm.accounts",
+          "finance.invoices",
+          "finance.payments",
+          "sales.customers"
+        ],
+        "row_count": 4
+      },
+      {
+        "task": "mh_campaign_order_revenue",
+        "category": "join_multihop",
+        "cold": false,
+        "elapsed_ms": 216.55,
+        "tokens": 1537,
+        "context_tokens": 1072,
+        "recall_ok": false,
+        "missing": [
+          "crm.leads",
+          "crm.opportunities",
+          "marketing.campaigns",
+          "sales.orders",
+          "sales.quotes"
+        ],
+        "row_count": 10
+      },
+      {
+        "task": "agg_monthly_orders",
+        "category": "aggregate_time",
+        "cold": false,
+        "elapsed_ms": 20.05,
+        "tokens": 1343,
+        "context_tokens": 1199,
+        "recall_ok": false,
+        "missing": [
+          "sales.orders"
+        ],
+        "row_count": 0
+      },
+      {
+        "task": "agg_top_customers_q3_emea",
+        "category": "aggregate_time",
+        "cold": false,
+        "elapsed_ms": 131.99,
+        "tokens": 1498,
+        "context_tokens": 1059,
+        "recall_ok": false,
+        "missing": [
+          "crm.accounts",
+          "public.regions",
+          "sales.customers",
+          "sales.orders"
+        ],
+        "row_count": 10
+      },
+      {
+        "task": "agg_failed_api_yesterday",
+        "category": "aggregate_time",
+        "cold": false,
+        "elapsed_ms": 178.4,
+        "tokens": 354,
+        "context_tokens": 249,
+        "recall_ok": false,
+        "missing": [
+          "ops.api_request_log"
+        ],
+        "row_count": 1
+      },
+      {
+        "task": "agg_pageviews_daily",
+        "category": "aggregate_time",
+        "cold": false,
+        "elapsed_ms": 145.8,
+        "tokens": 938,
+        "context_tokens": 201,
+        "recall_ok": false,
+        "missing": [
+          "analytics.page_views"
+        ],
+        "row_count": 30
+      },
+      {
+        "task": "agg_gl_q2",
+        "category": "aggregate_time",
+        "cold": false,
+        "elapsed_ms": 172.7,
+        "tokens": 3475,
+        "context_tokens": 793,
+        "recall_ok": false,
+        "missing": [
+          "finance.budgets",
+          "finance.chart_of_accounts",
+          "finance.cost_centers",
+          "finance.gl_entries"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "agg_stock_movements",
+        "category": "aggregate_time",
+        "cold": false,
+        "elapsed_ms": 176.11,
+        "tokens": 798,
+        "context_tokens": 527,
+        "recall_ok": false,
+        "missing": [
+          "inventory.stock_movements"
+        ],
+        "row_count": 6
+      },
+      {
+        "task": "agg_email_ctr",
+        "category": "aggregate_time",
+        "cold": false,
+        "elapsed_ms": 361.41,
+        "tokens": 2522,
+        "context_tokens": 1529,
+        "recall_ok": false,
+        "missing": [
+          "marketing.campaigns",
+          "marketing.email_events"
+        ],
+        "row_count": 20
+      },
+      {
+        "task": "au_deletes_exports",
+        "category": "audit_log",
+        "cold": false,
+        "elapsed_ms": 195.62,
+        "tokens": 2501,
+        "context_tokens": 940,
+        "recall_ok": false,
+        "missing": [
+          "ops.app_users",
+          "public.audit_log"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "au_salary_changes",
+        "category": "audit_log",
+        "cold": false,
+        "elapsed_ms": 177.8,
+        "tokens": 4030,
+        "context_tokens": 477,
+        "recall_ok": false,
+        "missing": [
+          "public.change_history"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "au_failed_logins",
+        "category": "audit_log",
+        "cold": false,
+        "elapsed_ms": 157.6,
+        "tokens": 1567,
+        "context_tokens": 882,
+        "recall_ok": false,
+        "missing": [
+          "ops.app_users",
+          "ops.login_events"
+        ],
+        "row_count": 20
+      },
+      {
+        "task": "au_bruteforce_ips",
+        "category": "audit_log",
+        "cold": false,
+        "elapsed_ms": 105.61,
+        "tokens": 838,
+        "context_tokens": 682,
+        "recall_ok": false,
+        "missing": [
+          "ops.login_events"
+        ],
+        "row_count": 0
+      },
+      {
+        "task": "au_subscription_cancels",
+        "category": "audit_log",
+        "cold": false,
+        "elapsed_ms": 80.89,
+        "tokens": 1948,
+        "context_tokens": 1710,
+        "recall_ok": false,
+        "missing": [
+          "finance.subscription_events",
+          "finance.subscriptions"
+        ],
+        "row_count": 6
+      },
+      {
+        "task": "au_critical_audit",
+        "category": "audit_log",
+        "cold": false,
+        "elapsed_ms": 186.12,
+        "tokens": 1831,
+        "context_tokens": 1651,
+        "recall_ok": false,
+        "missing": [
+          "public.audit_log"
+        ],
+        "row_count": 4
+      },
+      {
+        "task": "au_api_keys_failed_yesterday",
+        "category": "audit_log",
+        "cold": false,
+        "elapsed_ms": 235.02,
+        "tokens": 447,
+        "context_tokens": 267,
+        "recall_ok": false,
+        "missing": [
+          "ops.api_keys",
+          "ops.api_request_log"
+        ],
+        "row_count": 0
+      },
+      {
+        "task": "amb_purchase_orders_late",
+        "category": "cross_schema_ambiguity",
+        "cold": false,
+        "elapsed_ms": 81.15,
+        "tokens": 2769,
+        "context_tokens": 894,
+        "recall_ok": false,
+        "missing": [
+          "inventory.suppliers",
+          "ops.orders"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "amb_po_qty_warehouse",
+        "category": "cross_schema_ambiguity",
+        "cold": false,
+        "elapsed_ms": 194.28,
+        "tokens": 1577,
+        "context_tokens": 994,
+        "recall_ok": false,
+        "missing": [
+          "inventory.warehouses",
+          "ops.order_lines",
+          "ops.orders"
+        ],
+        "row_count": 23
+      },
+      {
+        "task": "amb_sales_order_status",
+        "category": "cross_schema_ambiguity",
+        "cold": false,
+        "elapsed_ms": 138.12,
+        "tokens": 1296,
+        "context_tokens": 1035,
+        "recall_ok": false,
+        "missing": [
+          "sales.orders"
+        ],
+        "row_count": 8
+      },
+      {
+        "task": "amb_gl_expense_accounts",
+        "category": "cross_schema_ambiguity",
+        "cold": false,
+        "elapsed_ms": 19.24,
+        "tokens": 2328,
+        "context_tokens": 715,
+        "recall_ok": false,
+        "missing": [
+          "finance.chart_of_accounts"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "amb_support_tier",
+        "category": "cross_schema_ambiguity",
+        "cold": false,
+        "elapsed_ms": 53.87,
+        "tokens": 1270,
+        "context_tokens": 1097,
+        "recall_ok": false,
+        "missing": [
+          "crm.accounts",
+          "support.tiers"
+        ],
+        "row_count": 4
+      },
+      {
+        "task": "amb_login_account_types",
+        "category": "cross_schema_ambiguity",
+        "cold": false,
+        "elapsed_ms": 34.88,
+        "tokens": 1196,
+        "context_tokens": 1040,
+        "recall_ok": false,
+        "missing": [
+          "ops.app_users"
+        ],
+        "row_count": 3
+      },
+      {
+        "task": "amb_order_shipments",
+        "category": "cross_schema_ambiguity",
+        "cold": false,
+        "elapsed_ms": 357.15,
+        "tokens": 1300,
+        "context_tokens": 1200,
+        "recall_ok": false,
+        "missing": [
+          "ops.shipments",
+          "sales.orders"
+        ],
+        "row_count": 1
+      },
+      {
+        "task": "lg_legacy_country",
+        "category": "legacy_no_fk",
+        "cold": false,
+        "elapsed_ms": 36.17,
+        "tokens": 842,
+        "context_tokens": 580,
+        "recall_ok": false,
+        "missing": [
+          "public.tbl_cust_legacy"
+        ],
+        "row_count": 9
+      },
+      {
+        "task": "lg_archive_2019_region",
+        "category": "legacy_no_fk",
+        "cold": false,
+        "elapsed_ms": 112.39,
+        "tokens": 1333,
+        "context_tokens": 1063,
+        "recall_ok": false,
+        "missing": [
+          "sales.orders_archive_2019"
+        ],
+        "row_count": 7
+      },
+      {
+        "task": "lg_newsletter_country",
+        "category": "legacy_no_fk",
+        "cold": false,
+        "elapsed_ms": 45.98,
+        "tokens": 348,
+        "context_tokens": 116,
+        "recall_ok": false,
+        "missing": [
+          "marketing.newsletter_subscribers"
+        ],
+        "row_count": 7
+      },
+      {
+        "task": "lg_app_settings",
+        "category": "legacy_no_fk",
+        "cold": false,
+        "elapsed_ms": 16.0,
+        "tokens": 4132,
+        "context_tokens": 164,
+        "recall_ok": false,
+        "missing": [
+          "public.app_settings"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "lg_archive_customer",
+        "category": "legacy_no_fk",
+        "cold": false,
+        "elapsed_ms": 45.69,
+        "tokens": 1125,
+        "context_tokens": 980,
+        "recall_ok": false,
+        "missing": [
+          "sales.customers",
+          "sales.orders_archive_2019"
+        ],
+        "row_count": 0
+      },
+      {
+        "task": "lg_change_history_ui",
+        "category": "legacy_no_fk",
+        "cold": false,
+        "elapsed_ms": 43.17,
+        "tokens": 1098,
+        "context_tokens": 953,
+        "recall_ok": false,
+        "missing": [
+          "hr.employees",
+          "public.change_history"
+        ],
+        "row_count": 0
+      },
+      {
+        "task": "lg_legacy_migrated",
+        "category": "legacy_no_fk",
+        "cold": false,
+        "elapsed_ms": 27.5,
+        "tokens": 916,
+        "context_tokens": 804,
+        "recall_ok": false,
+        "missing": [
+          "public.tbl_cust_legacy"
+        ],
+        "row_count": 1
+      },
+      {
+        "task": "wd_employees_hires_2026",
+        "category": "wide_table",
+        "cold": false,
+        "elapsed_ms": 46.72,
+        "tokens": 4236,
+        "context_tokens": 1056,
+        "recall_ok": false,
+        "missing": [
+          "hr.departments",
+          "hr.employees"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "wd_accounts_strategic",
+        "category": "wide_table",
+        "cold": false,
+        "elapsed_ms": 28.94,
+        "tokens": 3697,
+        "context_tokens": 1315,
+        "recall_ok": false,
+        "missing": [
+          "crm.accounts"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "wd_products_margin",
+        "category": "wide_table",
+        "cold": false,
+        "elapsed_ms": 37.25,
+        "tokens": 2239,
+        "context_tokens": 891,
+        "recall_ok": false,
+        "missing": [
+          "inventory.products"
+        ],
+        "row_count": 20
+      },
+      {
+        "task": "wd_orders_channel_q3",
+        "category": "wide_table",
+        "cold": false,
+        "elapsed_ms": 93.71,
+        "tokens": 1316,
+        "context_tokens": 1058,
+        "recall_ok": false,
+        "missing": [
+          "sales.orders"
+        ],
+        "row_count": 5
+      },
+      {
+        "task": "wd_manager_other_dept",
+        "category": "wide_table",
+        "cold": false,
+        "elapsed_ms": 24.61,
+        "tokens": 1026,
+        "context_tokens": 927,
+        "recall_ok": false,
+        "missing": [
+          "hr.employees"
+        ],
+        "row_count": 1
+      },
+      {
+        "task": "wd_terminations_year",
+        "category": "wide_table",
+        "cold": false,
+        "elapsed_ms": 18.83,
+        "tokens": 866,
+        "context_tokens": 579,
+        "recall_ok": false,
+        "missing": [
+          "hr.employees"
+        ],
+        "row_count": 12
+      },
+      {
+        "task": "wd_hazmat_products",
+        "category": "wide_table",
+        "cold": false,
+        "elapsed_ms": 16.05,
+        "tokens": 2839,
+        "context_tokens": 309,
+        "recall_ok": false,
+        "missing": [
+          "inventory.products"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "vg_best_customers",
+        "category": "vague_business",
+        "cold": false,
+        "elapsed_ms": 932.28,
+        "tokens": 1035,
+        "context_tokens": 598,
+        "recall_ok": false,
+        "missing": [
+          "sales.customers",
+          "sales.orders"
+        ],
+        "row_count": 10
+      },
+      {
+        "task": "vg_whats_low_stock",
+        "category": "vague_business",
+        "cold": false,
+        "elapsed_ms": 118.43,
+        "tokens": 3467,
+        "context_tokens": 1009,
+        "recall_ok": false,
+        "missing": [
+          "inventory.products",
+          "inventory.stock_levels",
+          "inventory.warehouses"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "vg_complaints",
+        "category": "vague_business",
+        "cold": false,
+        "elapsed_ms": 156.1,
+        "tokens": 950,
+        "context_tokens": 569,
+        "recall_ok": false,
+        "missing": [
+          "crm.accounts",
+          "support.tickets"
+        ],
+        "row_count": 10
+      },
+      {
+        "task": "vg_sales_trend",
+        "category": "vague_business",
+        "cold": false,
+        "elapsed_ms": 24.12,
+        "tokens": 1805,
+        "context_tokens": 1663,
+        "recall_ok": false,
+        "missing": [
+          "sales.orders"
+        ],
+        "row_count": 0
+      },
+      {
+        "task": "vg_who_owes",
+        "category": "vague_business",
+        "cold": false,
+        "elapsed_ms": 369.36,
+        "tokens": 1994,
+        "context_tokens": 1199,
+        "recall_ok": false,
+        "missing": [
+          "finance.invoices",
+          "sales.customers"
+        ],
+        "row_count": 20
+      },
+      {
+        "task": "vg_churn",
+        "category": "vague_business",
+        "cold": false,
+        "elapsed_ms": 20.48,
+        "tokens": 987,
+        "context_tokens": 759,
+        "recall_ok": false,
+        "missing": [
+          "finance.subscriptions"
+        ],
+        "row_count": 6
+      },
+      {
+        "task": "vg_top_sellers",
+        "category": "vague_business",
+        "cold": false,
+        "elapsed_ms": 277.02,
+        "tokens": 1057,
+        "context_tokens": 567,
+        "recall_ok": false,
+        "missing": [
+          "hr.employees",
+          "sales.orders"
+        ],
+        "row_count": 10
+      }
+    ],
+    [
+      {
+        "task": "st_regions",
+        "category": "single_table_exact",
+        "cold": true,
+        "elapsed_ms": 317.34,
+        "tokens": 876,
+        "context_tokens": 564,
+        "recall_ok": false,
+        "missing": [
+          "public.regions"
+        ],
+        "row_count": 5
+      },
+      {
+        "task": "st_carriers",
+        "category": "single_table_exact",
+        "cold": false,
+        "elapsed_ms": 17.92,
+        "tokens": 675,
+        "context_tokens": 180,
+        "recall_ok": false,
+        "missing": [
+          "ops.carriers"
+        ],
+        "row_count": 12
+      },
+      {
+        "task": "st_warehouses",
+        "category": "single_table_exact",
+        "cold": false,
+        "elapsed_ms": 32.15,
+        "tokens": 1634,
+        "context_tokens": 573,
+        "recall_ok": false,
+        "missing": [
+          "inventory.warehouses"
+        ],
+        "row_count": 24
+      },
+      {
+        "task": "st_plans",
+        "category": "single_table_exact",
+        "cold": false,
+        "elapsed_ms": 25.24,
+        "tokens": 1412,
+        "context_tokens": 923,
+        "recall_ok": false,
+        "missing": [
+          "finance.plans"
+        ],
+        "row_count": 8
+      },
+      {
+        "task": "st_kb_articles",
+        "category": "single_table_exact",
+        "cold": false,
+        "elapsed_ms": 26.56,
+        "tokens": 1586,
+        "context_tokens": 759,
+        "recall_ok": false,
+        "missing": [
+          "support.kb_articles"
+        ],
+        "row_count": 20
+      },
+      {
+        "task": "st_promo_codes",
+        "category": "single_table_exact",
+        "cold": false,
+        "elapsed_ms": 26.11,
+        "tokens": 1342,
+        "context_tokens": 805,
+        "recall_ok": false,
+        "missing": [
+          "sales.promo_codes"
+        ],
+        "row_count": 20
+      },
+      {
+        "task": "st_currencies",
+        "category": "single_table_exact",
+        "cold": false,
+        "elapsed_ms": 17.2,
+        "tokens": 1177,
+        "context_tokens": 580,
+        "recall_ok": false,
+        "missing": [
+          "public.currencies"
+        ],
+        "row_count": 14
+      },
+      {
+        "task": "syn_clients_region",
+        "category": "synonym_abbreviation",
+        "cold": false,
+        "elapsed_ms": 74.46,
+        "tokens": 1117,
+        "context_tokens": 927,
+        "recall_ok": false,
+        "missing": [
+          "crm.accounts",
+          "public.regions"
+        ],
+        "row_count": 5
+      },
+      {
+        "task": "syn_staff_per_dept",
+        "category": "synonym_abbreviation",
+        "cold": false,
+        "elapsed_ms": 64.35,
+        "tokens": 2139,
+        "context_tokens": 1390,
+        "recall_ok": false,
+        "missing": [
+          "hr.departments",
+          "hr.employees"
+        ],
+        "row_count": 30
+      },
+      {
+        "task": "syn_sku_lookup",
+        "category": "synonym_abbreviation",
+        "cold": false,
+        "elapsed_ms": 31.88,
+        "tokens": 1048,
+        "context_tokens": 895,
+        "recall_ok": false,
+        "missing": [
+          "inventory.products"
+        ],
+        "row_count": 1
+      },
+      {
+        "task": "syn_qty_sold",
+        "category": "synonym_abbreviation",
+        "cold": false,
+        "elapsed_ms": 752.91,
+        "tokens": 1685,
+        "context_tokens": 1154,
+        "recall_ok": false,
+        "missing": [
+          "inventory.products",
+          "sales.order_items"
+        ],
+        "row_count": 20
+      },
+      {
+        "task": "syn_item_code",
+        "category": "synonym_abbreviation",
+        "cold": false,
+        "elapsed_ms": 55.23,
+        "tokens": 1135,
+        "context_tokens": 959,
+        "recall_ok": false,
+        "missing": [
+          "inventory.item_aliases",
+          "inventory.products"
+        ],
+        "row_count": 1
+      },
+      {
+        "task": "syn_opp_amt",
+        "category": "synonym_abbreviation",
+        "cold": false,
+        "elapsed_ms": 43.48,
+        "tokens": 1448,
+        "context_tokens": 1152,
+        "recall_ok": false,
+        "missing": [
+          "crm.opportunities"
+        ],
+        "row_count": 6
+      },
+      {
+        "task": "syn_headcount_country",
+        "category": "synonym_abbreviation",
+        "cold": false,
+        "elapsed_ms": 24.19,
+        "tokens": 1598,
+        "context_tokens": 1326,
+        "recall_ok": false,
+        "missing": [
+          "hr.employees"
+        ],
+        "row_count": 10
+      },
+      {
+        "task": "j2_tickets_by_tier",
+        "category": "join_2hop",
+        "cold": false,
+        "elapsed_ms": 202.27,
+        "tokens": 1120,
+        "context_tokens": 940,
+        "recall_ok": false,
+        "missing": [
+          "support.tickets",
+          "support.tiers"
+        ],
+        "row_count": 4
+      },
+      {
+        "task": "j2_shipments_per_carrier",
+        "category": "join_2hop",
+        "cold": false,
+        "elapsed_ms": 229.83,
+        "tokens": 594,
+        "context_tokens": 259,
+        "recall_ok": false,
+        "missing": [
+          "ops.carriers",
+          "ops.shipments"
+        ],
+        "row_count": 11
+      },
+      {
+        "task": "j2_mrr_by_plan",
+        "category": "join_2hop",
+        "cold": false,
+        "elapsed_ms": 55.76,
+        "tokens": 1025,
+        "context_tokens": 595,
+        "recall_ok": false,
+        "missing": [
+          "finance.plans",
+          "finance.subscriptions"
+        ],
+        "row_count": 8
+      },
+      {
+        "task": "j2_contacts_per_account",
+        "category": "join_2hop",
+        "cold": false,
+        "elapsed_ms": 78.4,
+        "tokens": 1097,
+        "context_tokens": 715,
+        "recall_ok": false,
+        "missing": [
+          "crm.accounts",
+          "crm.contacts"
+        ],
+        "row_count": 10
+      },
+      {
+        "task": "j2_campaign_leads",
+        "category": "join_2hop",
+        "cold": false,
+        "elapsed_ms": 123.01,
+        "tokens": 2770,
+        "context_tokens": 904,
+        "recall_ok": false,
+        "missing": [
+          "crm.leads",
+          "marketing.campaigns"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "j2_dept_cost_centers",
+        "category": "join_2hop",
+        "cold": false,
+        "elapsed_ms": 49.3,
+        "tokens": 3036,
+        "context_tokens": 787,
+        "recall_ok": false,
+        "missing": [
+          "finance.cost_centers",
+          "hr.departments"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "j2_supplier_products",
+        "category": "join_2hop",
+        "cold": false,
+        "elapsed_ms": 104.41,
+        "tokens": 1472,
+        "context_tokens": 760,
+        "recall_ok": false,
+        "missing": [
+          "inventory.product_suppliers",
+          "inventory.suppliers"
+        ],
+        "row_count": 20
+      },
+      {
+        "task": "mh_invoice_region",
+        "category": "join_multihop",
+        "cold": false,
+        "elapsed_ms": 177.28,
+        "tokens": 976,
+        "context_tokens": 757,
+        "recall_ok": false,
+        "missing": [
+          "crm.accounts",
+          "finance.invoices",
+          "public.regions",
+          "sales.customers"
+        ],
+        "row_count": 5
+      },
+      {
+        "task": "mh_invoice_units_category",
+        "category": "join_multihop",
+        "cold": false,
+        "elapsed_ms": 352.05,
+        "tokens": 1310,
+        "context_tokens": 951,
+        "recall_ok": false,
+        "missing": [
+          "finance.invoice_lines",
+          "finance.invoices",
+          "inventory.product_categories",
+          "inventory.products",
+          "sales.order_items"
+        ],
+        "row_count": 12
+      },
+      {
+        "task": "mh_return_rate_category",
+        "category": "join_multihop",
+        "cold": false,
+        "elapsed_ms": 1175.96,
+        "tokens": 1663,
+        "context_tokens": 1119,
+        "recall_ok": false,
+        "missing": [
+          "inventory.product_categories",
+          "inventory.products",
+          "sales.order_items",
+          "sales.returns"
+        ],
+        "row_count": 12
+      },
+      {
+        "task": "mh_tickets_agent_department",
+        "category": "join_multihop",
+        "cold": false,
+        "elapsed_ms": 176.85,
+        "tokens": 1307,
+        "context_tokens": 1133,
+        "recall_ok": false,
+        "missing": [
+          "hr.departments",
+          "hr.employees",
+          "support.agents",
+          "support.tickets"
+        ],
+        "row_count": 3
+      },
+      {
+        "task": "mh_api_failures_region",
+        "category": "join_multihop",
+        "cold": false,
+        "elapsed_ms": 248.13,
+        "tokens": 1387,
+        "context_tokens": 1197,
+        "recall_ok": false,
+        "missing": [
+          "crm.accounts",
+          "ops.api_keys",
+          "ops.api_request_log",
+          "public.regions"
+        ],
+        "row_count": 5
+      },
+      {
+        "task": "mh_payments_tier",
+        "category": "join_multihop",
+        "cold": false,
+        "elapsed_ms": 308.17,
+        "tokens": 1628,
+        "context_tokens": 1434,
+        "recall_ok": false,
+        "missing": [
+          "crm.accounts",
+          "finance.invoices",
+          "finance.payments",
+          "sales.customers"
+        ],
+        "row_count": 4
+      },
+      {
+        "task": "mh_campaign_order_revenue",
+        "category": "join_multihop",
+        "cold": false,
+        "elapsed_ms": 203.59,
+        "tokens": 1537,
+        "context_tokens": 1072,
+        "recall_ok": false,
+        "missing": [
+          "crm.leads",
+          "crm.opportunities",
+          "marketing.campaigns",
+          "sales.orders",
+          "sales.quotes"
+        ],
+        "row_count": 10
+      },
+      {
+        "task": "agg_monthly_orders",
+        "category": "aggregate_time",
+        "cold": false,
+        "elapsed_ms": 23.44,
+        "tokens": 1343,
+        "context_tokens": 1199,
+        "recall_ok": false,
+        "missing": [
+          "sales.orders"
+        ],
+        "row_count": 0
+      },
+      {
+        "task": "agg_top_customers_q3_emea",
+        "category": "aggregate_time",
+        "cold": false,
+        "elapsed_ms": 226.49,
+        "tokens": 1498,
+        "context_tokens": 1059,
+        "recall_ok": false,
+        "missing": [
+          "crm.accounts",
+          "public.regions",
+          "sales.customers",
+          "sales.orders"
+        ],
+        "row_count": 10
+      },
+      {
+        "task": "agg_failed_api_yesterday",
+        "category": "aggregate_time",
+        "cold": false,
+        "elapsed_ms": 197.92,
+        "tokens": 354,
+        "context_tokens": 249,
+        "recall_ok": false,
+        "missing": [
+          "ops.api_request_log"
+        ],
+        "row_count": 1
+      },
+      {
+        "task": "agg_pageviews_daily",
+        "category": "aggregate_time",
+        "cold": false,
+        "elapsed_ms": 150.41,
+        "tokens": 938,
+        "context_tokens": 201,
+        "recall_ok": false,
+        "missing": [
+          "analytics.page_views"
+        ],
+        "row_count": 30
+      },
+      {
+        "task": "agg_gl_q2",
+        "category": "aggregate_time",
+        "cold": false,
+        "elapsed_ms": 215.7,
+        "tokens": 3475,
+        "context_tokens": 793,
+        "recall_ok": false,
+        "missing": [
+          "finance.budgets",
+          "finance.chart_of_accounts",
+          "finance.cost_centers",
+          "finance.gl_entries"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "agg_stock_movements",
+        "category": "aggregate_time",
+        "cold": false,
+        "elapsed_ms": 166.71,
+        "tokens": 798,
+        "context_tokens": 527,
+        "recall_ok": false,
+        "missing": [
+          "inventory.stock_movements"
+        ],
+        "row_count": 6
+      },
+      {
+        "task": "agg_email_ctr",
+        "category": "aggregate_time",
+        "cold": false,
+        "elapsed_ms": 367.67,
+        "tokens": 2522,
+        "context_tokens": 1529,
+        "recall_ok": false,
+        "missing": [
+          "marketing.campaigns",
+          "marketing.email_events"
+        ],
+        "row_count": 20
+      },
+      {
+        "task": "au_deletes_exports",
+        "category": "audit_log",
+        "cold": false,
+        "elapsed_ms": 209.01,
+        "tokens": 2501,
+        "context_tokens": 940,
+        "recall_ok": false,
+        "missing": [
+          "ops.app_users",
+          "public.audit_log"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "au_salary_changes",
+        "category": "audit_log",
+        "cold": false,
+        "elapsed_ms": 132.98,
+        "tokens": 4030,
+        "context_tokens": 477,
+        "recall_ok": false,
+        "missing": [
+          "public.change_history"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "au_failed_logins",
+        "category": "audit_log",
+        "cold": false,
+        "elapsed_ms": 176.53,
+        "tokens": 1567,
+        "context_tokens": 882,
+        "recall_ok": false,
+        "missing": [
+          "ops.app_users",
+          "ops.login_events"
+        ],
+        "row_count": 20
+      },
+      {
+        "task": "au_bruteforce_ips",
+        "category": "audit_log",
+        "cold": false,
+        "elapsed_ms": 102.64,
+        "tokens": 838,
+        "context_tokens": 682,
+        "recall_ok": false,
+        "missing": [
+          "ops.login_events"
+        ],
+        "row_count": 0
+      },
+      {
+        "task": "au_subscription_cancels",
+        "category": "audit_log",
+        "cold": false,
+        "elapsed_ms": 89.15,
+        "tokens": 1948,
+        "context_tokens": 1710,
+        "recall_ok": false,
+        "missing": [
+          "finance.subscription_events",
+          "finance.subscriptions"
+        ],
+        "row_count": 6
+      },
+      {
+        "task": "au_critical_audit",
+        "category": "audit_log",
+        "cold": false,
+        "elapsed_ms": 175.97,
+        "tokens": 1831,
+        "context_tokens": 1651,
+        "recall_ok": false,
+        "missing": [
+          "public.audit_log"
+        ],
+        "row_count": 4
+      },
+      {
+        "task": "au_api_keys_failed_yesterday",
+        "category": "audit_log",
+        "cold": false,
+        "elapsed_ms": 211.01,
+        "tokens": 447,
+        "context_tokens": 267,
+        "recall_ok": false,
+        "missing": [
+          "ops.api_keys",
+          "ops.api_request_log"
+        ],
+        "row_count": 0
+      },
+      {
+        "task": "amb_purchase_orders_late",
+        "category": "cross_schema_ambiguity",
+        "cold": false,
+        "elapsed_ms": 96.87,
+        "tokens": 2769,
+        "context_tokens": 894,
+        "recall_ok": false,
+        "missing": [
+          "inventory.suppliers",
+          "ops.orders"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "amb_po_qty_warehouse",
+        "category": "cross_schema_ambiguity",
+        "cold": false,
+        "elapsed_ms": 212.68,
+        "tokens": 1577,
+        "context_tokens": 994,
+        "recall_ok": false,
+        "missing": [
+          "inventory.warehouses",
+          "ops.order_lines",
+          "ops.orders"
+        ],
+        "row_count": 23
+      },
+      {
+        "task": "amb_sales_order_status",
+        "category": "cross_schema_ambiguity",
+        "cold": false,
+        "elapsed_ms": 140.98,
+        "tokens": 1296,
+        "context_tokens": 1035,
+        "recall_ok": false,
+        "missing": [
+          "sales.orders"
+        ],
+        "row_count": 8
+      },
+      {
+        "task": "amb_gl_expense_accounts",
+        "category": "cross_schema_ambiguity",
+        "cold": false,
+        "elapsed_ms": 17.1,
+        "tokens": 2328,
+        "context_tokens": 715,
+        "recall_ok": false,
+        "missing": [
+          "finance.chart_of_accounts"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "amb_support_tier",
+        "category": "cross_schema_ambiguity",
+        "cold": false,
+        "elapsed_ms": 60.54,
+        "tokens": 1270,
+        "context_tokens": 1097,
+        "recall_ok": false,
+        "missing": [
+          "crm.accounts",
+          "support.tiers"
+        ],
+        "row_count": 4
+      },
+      {
+        "task": "amb_login_account_types",
+        "category": "cross_schema_ambiguity",
+        "cold": false,
+        "elapsed_ms": 40.98,
+        "tokens": 1196,
+        "context_tokens": 1040,
+        "recall_ok": false,
+        "missing": [
+          "ops.app_users"
+        ],
+        "row_count": 3
+      },
+      {
+        "task": "amb_order_shipments",
+        "category": "cross_schema_ambiguity",
+        "cold": false,
+        "elapsed_ms": 393.92,
+        "tokens": 1300,
+        "context_tokens": 1200,
+        "recall_ok": false,
+        "missing": [
+          "ops.shipments",
+          "sales.orders"
+        ],
+        "row_count": 1
+      },
+      {
+        "task": "lg_legacy_country",
+        "category": "legacy_no_fk",
+        "cold": false,
+        "elapsed_ms": 35.63,
+        "tokens": 842,
+        "context_tokens": 580,
+        "recall_ok": false,
+        "missing": [
+          "public.tbl_cust_legacy"
+        ],
+        "row_count": 9
+      },
+      {
+        "task": "lg_archive_2019_region",
+        "category": "legacy_no_fk",
+        "cold": false,
+        "elapsed_ms": 88.68,
+        "tokens": 1333,
+        "context_tokens": 1063,
+        "recall_ok": false,
+        "missing": [
+          "sales.orders_archive_2019"
+        ],
+        "row_count": 7
+      },
+      {
+        "task": "lg_newsletter_country",
+        "category": "legacy_no_fk",
+        "cold": false,
+        "elapsed_ms": 44.97,
+        "tokens": 348,
+        "context_tokens": 116,
+        "recall_ok": false,
+        "missing": [
+          "marketing.newsletter_subscribers"
+        ],
+        "row_count": 7
+      },
+      {
+        "task": "lg_app_settings",
+        "category": "legacy_no_fk",
+        "cold": false,
+        "elapsed_ms": 17.37,
+        "tokens": 4132,
+        "context_tokens": 164,
+        "recall_ok": false,
+        "missing": [
+          "public.app_settings"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "lg_archive_customer",
+        "category": "legacy_no_fk",
+        "cold": false,
+        "elapsed_ms": 53.87,
+        "tokens": 1125,
+        "context_tokens": 980,
+        "recall_ok": false,
+        "missing": [
+          "sales.customers",
+          "sales.orders_archive_2019"
+        ],
+        "row_count": 0
+      },
+      {
+        "task": "lg_change_history_ui",
+        "category": "legacy_no_fk",
+        "cold": false,
+        "elapsed_ms": 59.99,
+        "tokens": 1098,
+        "context_tokens": 953,
+        "recall_ok": false,
+        "missing": [
+          "hr.employees",
+          "public.change_history"
+        ],
+        "row_count": 0
+      },
+      {
+        "task": "lg_legacy_migrated",
+        "category": "legacy_no_fk",
+        "cold": false,
+        "elapsed_ms": 34.24,
+        "tokens": 916,
+        "context_tokens": 804,
+        "recall_ok": false,
+        "missing": [
+          "public.tbl_cust_legacy"
+        ],
+        "row_count": 1
+      },
+      {
+        "task": "wd_employees_hires_2026",
+        "category": "wide_table",
+        "cold": false,
+        "elapsed_ms": 58.05,
+        "tokens": 4236,
+        "context_tokens": 1056,
+        "recall_ok": false,
+        "missing": [
+          "hr.departments",
+          "hr.employees"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "wd_accounts_strategic",
+        "category": "wide_table",
+        "cold": false,
+        "elapsed_ms": 37.67,
+        "tokens": 3697,
+        "context_tokens": 1315,
+        "recall_ok": false,
+        "missing": [
+          "crm.accounts"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "wd_products_margin",
+        "category": "wide_table",
+        "cold": false,
+        "elapsed_ms": 54.72,
+        "tokens": 2239,
+        "context_tokens": 891,
+        "recall_ok": false,
+        "missing": [
+          "inventory.products"
+        ],
+        "row_count": 20
+      },
+      {
+        "task": "wd_orders_channel_q3",
+        "category": "wide_table",
+        "cold": false,
+        "elapsed_ms": 98.09,
+        "tokens": 1316,
+        "context_tokens": 1058,
+        "recall_ok": false,
+        "missing": [
+          "sales.orders"
+        ],
+        "row_count": 5
+      },
+      {
+        "task": "wd_manager_other_dept",
+        "category": "wide_table",
+        "cold": false,
+        "elapsed_ms": 28.68,
+        "tokens": 1026,
+        "context_tokens": 927,
+        "recall_ok": false,
+        "missing": [
+          "hr.employees"
+        ],
+        "row_count": 1
+      },
+      {
+        "task": "wd_terminations_year",
+        "category": "wide_table",
+        "cold": false,
+        "elapsed_ms": 20.48,
+        "tokens": 866,
+        "context_tokens": 579,
+        "recall_ok": false,
+        "missing": [
+          "hr.employees"
+        ],
+        "row_count": 12
+      },
+      {
+        "task": "wd_hazmat_products",
+        "category": "wide_table",
+        "cold": false,
+        "elapsed_ms": 21.28,
+        "tokens": 2839,
+        "context_tokens": 309,
+        "recall_ok": false,
+        "missing": [
+          "inventory.products"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "vg_best_customers",
+        "category": "vague_business",
+        "cold": false,
+        "elapsed_ms": 1244.43,
+        "tokens": 1035,
+        "context_tokens": 598,
+        "recall_ok": false,
+        "missing": [
+          "sales.customers",
+          "sales.orders"
+        ],
+        "row_count": 10
+      },
+      {
+        "task": "vg_whats_low_stock",
+        "category": "vague_business",
+        "cold": false,
+        "elapsed_ms": 161.49,
+        "tokens": 3467,
+        "context_tokens": 1009,
+        "recall_ok": false,
+        "missing": [
+          "inventory.products",
+          "inventory.stock_levels",
+          "inventory.warehouses"
+        ],
+        "row_count": 50
+      },
+      {
+        "task": "vg_complaints",
+        "category": "vague_business",
+        "cold": false,
+        "elapsed_ms": 204.7,
+        "tokens": 950,
+        "context_tokens": 569,
+        "recall_ok": false,
+        "missing": [
+          "crm.accounts",
+          "support.tickets"
+        ],
+        "row_count": 10
+      },
+      {
+        "task": "vg_sales_trend",
+        "category": "vague_business",
+        "cold": false,
+        "elapsed_ms": 30.32,
+        "tokens": 1805,
+        "context_tokens": 1663,
+        "recall_ok": false,
+        "missing": [
+          "sales.orders"
+        ],
+        "row_count": 0
+      },
+      {
+        "task": "vg_who_owes",
+        "category": "vague_business",
+        "cold": false,
+        "elapsed_ms": 529.94,
+        "tokens": 1994,
+        "context_tokens": 1199,
+        "recall_ok": false,
+        "missing": [
+          "finance.invoices",
+          "sales.customers"
+        ],
+        "row_count": 20
+      },
+      {
+        "task": "vg_churn",
+        "category": "vague_business",
+        "cold": false,
+        "elapsed_ms": 26.75,
+        "tokens": 987,
+        "context_tokens": 759,
+        "recall_ok": false,
+        "missing": [
+          "finance.subscriptions"
+        ],
+        "row_count": 6
+      },
+      {
+        "task": "vg_top_sellers",
+        "category": "vague_business",
+        "cold": false,
+        "elapsed_ms": 314.32,
+        "tokens": 1057,
+        "context_tokens": 567,
+        "recall_ok": false,
+        "missing": [
+          "hr.employees",
+          "sales.orders"
+        ],
+        "row_count": 10
+      }
+    ]
+  ],
+  "conventional": [
+    {
+      "task": "st_regions",
+      "elapsed_ms": 165.86,
+      "tokens": 1380,
+      "row_count": 5
+    },
+    {
+      "task": "st_carriers",
+      "elapsed_ms": 134.44,
+      "tokens": 407,
+      "row_count": 12
+    },
+    {
+      "task": "st_warehouses",
+      "elapsed_ms": 180.91,
+      "tokens": 1727,
+      "row_count": 24
+    },
+    {
+      "task": "st_plans",
+      "elapsed_ms": 179.88,
+      "tokens": 1660,
+      "row_count": 8
+    },
+    {
+      "task": "st_kb_articles",
+      "elapsed_ms": 204.69,
+      "tokens": 1727,
+      "row_count": 20
+    },
+    {
+      "task": "st_promo_codes",
+      "elapsed_ms": 170.72,
+      "tokens": 685,
+      "row_count": 20
+    },
+    {
+      "task": "st_currencies",
+      "elapsed_ms": 233.33,
+      "tokens": 1500,
+      "row_count": 14
+    },
+    {
+      "task": "syn_clients_region",
+      "elapsed_ms": 212.12,
+      "tokens": 4099,
+      "row_count": 5
+    },
+    {
+      "task": "syn_staff_per_dept",
+      "elapsed_ms": 252.27,
+      "tokens": 3280,
+      "row_count": 30
+    },
+    {
+      "task": "syn_sku_lookup",
+      "elapsed_ms": 217.51,
+      "tokens": 2678,
+      "row_count": 1
+    },
+    {
+      "task": "syn_qty_sold",
+      "elapsed_ms": 880.06,
+      "tokens": 3412,
+      "row_count": 20
+    },
+    {
+      "task": "syn_item_code",
+      "elapsed_ms": 216.97,
+      "tokens": 2500,
+      "row_count": 1
+    },
+    {
+      "task": "syn_opp_amt",
+      "elapsed_ms": 228.38,
+      "tokens": 877,
+      "row_count": 6
+    },
+    {
+      "task": "syn_headcount_country",
+      "elapsed_ms": 217.27,
+      "tokens": 2046,
+      "row_count": 10
+    },
+    {
+      "task": "j2_tickets_by_tier",
+      "elapsed_ms": 525.62,
+      "tokens": 1675,
+      "row_count": 4
+    },
+    {
+      "task": "j2_shipments_per_carrier",
+      "elapsed_ms": 313.59,
+      "tokens": 699,
+      "row_count": 11
+    },
+    {
+      "task": "j2_mrr_by_plan",
+      "elapsed_ms": 221.34,
+      "tokens": 3234,
+      "row_count": 8
+    },
+    {
+      "task": "j2_contacts_per_account",
+      "elapsed_ms": 245.78,
+      "tokens": 2468,
+      "row_count": 10
+    },
+    {
+      "task": "j2_campaign_leads",
+      "elapsed_ms": 291.07,
+      "tokens": 2886,
+      "row_count": 50
+    },
+    {
+      "task": "j2_dept_cost_centers",
+      "elapsed_ms": 205.86,
+      "tokens": 2729,
+      "row_count": 60
+    },
+    {
+      "task": "j2_supplier_products",
+      "elapsed_ms": 200.92,
+      "tokens": 2423,
+      "row_count": 20
+    },
+    {
+      "task": "mh_invoice_region",
+      "elapsed_ms": 351.85,
+      "tokens": 2339,
+      "row_count": 5
+    },
+    {
+      "task": "mh_invoice_units_category",
+      "elapsed_ms": 547.36,
+      "tokens": 2279,
+      "row_count": 12
+    },
+    {
+      "task": "mh_return_rate_category",
+      "elapsed_ms": 1298.43,
+      "tokens": 1890,
+      "row_count": 12
+    },
+    {
+      "task": "mh_tickets_agent_department",
+      "elapsed_ms": 346.52,
+      "tokens": 2013,
+      "row_count": 3
+    },
+    {
+      "task": "mh_api_failures_region",
+      "elapsed_ms": 432.59,
+      "tokens": 2924,
+      "row_count": 5
+    },
+    {
+      "task": "mh_payments_tier",
+      "elapsed_ms": 571.18,
+      "tokens": 1166,
+      "row_count": 4
+    },
+    {
+      "task": "mh_campaign_order_revenue",
+      "elapsed_ms": 403.14,
+      "tokens": 3070,
+      "row_count": 10
+    },
+    {
+      "task": "agg_monthly_orders",
+      "elapsed_ms": 761.96,
+      "tokens": 3716,
+      "row_count": 12
+    },
+    {
+      "task": "agg_top_customers_q3_emea",
+      "elapsed_ms": 493.27,
+      "tokens": 3742,
+      "row_count": 10
+    },
+    {
+      "task": "agg_failed_api_yesterday",
+      "elapsed_ms": 374.18,
+      "tokens": 2760,
+      "row_count": 1
+    },
+    {
+      "task": "agg_pageviews_daily",
+      "elapsed_ms": 306.09,
+      "tokens": 1312,
+      "row_count": 30
+    },
+    {
+      "task": "agg_gl_q2",
+      "elapsed_ms": 371.62,
+      "tokens": 3262,
+      "row_count": 60
+    },
+    {
+      "task": "agg_stock_movements",
+      "elapsed_ms": 328.11,
+      "tokens": 1423,
+      "row_count": 6
+    },
+    {
+      "task": "agg_email_ctr",
+      "elapsed_ms": 634.79,
+      "tokens": 2300,
+      "row_count": 20
+    },
+    {
+      "task": "au_deletes_exports",
+      "elapsed_ms": 341.35,
+      "tokens": 3138,
+      "row_count": 50
+    },
+    {
+      "task": "au_salary_changes",
+      "elapsed_ms": 350.04,
+      "tokens": 3246,
+      "row_count": 50
+    },
+    {
+      "task": "au_failed_logins",
+      "elapsed_ms": 310.67,
+      "tokens": 2351,
+      "row_count": 20
+    },
+    {
+      "task": "au_bruteforce_ips",
+      "elapsed_ms": 273.98,
+      "tokens": 2259,
+      "row_count": 20
+    },
+    {
+      "task": "au_subscription_cancels",
+      "elapsed_ms": 226.33,
+      "tokens": 2573,
+      "row_count": 6
+    },
+    {
+      "task": "au_critical_audit",
+      "elapsed_ms": 331.57,
+      "tokens": 805,
+      "row_count": 4
+    },
+    {
+      "task": "au_api_keys_failed_yesterday",
+      "elapsed_ms": 371.99,
+      "tokens": 2175,
+      "row_count": 10
+    },
+    {
+      "task": "amb_purchase_orders_late",
+      "elapsed_ms": 228.23,
+      "tokens": 2617,
+      "row_count": 50
+    },
+    {
+      "task": "amb_po_qty_warehouse",
+      "elapsed_ms": 362.08,
+      "tokens": 2820,
+      "row_count": 23
+    },
+    {
+      "task": "amb_sales_order_status",
+      "elapsed_ms": 291.44,
+      "tokens": 2480,
+      "row_count": 8
+    },
+    {
+      "task": "amb_gl_expense_accounts",
+      "elapsed_ms": 195.66,
+      "tokens": 2535,
+      "row_count": 50
+    },
+    {
+      "task": "amb_support_tier",
+      "elapsed_ms": 324.34,
+      "tokens": 2865,
+      "row_count": 4
+    },
+    {
+      "task": "amb_login_account_types",
+      "elapsed_ms": 338.26,
+      "tokens": 2157,
+      "row_count": 3
+    },
+    {
+      "task": "amb_order_shipments",
+      "elapsed_ms": 540.97,
+      "tokens": 2111,
+      "row_count": 1
+    },
+    {
+      "task": "lg_legacy_country",
+      "elapsed_ms": 179.83,
+      "tokens": 2870,
+      "row_count": 9
+    },
+    {
+      "task": "lg_archive_2019_region",
+      "elapsed_ms": 271.32,
+      "tokens": 2595,
+      "row_count": 7
+    },
+    {
+      "task": "lg_newsletter_country",
+      "elapsed_ms": 344.56,
+      "tokens": 1433,
+      "row_count": 7
+    },
+    {
+      "task": "lg_app_settings",
+      "elapsed_ms": 167.05,
+      "tokens": 2267,
+      "row_count": 60
+    },
+    {
+      "task": "lg_archive_customer",
+      "elapsed_ms": 545.89,
+      "tokens": 2305,
+      "row_count": 10
+    },
+    {
+      "task": "lg_change_history_ui",
+      "elapsed_ms": 386.97,
+      "tokens": 2357,
+      "row_count": 10
+    },
+    {
+      "task": "lg_legacy_migrated",
+      "elapsed_ms": 196.37,
+      "tokens": 2154,
+      "row_count": 1
+    },
+    {
+      "task": "wd_employees_hires_2026",
+      "elapsed_ms": 214.51,
+      "tokens": 8989,
+      "row_count": 200
+    },
+    {
+      "task": "wd_accounts_strategic",
+      "elapsed_ms": 217.96,
+      "tokens": 2838,
+      "row_count": 50
+    },
+    {
+      "task": "wd_products_margin",
+      "elapsed_ms": 221.2,
+      "tokens": 2949,
+      "row_count": 20
+    },
+    {
+      "task": "wd_orders_channel_q3",
+      "elapsed_ms": 368.3,
+      "tokens": 2825,
+      "row_count": 5
+    },
+    {
+      "task": "wd_manager_other_dept",
+      "elapsed_ms": 217.59,
+      "tokens": 2981,
+      "row_count": 1
+    },
+    {
+      "task": "wd_terminations_year",
+      "elapsed_ms": 310.14,
+      "tokens": 1438,
+      "row_count": 12
+    },
+    {
+      "task": "wd_hazmat_products",
+      "elapsed_ms": 214.32,
+      "tokens": 4123,
+      "row_count": 100
+    },
+    {
+      "task": "vg_best_customers",
+      "elapsed_ms": 1213.74,
+      "tokens": 3752,
+      "row_count": 10
+    },
+    {
+      "task": "vg_whats_low_stock",
+      "elapsed_ms": 319.39,
+      "tokens": 4136,
+      "row_count": 50
+    },
+    {
+      "task": "vg_complaints",
+      "elapsed_ms": 355.02,
+      "tokens": 2538,
+      "row_count": 10
+    },
+    {
+      "task": "vg_sales_trend",
+      "elapsed_ms": 640.37,
+      "tokens": 3728,
+      "row_count": 10
+    },
+    {
+      "task": "vg_who_owes",
+      "elapsed_ms": 675.47,
+      "tokens": 1381,
+      "row_count": 20
+    },
+    {
+      "task": "vg_churn",
+      "elapsed_ms": 215.48,
+      "tokens": 621,
+      "row_count": 6
+    },
+    {
+      "task": "vg_top_sellers",
+      "elapsed_ms": 467.59,
+      "tokens": 3780,
+      "row_count": 10
+    }
+  ]
+}

@@ -1,0 +1,1495 @@
+{
+ "summary": {
+  "tasks": 70,
+  "repeats": 3,
+  "latency_ms": {
+   "n": 210,
+   "median": 282.11,
+   "p95": 690.18,
+   "p99": 1335.21,
+   "max": 1353.02
+  },
+  "catalog_search_ms": {
+   "n": 210,
+   "median": 132.81,
+   "p95": 150.55,
+   "p99": 169.0,
+   "max": 180.91
+  },
+  "tokens_mean": 2492.6,
+  "tokens_median": 2474.0,
+  "note": "Fresh connection per task, catalog ILIKE search per catalog term, then the ground-truth SQL unbounded by TableFox policy."
+ },
+ "rows": [
+  {
+   "task": "st_regions",
+   "repeat": 0,
+   "elapsed_ms": 142.0,
+   "catalog_search_ms": 90.76,
+   "tokens": 1380
+  },
+  {
+   "task": "st_carriers",
+   "repeat": 0,
+   "elapsed_ms": 119.15,
+   "catalog_search_ms": 69.56,
+   "tokens": 407
+  },
+  {
+   "task": "st_warehouses",
+   "repeat": 0,
+   "elapsed_ms": 154.39,
+   "catalog_search_ms": 99.72,
+   "tokens": 1727
+  },
+  {
+   "task": "st_plans",
+   "repeat": 0,
+   "elapsed_ms": 159.84,
+   "catalog_search_ms": 104.05,
+   "tokens": 1660
+  },
+  {
+   "task": "st_kb_articles",
+   "repeat": 0,
+   "elapsed_ms": 198.5,
+   "catalog_search_ms": 140.34,
+   "tokens": 1727
+  },
+  {
+   "task": "st_promo_codes",
+   "repeat": 0,
+   "elapsed_ms": 270.79,
+   "catalog_search_ms": 120.13,
+   "tokens": 685
+  },
+  {
+   "task": "st_currencies",
+   "repeat": 0,
+   "elapsed_ms": 128.51,
+   "catalog_search_ms": 80.4,
+   "tokens": 1500
+  },
+  {
+   "task": "syn_clients_region",
+   "repeat": 0,
+   "elapsed_ms": 218.67,
+   "catalog_search_ms": 154.53,
+   "tokens": 4099
+  },
+  {
+   "task": "syn_staff_per_dept",
+   "repeat": 0,
+   "elapsed_ms": 213.47,
+   "catalog_search_ms": 144.35,
+   "tokens": 3280
+  },
+  {
+   "task": "syn_sku_lookup",
+   "repeat": 0,
+   "elapsed_ms": 190.91,
+   "catalog_search_ms": 134.35,
+   "tokens": 2678
+  },
+  {
+   "task": "syn_qty_sold",
+   "repeat": 0,
+   "elapsed_ms": 920.0,
+   "catalog_search_ms": 132.65,
+   "tokens": 3412
+  },
+  {
+   "task": "syn_item_code",
+   "repeat": 0,
+   "elapsed_ms": 182.52,
+   "catalog_search_ms": 124.94,
+   "tokens": 2500
+  },
+  {
+   "task": "syn_opp_amt",
+   "repeat": 0,
+   "elapsed_ms": 198.19,
+   "catalog_search_ms": 129.54,
+   "tokens": 877
+  },
+  {
+   "task": "syn_headcount_country",
+   "repeat": 0,
+   "elapsed_ms": 189.6,
+   "catalog_search_ms": 131.18,
+   "tokens": 2046
+  },
+  {
+   "task": "j2_tickets_by_tier",
+   "repeat": 0,
+   "elapsed_ms": 394.15,
+   "catalog_search_ms": 141.79,
+   "tokens": 1675
+  },
+  {
+   "task": "j2_shipments_per_carrier",
+   "repeat": 0,
+   "elapsed_ms": 298.47,
+   "catalog_search_ms": 100.43,
+   "tokens": 699
+  },
+  {
+   "task": "j2_mrr_by_plan",
+   "repeat": 0,
+   "elapsed_ms": 202.51,
+   "catalog_search_ms": 132.29,
+   "tokens": 3234
+  },
+  {
+   "task": "j2_contacts_per_account",
+   "repeat": 0,
+   "elapsed_ms": 218.87,
+   "catalog_search_ms": 105.7,
+   "tokens": 2468
+  },
+  {
+   "task": "j2_campaign_leads",
+   "repeat": 0,
+   "elapsed_ms": 278.08,
+   "catalog_search_ms": 139.38,
+   "tokens": 2886
+  },
+  {
+   "task": "j2_dept_cost_centers",
+   "repeat": 0,
+   "elapsed_ms": 189.49,
+   "catalog_search_ms": 131.56,
+   "tokens": 2729
+  },
+  {
+   "task": "j2_supplier_products",
+   "repeat": 0,
+   "elapsed_ms": 190.5,
+   "catalog_search_ms": 104.96,
+   "tokens": 2423
+  },
+  {
+   "task": "mh_invoice_region",
+   "repeat": 0,
+   "elapsed_ms": 443.71,
+   "catalog_search_ms": 131.39,
+   "tokens": 2339
+  },
+  {
+   "task": "mh_invoice_units_category",
+   "repeat": 0,
+   "elapsed_ms": 498.67,
+   "catalog_search_ms": 132.13,
+   "tokens": 2279
+  },
+  {
+   "task": "mh_return_rate_category",
+   "repeat": 0,
+   "elapsed_ms": 1353.02,
+   "catalog_search_ms": 144.21,
+   "tokens": 1890
+  },
+  {
+   "task": "mh_tickets_agent_department",
+   "repeat": 0,
+   "elapsed_ms": 333.13,
+   "catalog_search_ms": 136.67,
+   "tokens": 2013
+  },
+  {
+   "task": "mh_api_failures_region",
+   "repeat": 0,
+   "elapsed_ms": 381.01,
+   "catalog_search_ms": 140.43,
+   "tokens": 2924
+  },
+  {
+   "task": "mh_payments_tier",
+   "repeat": 0,
+   "elapsed_ms": 488.56,
+   "catalog_search_ms": 131.36,
+   "tokens": 1166
+  },
+  {
+   "task": "mh_campaign_order_revenue",
+   "repeat": 0,
+   "elapsed_ms": 392.1,
+   "catalog_search_ms": 168.69,
+   "tokens": 3070
+  },
+  {
+   "task": "agg_monthly_orders",
+   "repeat": 0,
+   "elapsed_ms": 600.03,
+   "catalog_search_ms": 125.15,
+   "tokens": 3716
+  },
+  {
+   "task": "agg_top_customers_q3_emea",
+   "repeat": 0,
+   "elapsed_ms": 366.37,
+   "catalog_search_ms": 137.43,
+   "tokens": 3742
+  },
+  {
+   "task": "agg_failed_api_yesterday",
+   "repeat": 0,
+   "elapsed_ms": 331.69,
+   "catalog_search_ms": 135.54,
+   "tokens": 2760
+  },
+  {
+   "task": "agg_pageviews_daily",
+   "repeat": 0,
+   "elapsed_ms": 278.55,
+   "catalog_search_ms": 104.84,
+   "tokens": 1312
+  },
+  {
+   "task": "agg_gl_q2",
+   "repeat": 0,
+   "elapsed_ms": 351.93,
+   "catalog_search_ms": 169.08,
+   "tokens": 3262
+  },
+  {
+   "task": "agg_stock_movements",
+   "repeat": 0,
+   "elapsed_ms": 294.39,
+   "catalog_search_ms": 107.16,
+   "tokens": 1423
+  },
+  {
+   "task": "agg_email_ctr",
+   "repeat": 0,
+   "elapsed_ms": 477.35,
+   "catalog_search_ms": 138.58,
+   "tokens": 2300
+  },
+  {
+   "task": "au_deletes_exports",
+   "repeat": 0,
+   "elapsed_ms": 331.17,
+   "catalog_search_ms": 128.08,
+   "tokens": 3138
+  },
+  {
+   "task": "au_salary_changes",
+   "repeat": 0,
+   "elapsed_ms": 295.56,
+   "catalog_search_ms": 124.95,
+   "tokens": 3246
+  },
+  {
+   "task": "au_failed_logins",
+   "repeat": 0,
+   "elapsed_ms": 324.93,
+   "catalog_search_ms": 140.06,
+   "tokens": 2351
+  },
+  {
+   "task": "au_bruteforce_ips",
+   "repeat": 0,
+   "elapsed_ms": 288.73,
+   "catalog_search_ms": 145.31,
+   "tokens": 2259
+  },
+  {
+   "task": "au_subscription_cancels",
+   "repeat": 0,
+   "elapsed_ms": 207.54,
+   "catalog_search_ms": 127.24,
+   "tokens": 2573
+  },
+  {
+   "task": "au_critical_audit",
+   "repeat": 0,
+   "elapsed_ms": 307.08,
+   "catalog_search_ms": 131.79,
+   "tokens": 805
+  },
+  {
+   "task": "au_api_keys_failed_yesterday",
+   "repeat": 0,
+   "elapsed_ms": 380.81,
+   "catalog_search_ms": 138.54,
+   "tokens": 2175
+  },
+  {
+   "task": "amb_purchase_orders_late",
+   "repeat": 0,
+   "elapsed_ms": 231.4,
+   "catalog_search_ms": 139.4,
+   "tokens": 2617
+  },
+  {
+   "task": "amb_po_qty_warehouse",
+   "repeat": 0,
+   "elapsed_ms": 356.32,
+   "catalog_search_ms": 133.24,
+   "tokens": 2820
+  },
+  {
+   "task": "amb_sales_order_status",
+   "repeat": 0,
+   "elapsed_ms": 274.63,
+   "catalog_search_ms": 99.59,
+   "tokens": 2480
+  },
+  {
+   "task": "amb_gl_expense_accounts",
+   "repeat": 0,
+   "elapsed_ms": 171.84,
+   "catalog_search_ms": 123.71,
+   "tokens": 2535
+  },
+  {
+   "task": "amb_support_tier",
+   "repeat": 0,
+   "elapsed_ms": 200.49,
+   "catalog_search_ms": 136.23,
+   "tokens": 2865
+  },
+  {
+   "task": "amb_login_account_types",
+   "repeat": 0,
+   "elapsed_ms": 312.16,
+   "catalog_search_ms": 129.15,
+   "tokens": 2157
+  },
+  {
+   "task": "amb_order_shipments",
+   "repeat": 0,
+   "elapsed_ms": 644.96,
+   "catalog_search_ms": 139.38,
+   "tokens": 2111
+  },
+  {
+   "task": "lg_legacy_country",
+   "repeat": 0,
+   "elapsed_ms": 215.07,
+   "catalog_search_ms": 143.6,
+   "tokens": 2870
+  },
+  {
+   "task": "lg_archive_2019_region",
+   "repeat": 0,
+   "elapsed_ms": 261.55,
+   "catalog_search_ms": 136.81,
+   "tokens": 2595
+  },
+  {
+   "task": "lg_newsletter_country",
+   "repeat": 0,
+   "elapsed_ms": 212.88,
+   "catalog_search_ms": 135.39,
+   "tokens": 1433
+  },
+  {
+   "task": "lg_app_settings",
+   "repeat": 0,
+   "elapsed_ms": 156.84,
+   "catalog_search_ms": 108.59,
+   "tokens": 2267
+  },
+  {
+   "task": "lg_archive_customer",
+   "repeat": 0,
+   "elapsed_ms": 487.92,
+   "catalog_search_ms": 138.06,
+   "tokens": 2305
+  },
+  {
+   "task": "lg_change_history_ui",
+   "repeat": 0,
+   "elapsed_ms": 397.83,
+   "catalog_search_ms": 139.59,
+   "tokens": 2357
+  },
+  {
+   "task": "lg_legacy_migrated",
+   "repeat": 0,
+   "elapsed_ms": 195.34,
+   "catalog_search_ms": 134.22,
+   "tokens": 2154
+  },
+  {
+   "task": "wd_employees_hires_2026",
+   "repeat": 0,
+   "elapsed_ms": 190.62,
+   "catalog_search_ms": 127.33,
+   "tokens": 8989
+  },
+  {
+   "task": "wd_accounts_strategic",
+   "repeat": 0,
+   "elapsed_ms": 195.83,
+   "catalog_search_ms": 131.82,
+   "tokens": 2838
+  },
+  {
+   "task": "wd_products_margin",
+   "repeat": 0,
+   "elapsed_ms": 218.8,
+   "catalog_search_ms": 138.48,
+   "tokens": 2949
+  },
+  {
+   "task": "wd_orders_channel_q3",
+   "repeat": 0,
+   "elapsed_ms": 370.27,
+   "catalog_search_ms": 134.11,
+   "tokens": 2825
+  },
+  {
+   "task": "wd_manager_other_dept",
+   "repeat": 0,
+   "elapsed_ms": 201.26,
+   "catalog_search_ms": 140.96,
+   "tokens": 2981
+  },
+  {
+   "task": "wd_terminations_year",
+   "repeat": 0,
+   "elapsed_ms": 185.75,
+   "catalog_search_ms": 130.03,
+   "tokens": 1438
+  },
+  {
+   "task": "wd_hazmat_products",
+   "repeat": 0,
+   "elapsed_ms": 189.28,
+   "catalog_search_ms": 133.96,
+   "tokens": 4123
+  },
+  {
+   "task": "vg_best_customers",
+   "repeat": 0,
+   "elapsed_ms": 1171.18,
+   "catalog_search_ms": 144.34,
+   "tokens": 3752
+  },
+  {
+   "task": "vg_whats_low_stock",
+   "repeat": 0,
+   "elapsed_ms": 301.28,
+   "catalog_search_ms": 133.27,
+   "tokens": 4136
+  },
+  {
+   "task": "vg_complaints",
+   "repeat": 0,
+   "elapsed_ms": 319.95,
+   "catalog_search_ms": 130.61,
+   "tokens": 2538
+  },
+  {
+   "task": "vg_sales_trend",
+   "repeat": 0,
+   "elapsed_ms": 574.61,
+   "catalog_search_ms": 132.42,
+   "tokens": 3728
+  },
+  {
+   "task": "vg_who_owes",
+   "repeat": 0,
+   "elapsed_ms": 596.62,
+   "catalog_search_ms": 131.31,
+   "tokens": 1381
+  },
+  {
+   "task": "vg_churn",
+   "repeat": 0,
+   "elapsed_ms": 170.79,
+   "catalog_search_ms": 118.85,
+   "tokens": 621
+  },
+  {
+   "task": "vg_top_sellers",
+   "repeat": 0,
+   "elapsed_ms": 423.58,
+   "catalog_search_ms": 128.51,
+   "tokens": 3780
+  },
+  {
+   "task": "st_regions",
+   "repeat": 1,
+   "elapsed_ms": 102.16,
+   "catalog_search_ms": 61.36,
+   "tokens": 1380
+  },
+  {
+   "task": "st_carriers",
+   "repeat": 1,
+   "elapsed_ms": 103.32,
+   "catalog_search_ms": 64.37,
+   "tokens": 407
+  },
+  {
+   "task": "st_warehouses",
+   "repeat": 1,
+   "elapsed_ms": 155.35,
+   "catalog_search_ms": 103.12,
+   "tokens": 1727
+  },
+  {
+   "task": "st_plans",
+   "repeat": 1,
+   "elapsed_ms": 152.31,
+   "catalog_search_ms": 102.7,
+   "tokens": 1660
+  },
+  {
+   "task": "st_kb_articles",
+   "repeat": 1,
+   "elapsed_ms": 184.85,
+   "catalog_search_ms": 132.63,
+   "tokens": 1727
+  },
+  {
+   "task": "st_promo_codes",
+   "repeat": 1,
+   "elapsed_ms": 153.74,
+   "catalog_search_ms": 104.48,
+   "tokens": 685
+  },
+  {
+   "task": "st_currencies",
+   "repeat": 1,
+   "elapsed_ms": 124.09,
+   "catalog_search_ms": 69.41,
+   "tokens": 1500
+  },
+  {
+   "task": "syn_clients_region",
+   "repeat": 1,
+   "elapsed_ms": 191.08,
+   "catalog_search_ms": 126.45,
+   "tokens": 4099
+  },
+  {
+   "task": "syn_staff_per_dept",
+   "repeat": 1,
+   "elapsed_ms": 205.0,
+   "catalog_search_ms": 141.61,
+   "tokens": 3280
+  },
+  {
+   "task": "syn_sku_lookup",
+   "repeat": 1,
+   "elapsed_ms": 186.79,
+   "catalog_search_ms": 135.69,
+   "tokens": 2678
+  },
+  {
+   "task": "syn_qty_sold",
+   "repeat": 1,
+   "elapsed_ms": 911.16,
+   "catalog_search_ms": 139.36,
+   "tokens": 3412
+  },
+  {
+   "task": "syn_item_code",
+   "repeat": 1,
+   "elapsed_ms": 325.33,
+   "catalog_search_ms": 145.54,
+   "tokens": 2500
+  },
+  {
+   "task": "syn_opp_amt",
+   "repeat": 1,
+   "elapsed_ms": 207.37,
+   "catalog_search_ms": 131.84,
+   "tokens": 877
+  },
+  {
+   "task": "syn_headcount_country",
+   "repeat": 1,
+   "elapsed_ms": 192.66,
+   "catalog_search_ms": 135.11,
+   "tokens": 2046
+  },
+  {
+   "task": "j2_tickets_by_tier",
+   "repeat": 1,
+   "elapsed_ms": 386.37,
+   "catalog_search_ms": 134.12,
+   "tokens": 1675
+  },
+  {
+   "task": "j2_shipments_per_carrier",
+   "repeat": 1,
+   "elapsed_ms": 315.02,
+   "catalog_search_ms": 106.21,
+   "tokens": 699
+  },
+  {
+   "task": "j2_mrr_by_plan",
+   "repeat": 1,
+   "elapsed_ms": 217.49,
+   "catalog_search_ms": 139.45,
+   "tokens": 3234
+  },
+  {
+   "task": "j2_contacts_per_account",
+   "repeat": 1,
+   "elapsed_ms": 206.96,
+   "catalog_search_ms": 99.04,
+   "tokens": 2468
+  },
+  {
+   "task": "j2_campaign_leads",
+   "repeat": 1,
+   "elapsed_ms": 362.32,
+   "catalog_search_ms": 130.04,
+   "tokens": 2886
+  },
+  {
+   "task": "j2_dept_cost_centers",
+   "repeat": 1,
+   "elapsed_ms": 188.79,
+   "catalog_search_ms": 134.89,
+   "tokens": 2729
+  },
+  {
+   "task": "j2_supplier_products",
+   "repeat": 1,
+   "elapsed_ms": 188.12,
+   "catalog_search_ms": 101.48,
+   "tokens": 2423
+  },
+  {
+   "task": "mh_invoice_region",
+   "repeat": 1,
+   "elapsed_ms": 368.26,
+   "catalog_search_ms": 132.85,
+   "tokens": 2339
+  },
+  {
+   "task": "mh_invoice_units_category",
+   "repeat": 1,
+   "elapsed_ms": 536.73,
+   "catalog_search_ms": 132.98,
+   "tokens": 2279
+  },
+  {
+   "task": "mh_return_rate_category",
+   "repeat": 1,
+   "elapsed_ms": 1344.27,
+   "catalog_search_ms": 128.37,
+   "tokens": 1890
+  },
+  {
+   "task": "mh_tickets_agent_department",
+   "repeat": 1,
+   "elapsed_ms": 317.44,
+   "catalog_search_ms": 150.55,
+   "tokens": 2013
+  },
+  {
+   "task": "mh_api_failures_region",
+   "repeat": 1,
+   "elapsed_ms": 359.36,
+   "catalog_search_ms": 124.48,
+   "tokens": 2924
+  },
+  {
+   "task": "mh_payments_tier",
+   "repeat": 1,
+   "elapsed_ms": 520.98,
+   "catalog_search_ms": 139.07,
+   "tokens": 1166
+  },
+  {
+   "task": "mh_campaign_order_revenue",
+   "repeat": 1,
+   "elapsed_ms": 414.56,
+   "catalog_search_ms": 169.0,
+   "tokens": 3070
+  },
+  {
+   "task": "agg_monthly_orders",
+   "repeat": 1,
+   "elapsed_ms": 705.56,
+   "catalog_search_ms": 140.16,
+   "tokens": 3716
+  },
+  {
+   "task": "agg_top_customers_q3_emea",
+   "repeat": 1,
+   "elapsed_ms": 381.31,
+   "catalog_search_ms": 142.07,
+   "tokens": 3742
+  },
+  {
+   "task": "agg_failed_api_yesterday",
+   "repeat": 1,
+   "elapsed_ms": 353.62,
+   "catalog_search_ms": 143.95,
+   "tokens": 2760
+  },
+  {
+   "task": "agg_pageviews_daily",
+   "repeat": 1,
+   "elapsed_ms": 282.92,
+   "catalog_search_ms": 106.26,
+   "tokens": 1312
+  },
+  {
+   "task": "agg_gl_q2",
+   "repeat": 1,
+   "elapsed_ms": 360.07,
+   "catalog_search_ms": 166.45,
+   "tokens": 3262
+  },
+  {
+   "task": "agg_stock_movements",
+   "repeat": 1,
+   "elapsed_ms": 297.56,
+   "catalog_search_ms": 100.39,
+   "tokens": 1423
+  },
+  {
+   "task": "agg_email_ctr",
+   "repeat": 1,
+   "elapsed_ms": 511.77,
+   "catalog_search_ms": 135.17,
+   "tokens": 2300
+  },
+  {
+   "task": "au_deletes_exports",
+   "repeat": 1,
+   "elapsed_ms": 342.04,
+   "catalog_search_ms": 140.27,
+   "tokens": 3138
+  },
+  {
+   "task": "au_salary_changes",
+   "repeat": 1,
+   "elapsed_ms": 329.01,
+   "catalog_search_ms": 138.75,
+   "tokens": 3246
+  },
+  {
+   "task": "au_failed_logins",
+   "repeat": 1,
+   "elapsed_ms": 330.16,
+   "catalog_search_ms": 135.67,
+   "tokens": 2351
+  },
+  {
+   "task": "au_bruteforce_ips",
+   "repeat": 1,
+   "elapsed_ms": 271.66,
+   "catalog_search_ms": 125.51,
+   "tokens": 2259
+  },
+  {
+   "task": "au_subscription_cancels",
+   "repeat": 1,
+   "elapsed_ms": 224.51,
+   "catalog_search_ms": 137.3,
+   "tokens": 2573
+  },
+  {
+   "task": "au_critical_audit",
+   "repeat": 1,
+   "elapsed_ms": 311.67,
+   "catalog_search_ms": 131.06,
+   "tokens": 805
+  },
+  {
+   "task": "au_api_keys_failed_yesterday",
+   "repeat": 1,
+   "elapsed_ms": 377.51,
+   "catalog_search_ms": 138.64,
+   "tokens": 2175
+  },
+  {
+   "task": "amb_purchase_orders_late",
+   "repeat": 1,
+   "elapsed_ms": 223.02,
+   "catalog_search_ms": 134.1,
+   "tokens": 2617
+  },
+  {
+   "task": "amb_po_qty_warehouse",
+   "repeat": 1,
+   "elapsed_ms": 377.09,
+   "catalog_search_ms": 151.78,
+   "tokens": 2820
+  },
+  {
+   "task": "amb_sales_order_status",
+   "repeat": 1,
+   "elapsed_ms": 288.48,
+   "catalog_search_ms": 101.02,
+   "tokens": 2480
+  },
+  {
+   "task": "amb_gl_expense_accounts",
+   "repeat": 1,
+   "elapsed_ms": 181.23,
+   "catalog_search_ms": 132.02,
+   "tokens": 2535
+  },
+  {
+   "task": "amb_support_tier",
+   "repeat": 1,
+   "elapsed_ms": 191.61,
+   "catalog_search_ms": 125.26,
+   "tokens": 2865
+  },
+  {
+   "task": "amb_login_account_types",
+   "repeat": 1,
+   "elapsed_ms": 196.93,
+   "catalog_search_ms": 133.84,
+   "tokens": 2157
+  },
+  {
+   "task": "amb_order_shipments",
+   "repeat": 1,
+   "elapsed_ms": 626.64,
+   "catalog_search_ms": 136.34,
+   "tokens": 2111
+  },
+  {
+   "task": "lg_legacy_country",
+   "repeat": 1,
+   "elapsed_ms": 192.27,
+   "catalog_search_ms": 132.78,
+   "tokens": 2870
+  },
+  {
+   "task": "lg_archive_2019_region",
+   "repeat": 1,
+   "elapsed_ms": 264.51,
+   "catalog_search_ms": 134.58,
+   "tokens": 2595
+  },
+  {
+   "task": "lg_newsletter_country",
+   "repeat": 1,
+   "elapsed_ms": 216.68,
+   "catalog_search_ms": 141.39,
+   "tokens": 1433
+  },
+  {
+   "task": "lg_app_settings",
+   "repeat": 1,
+   "elapsed_ms": 150.43,
+   "catalog_search_ms": 99.73,
+   "tokens": 2267
+  },
+  {
+   "task": "lg_archive_customer",
+   "repeat": 1,
+   "elapsed_ms": 496.01,
+   "catalog_search_ms": 137.62,
+   "tokens": 2305
+  },
+  {
+   "task": "lg_change_history_ui",
+   "repeat": 1,
+   "elapsed_ms": 373.28,
+   "catalog_search_ms": 131.52,
+   "tokens": 2357
+  },
+  {
+   "task": "lg_legacy_migrated",
+   "repeat": 1,
+   "elapsed_ms": 203.12,
+   "catalog_search_ms": 141.64,
+   "tokens": 2154
+  },
+  {
+   "task": "wd_employees_hires_2026",
+   "repeat": 1,
+   "elapsed_ms": 209.56,
+   "catalog_search_ms": 138.4,
+   "tokens": 8989
+  },
+  {
+   "task": "wd_accounts_strategic",
+   "repeat": 1,
+   "elapsed_ms": 197.32,
+   "catalog_search_ms": 134.72,
+   "tokens": 2838
+  },
+  {
+   "task": "wd_products_margin",
+   "repeat": 1,
+   "elapsed_ms": 201.29,
+   "catalog_search_ms": 124.0,
+   "tokens": 2949
+  },
+  {
+   "task": "wd_orders_channel_q3",
+   "repeat": 1,
+   "elapsed_ms": 354.99,
+   "catalog_search_ms": 142.84,
+   "tokens": 2825
+  },
+  {
+   "task": "wd_manager_other_dept",
+   "repeat": 1,
+   "elapsed_ms": 190.15,
+   "catalog_search_ms": 134.52,
+   "tokens": 2981
+  },
+  {
+   "task": "wd_terminations_year",
+   "repeat": 1,
+   "elapsed_ms": 285.06,
+   "catalog_search_ms": 128.37,
+   "tokens": 1438
+  },
+  {
+   "task": "wd_hazmat_products",
+   "repeat": 1,
+   "elapsed_ms": 201.87,
+   "catalog_search_ms": 144.97,
+   "tokens": 4123
+  },
+  {
+   "task": "vg_best_customers",
+   "repeat": 1,
+   "elapsed_ms": 1125.83,
+   "catalog_search_ms": 140.63,
+   "tokens": 3752
+  },
+  {
+   "task": "vg_whats_low_stock",
+   "repeat": 1,
+   "elapsed_ms": 259.88,
+   "catalog_search_ms": 121.61,
+   "tokens": 4136
+  },
+  {
+   "task": "vg_complaints",
+   "repeat": 1,
+   "elapsed_ms": 283.11,
+   "catalog_search_ms": 115.36,
+   "tokens": 2538
+  },
+  {
+   "task": "vg_sales_trend",
+   "repeat": 1,
+   "elapsed_ms": 582.27,
+   "catalog_search_ms": 119.55,
+   "tokens": 3728
+  },
+  {
+   "task": "vg_who_owes",
+   "repeat": 1,
+   "elapsed_ms": 497.29,
+   "catalog_search_ms": 115.98,
+   "tokens": 1381
+  },
+  {
+   "task": "vg_churn",
+   "repeat": 1,
+   "elapsed_ms": 286.15,
+   "catalog_search_ms": 120.66,
+   "tokens": 621
+  },
+  {
+   "task": "vg_top_sellers",
+   "repeat": 1,
+   "elapsed_ms": 394.72,
+   "catalog_search_ms": 124.73,
+   "tokens": 3780
+  },
+  {
+   "task": "st_regions",
+   "repeat": 2,
+   "elapsed_ms": 104.35,
+   "catalog_search_ms": 62.58,
+   "tokens": 1380
+  },
+  {
+   "task": "st_carriers",
+   "repeat": 2,
+   "elapsed_ms": 105.46,
+   "catalog_search_ms": 62.41,
+   "tokens": 407
+  },
+  {
+   "task": "st_warehouses",
+   "repeat": 2,
+   "elapsed_ms": 133.95,
+   "catalog_search_ms": 89.61,
+   "tokens": 1727
+  },
+  {
+   "task": "st_plans",
+   "repeat": 2,
+   "elapsed_ms": 147.04,
+   "catalog_search_ms": 100.28,
+   "tokens": 1660
+  },
+  {
+   "task": "st_kb_articles",
+   "repeat": 2,
+   "elapsed_ms": 182.52,
+   "catalog_search_ms": 133.04,
+   "tokens": 1727
+  },
+  {
+   "task": "st_promo_codes",
+   "repeat": 2,
+   "elapsed_ms": 159.34,
+   "catalog_search_ms": 108.52,
+   "tokens": 685
+  },
+  {
+   "task": "st_currencies",
+   "repeat": 2,
+   "elapsed_ms": 226.89,
+   "catalog_search_ms": 70.77,
+   "tokens": 1500
+  },
+  {
+   "task": "syn_clients_region",
+   "repeat": 2,
+   "elapsed_ms": 195.44,
+   "catalog_search_ms": 131.4,
+   "tokens": 4099
+  },
+  {
+   "task": "syn_staff_per_dept",
+   "repeat": 2,
+   "elapsed_ms": 200.48,
+   "catalog_search_ms": 135.77,
+   "tokens": 3280
+  },
+  {
+   "task": "syn_sku_lookup",
+   "repeat": 2,
+   "elapsed_ms": 192.61,
+   "catalog_search_ms": 140.63,
+   "tokens": 2678
+  },
+  {
+   "task": "syn_qty_sold",
+   "repeat": 2,
+   "elapsed_ms": 1005.63,
+   "catalog_search_ms": 142.01,
+   "tokens": 3412
+  },
+  {
+   "task": "syn_item_code",
+   "repeat": 2,
+   "elapsed_ms": 293.37,
+   "catalog_search_ms": 121.92,
+   "tokens": 2500
+  },
+  {
+   "task": "syn_opp_amt",
+   "repeat": 2,
+   "elapsed_ms": 180.44,
+   "catalog_search_ms": 117.85,
+   "tokens": 877
+  },
+  {
+   "task": "syn_headcount_country",
+   "repeat": 2,
+   "elapsed_ms": 168.1,
+   "catalog_search_ms": 119.13,
+   "tokens": 2046
+  },
+  {
+   "task": "j2_tickets_by_tier",
+   "repeat": 2,
+   "elapsed_ms": 333.39,
+   "catalog_search_ms": 121.11,
+   "tokens": 1675
+  },
+  {
+   "task": "j2_shipments_per_carrier",
+   "repeat": 2,
+   "elapsed_ms": 282.45,
+   "catalog_search_ms": 93.86,
+   "tokens": 699
+  },
+  {
+   "task": "j2_mrr_by_plan",
+   "repeat": 2,
+   "elapsed_ms": 203.39,
+   "catalog_search_ms": 130.67,
+   "tokens": 3234
+  },
+  {
+   "task": "j2_contacts_per_account",
+   "repeat": 2,
+   "elapsed_ms": 216.43,
+   "catalog_search_ms": 101.78,
+   "tokens": 2468
+  },
+  {
+   "task": "j2_campaign_leads",
+   "repeat": 2,
+   "elapsed_ms": 263.76,
+   "catalog_search_ms": 135.36,
+   "tokens": 2886
+  },
+  {
+   "task": "j2_dept_cost_centers",
+   "repeat": 2,
+   "elapsed_ms": 179.64,
+   "catalog_search_ms": 124.88,
+   "tokens": 2729
+  },
+  {
+   "task": "j2_supplier_products",
+   "repeat": 2,
+   "elapsed_ms": 192.43,
+   "catalog_search_ms": 103.28,
+   "tokens": 2423
+  },
+  {
+   "task": "mh_invoice_region",
+   "repeat": 2,
+   "elapsed_ms": 338.37,
+   "catalog_search_ms": 128.66,
+   "tokens": 2339
+  },
+  {
+   "task": "mh_invoice_units_category",
+   "repeat": 2,
+   "elapsed_ms": 540.16,
+   "catalog_search_ms": 138.33,
+   "tokens": 2279
+  },
+  {
+   "task": "mh_return_rate_category",
+   "repeat": 2,
+   "elapsed_ms": 1335.21,
+   "catalog_search_ms": 137.87,
+   "tokens": 1890
+  },
+  {
+   "task": "mh_tickets_agent_department",
+   "repeat": 2,
+   "elapsed_ms": 287.49,
+   "catalog_search_ms": 121.95,
+   "tokens": 2013
+  },
+  {
+   "task": "mh_api_failures_region",
+   "repeat": 2,
+   "elapsed_ms": 364.77,
+   "catalog_search_ms": 116.73,
+   "tokens": 2924
+  },
+  {
+   "task": "mh_payments_tier",
+   "repeat": 2,
+   "elapsed_ms": 495.11,
+   "catalog_search_ms": 126.21,
+   "tokens": 1166
+  },
+  {
+   "task": "mh_campaign_order_revenue",
+   "repeat": 2,
+   "elapsed_ms": 430.85,
+   "catalog_search_ms": 180.91,
+   "tokens": 3070
+  },
+  {
+   "task": "agg_monthly_orders",
+   "repeat": 2,
+   "elapsed_ms": 690.18,
+   "catalog_search_ms": 133.64,
+   "tokens": 3716
+  },
+  {
+   "task": "agg_top_customers_q3_emea",
+   "repeat": 2,
+   "elapsed_ms": 299.55,
+   "catalog_search_ms": 126.66,
+   "tokens": 3742
+  },
+  {
+   "task": "agg_failed_api_yesterday",
+   "repeat": 2,
+   "elapsed_ms": 427.04,
+   "catalog_search_ms": 122.85,
+   "tokens": 2760
+  },
+  {
+   "task": "agg_pageviews_daily",
+   "repeat": 2,
+   "elapsed_ms": 281.76,
+   "catalog_search_ms": 89.01,
+   "tokens": 1312
+  },
+  {
+   "task": "agg_gl_q2",
+   "repeat": 2,
+   "elapsed_ms": 320.46,
+   "catalog_search_ms": 142.12,
+   "tokens": 3262
+  },
+  {
+   "task": "agg_stock_movements",
+   "repeat": 2,
+   "elapsed_ms": 289.2,
+   "catalog_search_ms": 89.91,
+   "tokens": 1423
+  },
+  {
+   "task": "agg_email_ctr",
+   "repeat": 2,
+   "elapsed_ms": 442.4,
+   "catalog_search_ms": 120.2,
+   "tokens": 2300
+  },
+  {
+   "task": "au_deletes_exports",
+   "repeat": 2,
+   "elapsed_ms": 328.29,
+   "catalog_search_ms": 134.3,
+   "tokens": 3138
+  },
+  {
+   "task": "au_salary_changes",
+   "repeat": 2,
+   "elapsed_ms": 301.68,
+   "catalog_search_ms": 136.79,
+   "tokens": 3246
+  },
+  {
+   "task": "au_failed_logins",
+   "repeat": 2,
+   "elapsed_ms": 351.61,
+   "catalog_search_ms": 144.45,
+   "tokens": 2351
+  },
+  {
+   "task": "au_bruteforce_ips",
+   "repeat": 2,
+   "elapsed_ms": 295.28,
+   "catalog_search_ms": 137.04,
+   "tokens": 2259
+  },
+  {
+   "task": "au_subscription_cancels",
+   "repeat": 2,
+   "elapsed_ms": 226.6,
+   "catalog_search_ms": 135.6,
+   "tokens": 2573
+  },
+  {
+   "task": "au_critical_audit",
+   "repeat": 2,
+   "elapsed_ms": 336.24,
+   "catalog_search_ms": 134.63,
+   "tokens": 805
+  },
+  {
+   "task": "au_api_keys_failed_yesterday",
+   "repeat": 2,
+   "elapsed_ms": 357.83,
+   "catalog_search_ms": 140.19,
+   "tokens": 2175
+  },
+  {
+   "task": "amb_purchase_orders_late",
+   "repeat": 2,
+   "elapsed_ms": 222.93,
+   "catalog_search_ms": 129.24,
+   "tokens": 2617
+  },
+  {
+   "task": "amb_po_qty_warehouse",
+   "repeat": 2,
+   "elapsed_ms": 351.84,
+   "catalog_search_ms": 132.01,
+   "tokens": 2820
+  },
+  {
+   "task": "amb_sales_order_status",
+   "repeat": 2,
+   "elapsed_ms": 398.36,
+   "catalog_search_ms": 101.6,
+   "tokens": 2480
+  },
+  {
+   "task": "amb_gl_expense_accounts",
+   "repeat": 2,
+   "elapsed_ms": 188.02,
+   "catalog_search_ms": 138.67,
+   "tokens": 2535
+  },
+  {
+   "task": "amb_support_tier",
+   "repeat": 2,
+   "elapsed_ms": 208.53,
+   "catalog_search_ms": 136.5,
+   "tokens": 2865
+  },
+  {
+   "task": "amb_login_account_types",
+   "repeat": 2,
+   "elapsed_ms": 204.58,
+   "catalog_search_ms": 140.83,
+   "tokens": 2157
+  },
+  {
+   "task": "amb_order_shipments",
+   "repeat": 2,
+   "elapsed_ms": 634.38,
+   "catalog_search_ms": 148.37,
+   "tokens": 2111
+  },
+  {
+   "task": "lg_legacy_country",
+   "repeat": 2,
+   "elapsed_ms": 189.92,
+   "catalog_search_ms": 132.21,
+   "tokens": 2870
+  },
+  {
+   "task": "lg_archive_2019_region",
+   "repeat": 2,
+   "elapsed_ms": 269.32,
+   "catalog_search_ms": 140.33,
+   "tokens": 2595
+  },
+  {
+   "task": "lg_newsletter_country",
+   "repeat": 2,
+   "elapsed_ms": 219.45,
+   "catalog_search_ms": 137.62,
+   "tokens": 1433
+  },
+  {
+   "task": "lg_app_settings",
+   "repeat": 2,
+   "elapsed_ms": 157.66,
+   "catalog_search_ms": 109.24,
+   "tokens": 2267
+  },
+  {
+   "task": "lg_archive_customer",
+   "repeat": 2,
+   "elapsed_ms": 439.44,
+   "catalog_search_ms": 130.5,
+   "tokens": 2305
+  },
+  {
+   "task": "lg_change_history_ui",
+   "repeat": 2,
+   "elapsed_ms": 390.38,
+   "catalog_search_ms": 144.94,
+   "tokens": 2357
+  },
+  {
+   "task": "lg_legacy_migrated",
+   "repeat": 2,
+   "elapsed_ms": 177.03,
+   "catalog_search_ms": 123.52,
+   "tokens": 2154
+  },
+  {
+   "task": "wd_employees_hires_2026",
+   "repeat": 2,
+   "elapsed_ms": 219.48,
+   "catalog_search_ms": 152.18,
+   "tokens": 8989
+  },
+  {
+   "task": "wd_accounts_strategic",
+   "repeat": 2,
+   "elapsed_ms": 216.19,
+   "catalog_search_ms": 145.87,
+   "tokens": 2838
+  },
+  {
+   "task": "wd_products_margin",
+   "repeat": 2,
+   "elapsed_ms": 228.64,
+   "catalog_search_ms": 151.36,
+   "tokens": 2949
+  },
+  {
+   "task": "wd_orders_channel_q3",
+   "repeat": 2,
+   "elapsed_ms": 268.24,
+   "catalog_search_ms": 133.68,
+   "tokens": 2825
+  },
+  {
+   "task": "wd_manager_other_dept",
+   "repeat": 2,
+   "elapsed_ms": 192.49,
+   "catalog_search_ms": 136.78,
+   "tokens": 2981
+  },
+  {
+   "task": "wd_terminations_year",
+   "repeat": 2,
+   "elapsed_ms": 192.22,
+   "catalog_search_ms": 132.96,
+   "tokens": 1438
+  },
+  {
+   "task": "wd_hazmat_products",
+   "repeat": 2,
+   "elapsed_ms": 191.52,
+   "catalog_search_ms": 137.62,
+   "tokens": 4123
+  },
+  {
+   "task": "vg_best_customers",
+   "repeat": 2,
+   "elapsed_ms": 1237.96,
+   "catalog_search_ms": 152.09,
+   "tokens": 3752
+  },
+  {
+   "task": "vg_whats_low_stock",
+   "repeat": 2,
+   "elapsed_ms": 312.96,
+   "catalog_search_ms": 141.45,
+   "tokens": 4136
+  },
+  {
+   "task": "vg_complaints",
+   "repeat": 2,
+   "elapsed_ms": 334.19,
+   "catalog_search_ms": 132.3,
+   "tokens": 2538
+  },
+  {
+   "task": "vg_sales_trend",
+   "repeat": 2,
+   "elapsed_ms": 571.46,
+   "catalog_search_ms": 135.45,
+   "tokens": 3728
+  },
+  {
+   "task": "vg_who_owes",
+   "repeat": 2,
+   "elapsed_ms": 628.22,
+   "catalog_search_ms": 128.81,
+   "tokens": 1381
+  },
+  {
+   "task": "vg_churn",
+   "repeat": 2,
+   "elapsed_ms": 191.19,
+   "catalog_search_ms": 130.95,
+   "tokens": 621
+  },
+  {
+   "task": "vg_top_sellers",
+   "repeat": 2,
+   "elapsed_ms": 468.29,
+   "catalog_search_ms": 146.92,
+   "tokens": 3780
+  }
+ ]
+}

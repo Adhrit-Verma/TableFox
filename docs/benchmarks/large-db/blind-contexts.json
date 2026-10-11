@@ -1,0 +1,3742 @@
+{
+ "st_kb_articles": {
+  "question": "Show the 20 most viewed knowledge base articles",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:support.kb_articles",
+     "columns": [
+      "article_id",
+      "author_employee_id"
+     ]
+    },
+    {
+     "id": "table:analytics.page_views",
+     "columns": [
+      "viewed_at",
+      "session_id",
+      "view_id"
+     ]
+    },
+    {
+     "id": "table:analytics.web_sessions",
+     "columns": [
+      "cust_id",
+      "session_id",
+      "country_code"
+     ]
+    },
+    {
+     "id": "table:hr.employees",
+     "columns": [
+      "cost_center_id",
+      "department_id",
+      "employee_id",
+      "manager_id",
+      "employee_number",
+      "employment_type",
+      "job_level",
+      "location_country",
+      "salary_currency",
+      "work_mode"
+     ]
+    },
+    {
+     "id": "table:public.countries",
+     "columns": [
+      "region_id",
+      "country_code",
+      "currency_code",
+      "country_name"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:analytics.page_views",
+     [
+      "session_id"
+     ],
+     "table:analytics.web_sessions",
+     [
+      "session_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:analytics.web_sessions",
+     [
+      "country_code"
+     ],
+     "table:public.countries",
+     [
+      "country_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:hr.employees",
+     [
+      "location_country"
+     ],
+     "table:public.countries",
+     [
+      "country_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:support.kb_articles",
+     [
+      "author_employee_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 1026
+  }
+ },
+ "st_promo_codes": {
+  "question": "Which promo codes give the biggest discount?",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:sales.promo_codes",
+     "columns": [
+      "promo_code",
+      "discount_pct",
+      "campaign_id"
+     ]
+    },
+    {
+     "id": "table:sales.orders",
+     "columns": [
+      "promo_code",
+      "discount_amt",
+      "currency_code",
+      "cust_id",
+      "order_id",
+      "quote_id",
+      "sales_rep_id",
+      "territory_id",
+      "warehouse_id",
+      "bill_to_country",
+      "channel",
+      "order_no"
+     ]
+    },
+    {
+     "id": "table:inventory.item_aliases",
+     "columns": [
+      "item_code",
+      "alias_id",
+      "product_id"
+     ]
+    },
+    {
+     "id": "table:inventory.products",
+     "columns": [
+      "currency_code",
+      "hs_code",
+      "category_id",
+      "product_id",
+      "supplier_id",
+      "country_of_origin",
+      "sku"
+     ]
+    },
+    {
+     "id": "table:public.countries",
+     "columns": [
+      "country_code",
+      "currency_code",
+      "region_id",
+      "country_name"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:inventory.item_aliases",
+     [
+      "product_id"
+     ],
+     "table:inventory.products",
+     [
+      "product_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:inventory.products",
+     [
+      "country_of_origin"
+     ],
+     "table:public.countries",
+     [
+      "country_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.orders",
+     [
+      "ship_to_country"
+     ],
+     "table:public.countries",
+     [
+      "country_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.orders",
+     [
+      "promo_code"
+     ],
+     "table:sales.promo_codes",
+     [
+      "promo_code"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 1076
+  }
+ },
+ "syn_clients_region": {
+  "question": "How many clients do we have in each region?",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:public.regions",
+     "columns": [
+      "region_id",
+      "region_code"
+     ]
+    },
+    {
+     "id": "table:crm.accounts",
+     "columns": [
+      "region_id",
+      "account_id",
+      "owner_employee_id",
+      "parent_account_id",
+      "support_tier_id",
+      "account_number",
+      "country_code",
+      "preferred_currency"
+     ]
+    },
+    {
+     "id": "table:public.tbl_cust_legacy",
+     "columns": []
+    },
+    {
+     "id": "table:finance.gl_entries",
+     "columns": [
+      "cost_center_id",
+      "entry_id",
+      "gl_account_id",
+      "currency_code"
+     ]
+    },
+    {
+     "id": "table:crm.contacts",
+     "columns": [
+      "account_id",
+      "contact_id"
+     ]
+    },
+    {
+     "id": "table:sales.customers",
+     "columns": [
+      "account_id",
+      "cust_id",
+      "price_list_id",
+      "territory_id",
+      "billing_country",
+      "customer_code",
+      "default_currency",
+      "shipping_country"
+     ]
+    },
+    {
+     "id": "table:public.currencies",
+     "columns": [
+      "currency_code",
+      "currency_name"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:crm.accounts",
+     [
+      "preferred_currency"
+     ],
+     "table:public.currencies",
+     [
+      "currency_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:crm.accounts",
+     [
+      "region_id"
+     ],
+     "table:public.regions",
+     [
+      "region_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:crm.contacts",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.gl_entries",
+     [
+      "currency_code"
+     ],
+     "table:public.currencies",
+     [
+      "currency_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.customers",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": false,
+   "bytes": 1249
+  }
+ },
+ "syn_staff_per_dept": {
+  "question": "How many staff are in each department?",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:hr.departments",
+     "columns": [
+      "department_id",
+      "parent_department_id",
+      "head_employee_id",
+      "dept_code",
+      "location_country"
+     ]
+    },
+    {
+     "id": "table:hr.employees",
+     "columns": [
+      "department_id",
+      "cost_center_id",
+      "employee_id",
+      "manager_id",
+      "employee_number",
+      "employment_type",
+      "job_level",
+      "location_country",
+      "salary_currency",
+      "work_mode"
+     ]
+    },
+    {
+     "id": "table:ops.login_events",
+     "columns": [
+      "event_id",
+      "user_id"
+     ]
+    },
+    {
+     "id": "table:finance.gl_entries",
+     "columns": [
+      "cost_center_id",
+      "entry_id",
+      "gl_account_id",
+      "currency_code"
+     ]
+    },
+    {
+     "id": "table:hr.teams",
+     "columns": [
+      "department_id",
+      "lead_employee_id",
+      "team_id"
+     ]
+    },
+    {
+     "id": "table:sales.customers",
+     "columns": [
+      "account_id",
+      "cust_id",
+      "price_list_id",
+      "territory_id",
+      "billing_country",
+      "customer_code",
+      "default_currency",
+      "shipping_country"
+     ]
+    },
+    {
+     "id": "table:finance.cost_centers",
+     "columns": [
+      "department_id",
+      "cost_center_id",
+      "cc_code",
+      "cc_name"
+     ]
+    },
+    {
+     "id": "table:ops.app_users",
+     "columns": [
+      "account_id",
+      "employee_id",
+      "user_id",
+      "user_type",
+      "username"
+     ]
+    },
+    {
+     "id": "table:public.currencies",
+     "columns": [
+      "currency_code",
+      "currency_name"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:finance.cost_centers",
+     [
+      "department_id"
+     ],
+     "table:hr.departments",
+     [
+      "department_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.gl_entries",
+     [
+      "cost_center_id"
+     ],
+     "table:finance.cost_centers",
+     [
+      "cost_center_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.gl_entries",
+     [
+      "currency_code"
+     ],
+     "table:public.currencies",
+     [
+      "currency_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:hr.departments",
+     [
+      "head_employee_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:hr.teams",
+     [
+      "department_id"
+     ],
+     "table:hr.departments",
+     [
+      "department_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.app_users",
+     [
+      "employee_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.login_events",
+     [
+      "user_id"
+     ],
+     "table:ops.app_users",
+     [
+      "user_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.customers",
+     [
+      "default_currency"
+     ],
+     "table:public.currencies",
+     [
+      "currency_code"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 1878
+  }
+ },
+ "syn_qty_sold": {
+  "question": "Which SKUs have the highest total qty ordered?",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:ops.order_lines",
+     "columns": [
+      "qty_ordered",
+      "qty_received",
+      "order_id",
+      "order_line_id",
+      "product_id"
+     ]
+    },
+    {
+     "id": "table:ops.orders",
+     "columns": [
+      "total_amt",
+      "ordered_dt",
+      "buyer_id",
+      "order_id",
+      "supplier_id",
+      "warehouse_id",
+      "currency_code",
+      "po_number",
+      "status"
+     ]
+    },
+    {
+     "id": "table:inventory.products",
+     "columns": [
+      "min_order_qty",
+      "sku",
+      "category_id",
+      "product_id",
+      "supplier_id",
+      "country_of_origin",
+      "currency_code"
+     ]
+    },
+    {
+     "id": "table:inventory.product_suppliers",
+     "columns": [
+      "supplier_sku",
+      "product_id",
+      "supplier_id"
+     ]
+    },
+    {
+     "id": "table:inventory.stock_levels",
+     "columns": [
+      "qty_on_hand",
+      "qty_on_order",
+      "product_id",
+      "warehouse_id"
+     ]
+    },
+    {
+     "id": "table:sales.quotes",
+     "columns": [
+      "total_amt",
+      "cust_id",
+      "opp_id",
+      "quote_id",
+      "created_by",
+      "status"
+     ]
+    },
+    {
+     "id": "table:hr.employees",
+     "columns": [
+      "cost_center_id",
+      "department_id",
+      "employee_id",
+      "manager_id",
+      "employee_number",
+      "employment_type",
+      "job_level",
+      "location_country",
+      "salary_currency",
+      "work_mode"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:inventory.product_suppliers",
+     [
+      "product_id"
+     ],
+     "table:inventory.products",
+     [
+      "product_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:inventory.stock_levels",
+     [
+      "product_id"
+     ],
+     "table:inventory.products",
+     [
+      "product_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.order_lines",
+     [
+      "product_id"
+     ],
+     "table:inventory.products",
+     [
+      "product_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.order_lines",
+     [
+      "order_id"
+     ],
+     "table:ops.orders",
+     [
+      "order_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.orders",
+     [
+      "buyer_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.quotes",
+     [
+      "created_by"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 1541
+  }
+ },
+ "syn_opp_amt": {
+  "question": "What is the total opp amt by stage?",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:sales.quotes",
+     "columns": [
+      "total_amt",
+      "created_by",
+      "opp_id",
+      "cust_id",
+      "quote_id",
+      "status"
+     ]
+    },
+    {
+     "id": "table:crm.opportunities",
+     "columns": [
+      "amt",
+      "opp_id",
+      "opp_name",
+      "stage",
+      "account_id",
+      "lead_id",
+      "owner_employee_id"
+     ]
+    },
+    {
+     "id": "table:sales.orders",
+     "columns": [
+      "total_amt",
+      "discount_amt",
+      "shipping_amt",
+      "total_usd",
+      "created_by",
+      "updated_by",
+      "cust_id",
+      "order_id",
+      "quote_id",
+      "sales_rep_id",
+      "territory_id",
+      "warehouse_id"
+     ]
+    },
+    {
+     "id": "table:finance.invoices",
+     "columns": [
+      "total_amt",
+      "subtotal_amt",
+      "tax_amt",
+      "cust_id",
+      "invoice_id",
+      "order_id",
+      "currency_code",
+      "invoice_no",
+      "status"
+     ]
+    },
+    {
+     "id": "table:finance.gl_entries",
+     "columns": [
+      "credit_amt",
+      "debit_amt",
+      "created_by",
+      "cost_center_id",
+      "entry_id",
+      "gl_account_id",
+      "currency_code"
+     ]
+    },
+    {
+     "id": "table:crm.activities",
+     "columns": [
+      "opp_id",
+      "account_id",
+      "activity_id",
+      "contact_id",
+      "employee_id"
+     ]
+    },
+    {
+     "id": "table:public.currencies",
+     "columns": [
+      "currency_code",
+      "currency_name"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:crm.activities",
+     [
+      "opp_id"
+     ],
+     "table:crm.opportunities",
+     [
+      "opp_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.gl_entries",
+     [
+      "currency_code"
+     ],
+     "table:public.currencies",
+     [
+      "currency_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.invoices",
+     [
+      "currency_code"
+     ],
+     "table:public.currencies",
+     [
+      "currency_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.invoices",
+     [
+      "order_id"
+     ],
+     "table:sales.orders",
+     [
+      "order_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.orders",
+     [
+      "quote_id"
+     ],
+     "table:sales.quotes",
+     [
+      "quote_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.quotes",
+     [
+      "opp_id"
+     ],
+     "table:crm.opportunities",
+     [
+      "opp_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 1513
+  }
+ },
+ "j2_tickets_by_tier": {
+  "question": "Average ticket resolution time in hours by support tier",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:support.tiers",
+     "columns": [
+      "resolution_sla_h",
+      "tier_id",
+      "has_phone_support",
+      "tier_name"
+     ]
+    },
+    {
+     "id": "view:support.v_open_tickets",
+     "columns": [
+      "ticket_id",
+      "ticket_ref",
+      "tier_name"
+     ]
+    },
+    {
+     "id": "table:support.tickets",
+     "columns": [
+      "ticket_id",
+      "tier_id",
+      "ticket_ref",
+      "account_id",
+      "assigned_agent_id",
+      "contact_id",
+      "cust_id",
+      "product_id",
+      "csat_score",
+      "status"
+     ]
+    },
+    {
+     "id": "table:support.ticket_messages",
+     "columns": [
+      "ticket_id",
+      "author_agent_id",
+      "author_contact_id",
+      "message_id",
+      "author_type"
+     ]
+    },
+    {
+     "id": "table:crm.accounts",
+     "columns": [
+      "support_tier_id",
+      "tier",
+      "account_id",
+      "owner_employee_id",
+      "parent_account_id",
+      "region_id",
+      "account_number",
+      "country_code",
+      "preferred_currency"
+     ]
+    },
+    {
+     "id": "table:support.sla_breaches",
+     "columns": [
+      "ticket_id",
+      "breach_id",
+      "breach_type"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "view:support.v_open_tickets",
+     [],
+     "table:support.tiers",
+     [],
+     "depends_on"
+    ],
+    [
+     "table:crm.accounts",
+     [
+      "support_tier_id"
+     ],
+     "table:support.tiers",
+     [
+      "tier_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:support.sla_breaches",
+     [
+      "ticket_id"
+     ],
+     "table:support.tickets",
+     [
+      "ticket_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:support.ticket_messages",
+     [
+      "ticket_id"
+     ],
+     "table:support.tickets",
+     [
+      "ticket_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:support.tickets",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 1265
+  }
+ },
+ "j2_mrr_by_plan": {
+  "question": "Total MRR of active subscriptions by plan",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "view:finance.v_mrr_by_plan",
+     "columns": [
+      "active_subscriptions",
+      "mrr_usd",
+      "plan_code",
+      "plan_name"
+     ]
+    },
+    {
+     "id": "table:finance.subscriptions",
+     "columns": [
+      "mrr_amt",
+      "plan_id",
+      "subscription_id",
+      "account_id",
+      "sales_rep_id",
+      "billing_period",
+      "currency_code",
+      "status"
+     ]
+    },
+    {
+     "id": "table:finance.subscription_events",
+     "columns": [
+      "new_mrr",
+      "old_mrr",
+      "new_plan_id",
+      "old_plan_id",
+      "subscription_id",
+      "event_id",
+      "event_type"
+     ]
+    },
+    {
+     "id": "table:finance.plans",
+     "columns": [
+      "plan_id",
+      "plan_code"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "view:finance.v_mrr_by_plan",
+     [],
+     "table:finance.plans",
+     [],
+     "depends_on"
+    ],
+    [
+     "table:finance.subscription_events",
+     [
+      "old_plan_id"
+     ],
+     "table:finance.plans",
+     [
+      "plan_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.subscriptions",
+     [
+      "plan_id"
+     ],
+     "table:finance.plans",
+     [
+      "plan_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 795
+  }
+ },
+ "j2_campaign_leads": {
+  "question": "Leads per marketing campaign and how many of them converted",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:crm.leads",
+     "columns": [
+      "campaign_id",
+      "converted_account_id",
+      "lead_id",
+      "converted_at",
+      "lead_source",
+      "owner_employee_id",
+      "country_code",
+      "status"
+     ]
+    },
+    {
+     "id": "table:marketing.campaigns",
+     "columns": [
+      "campaign_id",
+      "campaign_name",
+      "owner_employee_id",
+      "region_id"
+     ]
+    },
+    {
+     "id": "table:marketing.campaign_members",
+     "columns": [
+      "campaign_id",
+      "lead_id"
+     ]
+    },
+    {
+     "id": "table:marketing.email_events",
+     "columns": [
+      "campaign_id",
+      "contact_id",
+      "event_id",
+      "event_type"
+     ]
+    },
+    {
+     "id": "table:analytics.web_sessions",
+     "columns": [
+      "utm_campaign",
+      "converted",
+      "cust_id",
+      "session_id",
+      "country_code"
+     ]
+    },
+    {
+     "id": "table:public.countries",
+     "columns": [
+      "region_id",
+      "country_code",
+      "currency_code",
+      "country_name"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:analytics.web_sessions",
+     [
+      "country_code"
+     ],
+     "table:public.countries",
+     [
+      "country_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:crm.leads",
+     [
+      "campaign_id"
+     ],
+     "table:marketing.campaigns",
+     [
+      "campaign_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:crm.leads",
+     [
+      "country_code"
+     ],
+     "table:public.countries",
+     [
+      "country_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:marketing.campaign_members",
+     [
+      "lead_id"
+     ],
+     "table:crm.leads",
+     [
+      "lead_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:marketing.email_events",
+     [
+      "campaign_id"
+     ],
+     "table:marketing.campaigns",
+     [
+      "campaign_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 1214
+  }
+ },
+ "mh_invoice_region": {
+  "question": "Total invoiced amount by sales region for invoices issued in 2026-Q3",
+  "context": {
+   "interpreted": [
+    "invoiced~invoices",
+    "2026~2020"
+   ],
+   "relations": [
+    {
+     "id": "table:finance.invoices",
+     "columns": [
+      "invoice_id",
+      "total_amt",
+      "invoice_no",
+      "issued_dt",
+      "cust_id",
+      "order_id",
+      "currency_code",
+      "status"
+     ]
+    },
+    {
+     "id": "view:sales.v_order_summary",
+     "columns": [
+      "total_amt",
+      "total_usd",
+      "region_code"
+     ]
+    },
+    {
+     "id": "table:public.regions",
+     "columns": [
+      "region_id",
+      "region_code"
+     ]
+    },
+    {
+     "id": "table:sales.quotes",
+     "columns": [
+      "created_by",
+      "total_amt",
+      "cust_id",
+      "opp_id",
+      "quote_id",
+      "status"
+     ]
+    },
+    {
+     "id": "table:sales.orders",
+     "columns": [
+      "sales_rep_id",
+      "total_amt",
+      "total_usd",
+      "created_by",
+      "updated_by",
+      "cust_id",
+      "order_id",
+      "quote_id",
+      "territory_id",
+      "warehouse_id",
+      "bill_to_country",
+      "channel"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "view:sales.v_order_summary",
+     [],
+     "table:public.regions",
+     [],
+     "depends_on"
+    ],
+    [
+     "view:sales.v_order_summary",
+     [],
+     "table:sales.orders",
+     [],
+     "depends_on"
+    ],
+    [
+     "table:finance.invoices",
+     [
+      "order_id"
+     ],
+     "table:sales.orders",
+     [
+      "order_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.orders",
+     [
+      "quote_id"
+     ],
+     "table:sales.quotes",
+     [
+      "quote_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 999
+  }
+ },
+ "mh_return_rate_category": {
+  "question": "Return rate by top-level product category",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:sales.returns",
+     "columns": [
+      "return_id",
+      "return_dt",
+      "order_item_id"
+     ]
+    },
+    {
+     "id": "table:public.fx_rates",
+     "columns": [
+      "usd_rate",
+      "rate_dt",
+      "currency_code"
+     ]
+    },
+    {
+     "id": "table:inventory.products",
+     "columns": [
+      "category_id",
+      "product_id",
+      "product_name",
+      "supplier_id",
+      "country_of_origin",
+      "currency_code",
+      "sku"
+     ]
+    },
+    {
+     "id": "table:inventory.stock_levels",
+     "columns": [
+      "product_id",
+      "warehouse_id"
+     ]
+    },
+    {
+     "id": "table:inventory.product_categories",
+     "columns": [
+      "category_id",
+      "category_name",
+      "parent_id"
+     ]
+    },
+    {
+     "id": "table:inventory.item_aliases",
+     "columns": [
+      "product_id",
+      "alias_id"
+     ]
+    },
+    {
+     "id": "table:public.currencies",
+     "columns": [
+      "currency_code",
+      "currency_name"
+     ]
+    },
+    {
+     "id": "table:sales.order_items",
+     "columns": [
+      "product_id",
+      "order_id",
+      "order_item_id",
+      "qty"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:inventory.item_aliases",
+     [
+      "product_id"
+     ],
+     "table:inventory.products",
+     [
+      "product_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:inventory.products",
+     [
+      "category_id"
+     ],
+     "table:inventory.product_categories",
+     [
+      "category_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:inventory.products",
+     [
+      "currency_code"
+     ],
+     "table:public.currencies",
+     [
+      "currency_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:inventory.stock_levels",
+     [
+      "product_id"
+     ],
+     "table:inventory.products",
+     [
+      "product_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:public.fx_rates",
+     [
+      "currency_code"
+     ],
+     "table:public.currencies",
+     [
+      "currency_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.order_items",
+     [
+      "product_id"
+     ],
+     "table:inventory.products",
+     [
+      "product_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.returns",
+     [
+      "order_item_id"
+     ],
+     "table:sales.order_items",
+     [
+      "order_item_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 1508
+  }
+ },
+ "mh_api_failures_region": {
+  "question": "Failed API requests on 2026-10-10 broken down by the customer account's region",
+  "context": {
+   "interpreted": [
+    "2026~2020"
+   ],
+   "relations": [
+    {
+     "id": "table:ops.api_request_log",
+     "columns": [
+      "api_key_id",
+      "request_id"
+     ]
+    },
+    {
+     "id": "table:finance.chart_of_accounts",
+     "columns": [
+      "gl_account_id",
+      "parent_gl_account_id"
+     ]
+    },
+    {
+     "id": "table:public.regions",
+     "columns": [
+      "region_id",
+      "region_code"
+     ]
+    },
+    {
+     "id": "table:ops.api_keys",
+     "columns": [
+      "account_id",
+      "api_key_id",
+      "created_by",
+      "api_key"
+     ]
+    },
+    {
+     "id": "table:sales.customers",
+     "columns": [
+      "account_id",
+      "customer_code",
+      "customer_name",
+      "cust_id",
+      "price_list_id",
+      "territory_id",
+      "billing_country",
+      "default_currency",
+      "shipping_country"
+     ]
+    },
+    {
+     "id": "table:crm.accounts",
+     "columns": [
+      "account_id",
+      "parent_account_id",
+      "region_id",
+      "owner_employee_id",
+      "support_tier_id",
+      "country_code",
+      "preferred_currency"
+     ]
+    },
+    {
+     "id": "table:finance.gl_entries",
+     "columns": [
+      "gl_account_id",
+      "created_by",
+      "cost_center_id",
+      "entry_id",
+      "currency_code"
+     ]
+    },
+    {
+     "id": "table:public.currencies",
+     "columns": [
+      "currency_code",
+      "currency_name"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:crm.accounts",
+     [
+      "preferred_currency"
+     ],
+     "table:public.currencies",
+     [
+      "currency_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:crm.accounts",
+     [
+      "region_id"
+     ],
+     "table:public.regions",
+     [
+      "region_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.gl_entries",
+     [
+      "gl_account_id"
+     ],
+     "table:finance.chart_of_accounts",
+     [
+      "gl_account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.gl_entries",
+     [
+      "currency_code"
+     ],
+     "table:public.currencies",
+     [
+      "currency_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.api_keys",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.api_request_log",
+     [
+      "api_key_id"
+     ],
+     "table:ops.api_keys",
+     [
+      "api_key_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.customers",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 1616
+  }
+ },
+ "mh_payments_tier": {
+  "question": "Total settled payments received in September 2026 per account tier",
+  "context": {
+   "interpreted": [
+    "2026~2020"
+   ],
+   "relations": [
+    {
+     "id": "table:finance.payments",
+     "columns": [
+      "payment_id",
+      "invoice_id",
+      "currency_code",
+      "method",
+      "status"
+     ]
+    },
+    {
+     "id": "table:crm.accounts",
+     "columns": [
+      "account_id",
+      "parent_account_id",
+      "payment_terms_days",
+      "support_tier_id",
+      "tier",
+      "owner_employee_id",
+      "region_id",
+      "country_code",
+      "preferred_currency"
+     ]
+    },
+    {
+     "id": "table:support.tiers",
+     "columns": [
+      "price_per_seat_amt",
+      "tier_id",
+      "tier_name"
+     ]
+    },
+    {
+     "id": "table:finance.chart_of_accounts",
+     "columns": [
+      "gl_account_id",
+      "parent_gl_account_id"
+     ]
+    },
+    {
+     "id": "view:sales.v_order_summary",
+     "columns": [
+      "account_id",
+      "total_amt",
+      "total_usd",
+      "account_name",
+      "tier"
+     ]
+    },
+    {
+     "id": "table:ops.orders",
+     "columns": [
+      "total_amt",
+      "received_dt",
+      "buyer_id",
+      "order_id",
+      "supplier_id",
+      "warehouse_id",
+      "currency_code",
+      "po_number",
+      "status"
+     ]
+    },
+    {
+     "id": "table:finance.gl_entries",
+     "columns": [
+      "gl_account_id",
+      "cost_center_id",
+      "entry_id",
+      "currency_code"
+     ]
+    },
+    {
+     "id": "table:hr.employees",
+     "columns": [
+      "cost_center_id",
+      "department_id",
+      "employee_id",
+      "manager_id",
+      "employee_number",
+      "employment_type",
+      "job_level",
+      "location_country",
+      "salary_currency",
+      "work_mode"
+     ]
+    },
+    {
+     "id": "table:public.currencies",
+     "columns": [
+      "currency_code",
+      "currency_name"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "view:sales.v_order_summary",
+     [],
+     "table:crm.accounts",
+     [],
+     "depends_on"
+    ],
+    [
+     "table:crm.accounts",
+     [
+      "owner_employee_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:crm.accounts",
+     [
+      "preferred_currency"
+     ],
+     "table:public.currencies",
+     [
+      "currency_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:crm.accounts",
+     [
+      "support_tier_id"
+     ],
+     "table:support.tiers",
+     [
+      "tier_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.gl_entries",
+     [
+      "gl_account_id"
+     ],
+     "table:finance.chart_of_accounts",
+     [
+      "gl_account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.gl_entries",
+     [
+      "currency_code"
+     ],
+     "table:public.currencies",
+     [
+      "currency_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.payments",
+     [
+      "currency_code"
+     ],
+     "table:public.currencies",
+     [
+      "currency_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.orders",
+     [
+      "buyer_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 1944
+  }
+ },
+ "agg_top_customers_q3_emea": {
+  "question": "Top 10 customers by revenue in USD in 2026-Q3 in the EMEA region",
+  "context": {
+   "interpreted": [
+    "2026~2020"
+   ],
+   "relations": [
+    {
+     "id": "table:public.regions",
+     "columns": [
+      "region_id",
+      "region_code"
+     ]
+    },
+    {
+     "id": "materialized_view:analytics.mv_monthly_revenue",
+     "columns": []
+    },
+    {
+     "id": "table:sales.customers",
+     "columns": [
+      "customer_code",
+      "customer_name",
+      "account_id",
+      "cust_id",
+      "price_list_id",
+      "territory_id",
+      "billing_country",
+      "default_currency",
+      "shipping_country"
+     ]
+    },
+    {
+     "id": "view:sales.v_order_summary",
+     "columns": [
+      "total_usd",
+      "customer_name",
+      "region_code"
+     ]
+    },
+    {
+     "id": "table:sales.orders_archive_2019",
+     "columns": [
+      "region_txt"
+     ]
+    },
+    {
+     "id": "view:finance.v_mrr_by_plan",
+     "columns": [
+      "mrr_usd"
+     ]
+    },
+    {
+     "id": "table:crm.accounts",
+     "columns": [
+      "region_id",
+      "annual_revenue_amt",
+      "account_id",
+      "owner_employee_id",
+      "parent_account_id",
+      "support_tier_id",
+      "account_number",
+      "country_code",
+      "preferred_currency",
+      "account_name"
+     ]
+    },
+    {
+     "id": "table:finance.subscriptions",
+     "columns": [
+      "account_id",
+      "plan_id",
+      "sales_rep_id",
+      "subscription_id",
+      "billing_period",
+      "currency_code",
+      "status"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "materialized_view:analytics.mv_monthly_revenue",
+     [],
+     "table:crm.accounts",
+     [],
+     "depends_on"
+    ],
+    [
+     "materialized_view:analytics.mv_monthly_revenue",
+     [],
+     "table:public.regions",
+     [],
+     "depends_on"
+    ],
+    [
+     "materialized_view:analytics.mv_monthly_revenue",
+     [],
+     "table:sales.customers",
+     [],
+     "depends_on"
+    ],
+    [
+     "view:finance.v_mrr_by_plan",
+     [],
+     "table:finance.subscriptions",
+     [],
+     "depends_on"
+    ],
+    [
+     "view:sales.v_order_summary",
+     [],
+     "table:public.regions",
+     [],
+     "depends_on"
+    ],
+    [
+     "table:finance.subscriptions",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": false,
+   "bytes": 1494
+  }
+ },
+ "agg_monthly_orders": {
+  "question": "Monthly order count and USD revenue for 2025",
+  "context": {
+   "interpreted": [
+    "2025~2020"
+   ],
+   "relations": [
+    {
+     "id": "materialized_view:analytics.mv_monthly_revenue",
+     "columns": []
+    },
+    {
+     "id": "table:sales.orders",
+     "columns": [
+      "item_count",
+      "order_id",
+      "fx_rate_to_usd",
+      "total_usd",
+      "order_dt",
+      "cust_id",
+      "quote_id",
+      "sales_rep_id",
+      "territory_id",
+      "warehouse_id",
+      "bill_to_country",
+      "channel"
+     ]
+    },
+    {
+     "id": "view:sales.v_order_summary",
+     "columns": [
+      "order_id",
+      "total_usd",
+      "order_dt"
+     ]
+    },
+    {
+     "id": "table:finance.subscriptions",
+     "columns": [
+      "account_id",
+      "plan_id",
+      "sales_rep_id",
+      "subscription_id",
+      "billing_period",
+      "currency_code",
+      "status"
+     ]
+    },
+    {
+     "id": "table:ops.orders",
+     "columns": [
+      "order_id",
+      "buyer_id",
+      "supplier_id",
+      "warehouse_id",
+      "currency_code",
+      "po_number",
+      "status"
+     ]
+    },
+    {
+     "id": "table:crm.accounts",
+     "columns": [
+      "employee_count",
+      "annual_revenue_amt",
+      "account_id",
+      "owner_employee_id",
+      "parent_account_id",
+      "region_id",
+      "support_tier_id",
+      "account_number",
+      "country_code",
+      "preferred_currency",
+      "account_name"
+     ]
+    },
+    {
+     "id": "table:hr.employees",
+     "columns": [
+      "cost_center_id",
+      "department_id",
+      "employee_id",
+      "manager_id",
+      "employee_number",
+      "employment_type",
+      "job_level",
+      "location_country",
+      "salary_currency",
+      "work_mode"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "materialized_view:analytics.mv_monthly_revenue",
+     [],
+     "table:crm.accounts",
+     [],
+     "depends_on"
+    ],
+    [
+     "materialized_view:analytics.mv_monthly_revenue",
+     [],
+     "table:sales.orders",
+     [],
+     "depends_on"
+    ],
+    [
+     "view:sales.v_order_summary",
+     [],
+     "table:sales.orders",
+     [],
+     "depends_on"
+    ],
+    [
+     "table:finance.subscriptions",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.subscriptions",
+     [
+      "sales_rep_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.orders",
+     [
+      "buyer_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 1653
+  }
+ },
+ "agg_gl_q2": {
+  "question": "GL expense by cost center versus budget for 2026-Q2",
+  "context": {
+   "interpreted": [
+    "2026~2020"
+   ],
+   "relations": [
+    {
+     "id": "table:finance.budgets",
+     "columns": [
+      "cost_center_id",
+      "budget_amt",
+      "gl_account_id",
+      "fiscal_month"
+     ]
+    },
+    {
+     "id": "table:finance.cost_centers",
+     "columns": [
+      "cost_center_id",
+      "department_id",
+      "cc_code"
+     ]
+    },
+    {
+     "id": "table:finance.gl_entries",
+     "columns": [
+      "cost_center_id",
+      "created_by",
+      "gl_account_id",
+      "entry_id",
+      "currency_code"
+     ]
+    },
+    {
+     "id": "table:hr.departments",
+     "columns": [
+      "cost_center_code",
+      "department_id",
+      "head_employee_id",
+      "parent_department_id",
+      "dept_code",
+      "location_country"
+     ]
+    },
+    {
+     "id": "table:finance.chart_of_accounts",
+     "columns": [
+      "gl_account_id",
+      "parent_gl_account_id",
+      "account_code",
+      "account_type"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:finance.budgets",
+     [
+      "gl_account_id"
+     ],
+     "table:finance.chart_of_accounts",
+     [
+      "gl_account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.budgets",
+     [
+      "cost_center_id"
+     ],
+     "table:finance.cost_centers",
+     [
+      "cost_center_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.cost_centers",
+     [
+      "department_id"
+     ],
+     "table:hr.departments",
+     [
+      "department_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.gl_entries",
+     [
+      "cost_center_id"
+     ],
+     "table:finance.cost_centers",
+     [
+      "cost_center_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 1087
+  }
+ },
+ "au_deletes_exports": {
+  "question": "Who deleted or exported data according to the audit log between 2026-10-04 and 2026-10-10?",
+  "context": {
+   "interpreted": [
+    "or=ops request",
+    "exported~expected",
+    "2026~2020"
+   ],
+   "relations": [
+    {
+     "id": "table:public.audit_log",
+     "columns": [
+      "audit_id",
+      "request_id",
+      "actor_user_id"
+     ]
+    },
+    {
+     "id": "table:ops.api_request_log",
+     "columns": [
+      "request_id",
+      "api_key_id"
+     ]
+    },
+    {
+     "id": "table:ops.orders",
+     "columns": [
+      "expected_dt",
+      "buyer_id",
+      "order_id",
+      "supplier_id",
+      "warehouse_id",
+      "currency_code",
+      "po_number",
+      "status"
+     ]
+    },
+    {
+     "id": "table:hr.employees",
+     "columns": [
+      "cost_center_id",
+      "department_id",
+      "employee_id",
+      "manager_id",
+      "employee_number",
+      "employment_type",
+      "job_level",
+      "location_country",
+      "salary_currency",
+      "work_mode"
+     ]
+    },
+    {
+     "id": "table:ops.api_keys",
+     "columns": [
+      "account_id",
+      "api_key_id",
+      "created_by",
+      "key_name"
+     ]
+    },
+    {
+     "id": "table:ops.app_users",
+     "columns": [
+      "account_id",
+      "employee_id",
+      "user_id",
+      "user_type",
+      "username"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:ops.api_keys",
+     [
+      "created_by"
+     ],
+     "table:ops.app_users",
+     [
+      "user_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.api_request_log",
+     [
+      "api_key_id"
+     ],
+     "table:ops.api_keys",
+     [
+      "api_key_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.app_users",
+     [
+      "employee_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.orders",
+     [
+      "buyer_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:public.audit_log",
+     [
+      "actor_user_id"
+     ],
+     "table:ops.app_users",
+     [
+      "user_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 1242
+  }
+ },
+ "au_salary_changes": {
+  "question": "Changes to the employees salary field in the change history since 2026-07-12",
+  "context": {
+   "interpreted": [
+    "2026~2020"
+   ],
+   "relations": [
+    {
+     "id": "table:hr.employees",
+     "columns": [
+      "employee_id",
+      "salary_amt",
+      "employee_number",
+      "salary_currency",
+      "cost_center_id",
+      "department_id",
+      "manager_id",
+      "employment_type",
+      "job_level",
+      "location_country",
+      "work_mode"
+     ]
+    },
+    {
+     "id": "table:public.change_history",
+     "columns": [
+      "change_id"
+     ]
+    },
+    {
+     "id": "table:crm.accounts",
+     "columns": [
+      "employee_count",
+      "owner_employee_id",
+      "custom_fields",
+      "account_id",
+      "parent_account_id",
+      "region_id",
+      "support_tier_id",
+      "account_number",
+      "country_code",
+      "preferred_currency"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:crm.accounts",
+     [
+      "owner_employee_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": false,
+   "bytes": 647
+  }
+ },
+ "au_failed_logins": {
+  "question": "Users with the most failed logins between 2026-09-11 and 2026-10-10",
+  "context": {
+   "interpreted": [
+    "2026~2020"
+   ],
+   "relations": [
+    {
+     "id": "table:ops.login_events",
+     "columns": [
+      "user_id",
+      "user_agent",
+      "event_id"
+     ]
+    },
+    {
+     "id": "table:ops.app_users",
+     "columns": [
+      "user_id",
+      "last_login_at",
+      "user_type",
+      "account_id",
+      "employee_id",
+      "username"
+     ]
+    },
+    {
+     "id": "table:ops.api_request_log",
+     "columns": [
+      "api_key_id",
+      "request_id"
+     ]
+    },
+    {
+     "id": "table:analytics.feature_usage",
+     "columns": [
+      "active_users",
+      "account_id",
+      "usage_id"
+     ]
+    },
+    {
+     "id": "table:crm.accounts",
+     "columns": [
+      "account_id",
+      "owner_employee_id",
+      "parent_account_id",
+      "region_id",
+      "support_tier_id",
+      "account_number",
+      "country_code",
+      "preferred_currency",
+      "account_name"
+     ]
+    },
+    {
+     "id": "table:ops.api_keys",
+     "columns": [
+      "account_id",
+      "api_key_id",
+      "created_by",
+      "key_name"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:analytics.feature_usage",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.api_keys",
+     [
+      "created_by"
+     ],
+     "table:ops.app_users",
+     [
+      "user_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.api_request_log",
+     [
+      "api_key_id"
+     ],
+     "table:ops.api_keys",
+     [
+      "api_key_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.app_users",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.login_events",
+     [
+      "user_id"
+     ],
+     "table:ops.app_users",
+     [
+      "user_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 1165
+  }
+ },
+ "amb_purchase_orders_late": {
+  "question": "Purchase orders received later than expected, per supplier",
+  "context": {
+   "interpreted": [
+    "later~latency"
+   ],
+   "relations": [
+    {
+     "id": "table:ops.orders",
+     "columns": [
+      "order_id",
+      "supplier_id",
+      "expected_dt",
+      "received_dt",
+      "buyer_id",
+      "warehouse_id",
+      "currency_code",
+      "po_number",
+      "status"
+     ]
+    },
+    {
+     "id": "table:sales.orders",
+     "columns": [
+      "order_id",
+      "order_dt",
+      "cust_id",
+      "quote_id",
+      "sales_rep_id",
+      "territory_id",
+      "warehouse_id",
+      "bill_to_country",
+      "channel",
+      "currency_code",
+      "promo_code",
+      "ship_to_country"
+     ]
+    },
+    {
+     "id": "table:inventory.product_suppliers",
+     "columns": [
+      "supplier_id",
+      "supplier_sku",
+      "product_id"
+     ]
+    },
+    {
+     "id": "table:inventory.suppliers",
+     "columns": [
+      "supplier_id",
+      "supplier_name",
+      "country_code"
+     ]
+    },
+    {
+     "id": "table:hr.employees",
+     "columns": [
+      "cost_center_id",
+      "department_id",
+      "employee_id",
+      "manager_id",
+      "employee_number",
+      "employment_type",
+      "job_level",
+      "location_country",
+      "salary_currency",
+      "work_mode"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:inventory.product_suppliers",
+     [
+      "supplier_id"
+     ],
+     "table:inventory.suppliers",
+     [
+      "supplier_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.orders",
+     [
+      "buyer_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.orders",
+     [
+      "supplier_id"
+     ],
+     "table:inventory.suppliers",
+     [
+      "supplier_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.orders",
+     [
+      "sales_rep_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 1200
+  }
+ },
+ "amb_order_shipments": {
+  "question": "Average days from sales order date to delivery for orders placed in 2026",
+  "context": {
+   "interpreted": [
+    "2026~2020"
+   ],
+   "relations": [
+    {
+     "id": "table:sales.orders",
+     "columns": [
+      "order_id",
+      "sales_rep_id",
+      "order_dt",
+      "cust_id",
+      "quote_id",
+      "territory_id",
+      "warehouse_id",
+      "bill_to_country",
+      "channel",
+      "currency_code",
+      "promo_code",
+      "ship_to_country"
+     ]
+    },
+    {
+     "id": "table:ops.orders",
+     "columns": [
+      "order_id",
+      "buyer_id",
+      "supplier_id",
+      "warehouse_id",
+      "currency_code",
+      "po_number",
+      "status"
+     ]
+    },
+    {
+     "id": "table:sales.orders_archive_2019",
+     "columns": [
+      "ord_date"
+     ]
+    },
+    {
+     "id": "view:sales.v_order_summary",
+     "columns": [
+      "order_id",
+      "order_dt"
+     ]
+    },
+    {
+     "id": "table:sales.order_items",
+     "columns": [
+      "order_id",
+      "order_item_id",
+      "product_id",
+      "qty"
+     ]
+    },
+    {
+     "id": "table:marketing.email_events",
+     "columns": [
+      "campaign_id",
+      "contact_id",
+      "event_id",
+      "event_type"
+     ]
+    },
+    {
+     "id": "table:hr.employees",
+     "columns": [
+      "pto_balance_days",
+      "date_of_birth",
+      "cost_center_id",
+      "department_id",
+      "employee_id",
+      "manager_id",
+      "employee_number",
+      "employment_type",
+      "job_level",
+      "location_country",
+      "salary_currency",
+      "work_mode"
+     ]
+    },
+    {
+     "id": "table:marketing.campaigns",
+     "columns": [
+      "campaign_id",
+      "owner_employee_id",
+      "region_id",
+      "campaign_name"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "view:sales.v_order_summary",
+     [],
+     "table:sales.orders",
+     [],
+     "depends_on"
+    ],
+    [
+     "table:marketing.campaigns",
+     [
+      "owner_employee_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:marketing.email_events",
+     [
+      "campaign_id"
+     ],
+     "table:marketing.campaigns",
+     [
+      "campaign_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.orders",
+     [
+      "buyer_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.order_items",
+     [
+      "order_id"
+     ],
+     "table:sales.orders",
+     [
+      "order_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.orders",
+     [
+      "sales_rep_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": false,
+   "bytes": 1613
+  }
+ },
+ "amb_support_tier": {
+  "question": "How many client accounts are on each support tier?",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:crm.accounts",
+     "columns": [
+      "support_tier_id",
+      "account_id",
+      "parent_account_id",
+      "tier",
+      "owner_employee_id",
+      "region_id",
+      "country_code",
+      "preferred_currency"
+     ]
+    },
+    {
+     "id": "table:support.tiers",
+     "columns": [
+      "tier_id",
+      "has_phone_support",
+      "tier_name"
+     ]
+    },
+    {
+     "id": "table:crm.contacts",
+     "columns": [
+      "account_id",
+      "contact_id"
+     ]
+    },
+    {
+     "id": "table:finance.chart_of_accounts",
+     "columns": [
+      "gl_account_id",
+      "parent_gl_account_id"
+     ]
+    },
+    {
+     "id": "view:support.v_open_tickets",
+     "columns": [
+      "account_id",
+      "tier_name"
+     ]
+    },
+    {
+     "id": "table:support.agents",
+     "columns": [
+      "tier_id",
+      "joined_support_dt",
+      "agent_id",
+      "employee_id"
+     ]
+    },
+    {
+     "id": "table:finance.gl_entries",
+     "columns": [
+      "gl_account_id",
+      "cost_center_id",
+      "entry_id",
+      "currency_code"
+     ]
+    },
+    {
+     "id": "table:public.currencies",
+     "columns": [
+      "currency_code",
+      "currency_name"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "view:support.v_open_tickets",
+     [],
+     "table:support.tiers",
+     [],
+     "depends_on"
+    ],
+    [
+     "table:crm.accounts",
+     [
+      "preferred_currency"
+     ],
+     "table:public.currencies",
+     [
+      "currency_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:crm.accounts",
+     [
+      "support_tier_id"
+     ],
+     "table:support.tiers",
+     [
+      "tier_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:crm.contacts",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.gl_entries",
+     [
+      "gl_account_id"
+     ],
+     "table:finance.chart_of_accounts",
+     [
+      "gl_account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.gl_entries",
+     [
+      "currency_code"
+     ],
+     "table:public.currencies",
+     [
+      "currency_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:support.agents",
+     [
+      "tier_id"
+     ],
+     "table:support.tiers",
+     [
+      "tier_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 1479
+  }
+ },
+ "lg_archive_2019_region": {
+  "question": "Total net revenue in the 2019 order archive per region",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:sales.orders_archive_2019",
+     "columns": [
+      "net",
+      "region_txt"
+     ]
+    },
+    {
+     "id": "materialized_view:analytics.mv_monthly_revenue",
+     "columns": []
+    },
+    {
+     "id": "view:sales.v_order_summary",
+     "columns": [
+      "order_id",
+      "total_amt",
+      "total_usd",
+      "order_dt",
+      "region_code"
+     ]
+    },
+    {
+     "id": "table:public.regions",
+     "columns": [
+      "region_id",
+      "region_code"
+     ]
+    },
+    {
+     "id": "table:ops.orders",
+     "columns": [
+      "order_id",
+      "total_amt",
+      "buyer_id",
+      "supplier_id",
+      "warehouse_id",
+      "currency_code",
+      "po_number",
+      "status"
+     ]
+    },
+    {
+     "id": "table:finance.invoices",
+     "columns": [
+      "order_id",
+      "total_amt",
+      "cust_id",
+      "invoice_id",
+      "currency_code",
+      "invoice_no",
+      "status"
+     ]
+    },
+    {
+     "id": "table:public.currencies",
+     "columns": [
+      "currency_code",
+      "currency_name"
+     ]
+    },
+    {
+     "id": "table:sales.customers",
+     "columns": [
+      "first_order_dt",
+      "account_id",
+      "cust_id",
+      "price_list_id",
+      "territory_id",
+      "billing_country",
+      "customer_code",
+      "default_currency",
+      "shipping_country"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "materialized_view:analytics.mv_monthly_revenue",
+     [],
+     "table:public.regions",
+     [],
+     "depends_on"
+    ],
+    [
+     "materialized_view:analytics.mv_monthly_revenue",
+     [],
+     "table:sales.customers",
+     [],
+     "depends_on"
+    ],
+    [
+     "view:sales.v_order_summary",
+     [],
+     "table:public.regions",
+     [],
+     "depends_on"
+    ],
+    [
+     "table:finance.invoices",
+     [
+      "currency_code"
+     ],
+     "table:public.currencies",
+     [
+      "currency_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.invoices",
+     [
+      "cust_id"
+     ],
+     "table:sales.customers",
+     [
+      "cust_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.orders",
+     [
+      "currency_code"
+     ],
+     "table:public.currencies",
+     [
+      "currency_code"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": false,
+   "bytes": 1455
+  }
+ },
+ "wd_employees_hires_2026": {
+  "question": "Employees hired in 2026 with their job title and department name",
+  "context": {
+   "interpreted": [
+    "hired~hire",
+    "2026~2020"
+   ],
+   "relations": [
+    {
+     "id": "table:hr.employees",
+     "columns": [
+      "job_title",
+      "department_id",
+      "employee_id",
+      "job_level",
+      "employee_number",
+      "hire_dt",
+      "emergency_contact_name",
+      "first_name",
+      "cost_center_id",
+      "manager_id",
+      "employment_type",
+      "location_country"
+     ]
+    },
+    {
+     "id": "table:hr.departments",
+     "columns": [
+      "department_id",
+      "parent_department_id",
+      "head_employee_id",
+      "dept_name",
+      "dept_code",
+      "location_country"
+     ]
+    },
+    {
+     "id": "view:hr.v_employee_directory",
+     "columns": [
+      "job_title",
+      "employee_id",
+      "dept_name",
+      "first_name"
+     ]
+    },
+    {
+     "id": "table:crm.contacts",
+     "columns": [
+      "job_title",
+      "department",
+      "first_name",
+      "last_name",
+      "account_id",
+      "contact_id"
+     ]
+    },
+    {
+     "id": "table:hr.teams",
+     "columns": [
+      "department_id",
+      "lead_employee_id",
+      "team_name",
+      "team_id"
+     ]
+    },
+    {
+     "id": "table:crm.accounts",
+     "columns": [
+      "employee_count",
+      "owner_employee_id",
+      "account_name",
+      "legal_name",
+      "account_id",
+      "parent_account_id",
+      "region_id",
+      "support_tier_id",
+      "account_number",
+      "country_code",
+      "preferred_currency"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "view:hr.v_employee_directory",
+     [],
+     "table:hr.departments",
+     [],
+     "depends_on"
+    ],
+    [
+     "table:crm.accounts",
+     [
+      "owner_employee_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:crm.contacts",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:hr.departments",
+     [
+      "head_employee_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:hr.teams",
+     [
+      "department_id"
+     ],
+     "table:hr.departments",
+     [
+      "department_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 1432
+  }
+ },
+ "wd_products_margin": {
+  "question": "Which products have the highest margin between list price and unit cost?",
+  "context": {
+   "interpreted": [],
+   "relations": [
+    {
+     "id": "table:inventory.products",
+     "columns": [
+      "unit_cost",
+      "list_price",
+      "product_id",
+      "product_name",
+      "category_id",
+      "supplier_id",
+      "country_of_origin",
+      "currency_code",
+      "sku"
+     ]
+    },
+    {
+     "id": "table:sales.order_items",
+     "columns": [
+      "unit_price",
+      "product_id",
+      "order_id",
+      "order_item_id",
+      "qty"
+     ]
+    },
+    {
+     "id": "table:ops.order_lines",
+     "columns": [
+      "unit_cost",
+      "product_id",
+      "order_id",
+      "order_line_id"
+     ]
+    },
+    {
+     "id": "table:sales.price_list_items",
+     "columns": [
+      "price",
+      "price_list_id",
+      "product_id"
+     ]
+    },
+    {
+     "id": "table:inventory.product_suppliers",
+     "columns": [
+      "cost_amt",
+      "product_id",
+      "supplier_id"
+     ]
+    },
+    {
+     "id": "table:inventory.item_aliases",
+     "columns": [
+      "product_id",
+      "alias_id"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:inventory.item_aliases",
+     [
+      "product_id"
+     ],
+     "table:inventory.products",
+     [
+      "product_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:inventory.product_suppliers",
+     [
+      "product_id"
+     ],
+     "table:inventory.products",
+     [
+      "product_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:ops.order_lines",
+     [
+      "product_id"
+     ],
+     "table:inventory.products",
+     [
+      "product_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.order_items",
+     [
+      "product_id"
+     ],
+     "table:inventory.products",
+     [
+      "product_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.price_list_items",
+     [
+      "product_id"
+     ],
+     "table:inventory.products",
+     [
+      "product_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 1194
+  }
+ },
+ "vg_whats_low_stock": {
+  "question": "What are we running low on?",
+  "context": {
+   "interpreted": [
+    "running~run"
+   ],
+   "relations": [
+    {
+     "id": "table:inventory.stock_levels",
+     "columns": [
+      "qty_on_hand",
+      "qty_on_order",
+      "product_id",
+      "warehouse_id"
+     ]
+    },
+    {
+     "id": "table:hr.payroll",
+     "columns": [
+      "employee_id",
+      "payroll_id",
+      "currency_code",
+      "status"
+     ]
+    },
+    {
+     "id": "table:crm.accounts",
+     "columns": [
+      "account_id",
+      "owner_employee_id",
+      "parent_account_id",
+      "region_id",
+      "support_tier_id",
+      "account_number",
+      "country_code",
+      "preferred_currency"
+     ]
+    },
+    {
+     "id": "table:hr.employees",
+     "columns": [
+      "cost_center_id",
+      "department_id",
+      "employee_id",
+      "manager_id",
+      "employee_number",
+      "employment_type",
+      "job_level",
+      "location_country",
+      "salary_currency",
+      "work_mode"
+     ]
+    },
+    {
+     "id": "table:inventory.products",
+     "columns": [
+      "category_id",
+      "product_id",
+      "supplier_id",
+      "country_of_origin",
+      "currency_code",
+      "sku"
+     ]
+    },
+    {
+     "id": "table:public.countries",
+     "columns": [
+      "region_id",
+      "country_code",
+      "currency_code",
+      "country_name"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:crm.accounts",
+     [
+      "owner_employee_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:crm.accounts",
+     [
+      "country_code"
+     ],
+     "table:public.countries",
+     [
+      "country_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:hr.payroll",
+     [
+      "employee_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:inventory.products",
+     [
+      "country_of_origin"
+     ],
+     "table:public.countries",
+     [
+      "country_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:inventory.stock_levels",
+     [
+      "product_id"
+     ],
+     "table:inventory.products",
+     [
+      "product_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 1364
+  }
+ },
+ "vg_who_owes": {
+  "question": "Who owes us money?",
+  "context": {
+   "interpreted": [
+    "us=utm source"
+   ],
+   "relations": [
+    {
+     "id": "table:analytics.web_sessions",
+     "columns": [
+      "utm_source",
+      "utm_campaign",
+      "utm_medium",
+      "cust_id",
+      "session_id",
+      "country_code"
+     ]
+    },
+    {
+     "id": "table:marketing.campaigns",
+     "columns": [
+      "utm_campaign",
+      "campaign_id",
+      "owner_employee_id",
+      "region_id"
+     ]
+    },
+    {
+     "id": "table:finance.gl_entries",
+     "columns": [
+      "source_id",
+      "source_type",
+      "cost_center_id",
+      "entry_id",
+      "gl_account_id",
+      "currency_code"
+     ]
+    },
+    {
+     "id": "table:marketing.newsletter_subscribers",
+     "columns": [
+      "source",
+      "subscriber_id"
+     ]
+    },
+    {
+     "id": "table:public.fx_rates",
+     "columns": [
+      "source",
+      "currency_code",
+      "rate_dt"
+     ]
+    },
+    {
+     "id": "table:public.change_history",
+     "columns": [
+      "change_source",
+      "change_id"
+     ]
+    },
+    {
+     "id": "table:crm.leads",
+     "columns": [
+      "lead_source",
+      "campaign_id",
+      "converted_account_id",
+      "lead_id",
+      "owner_employee_id",
+      "country_code",
+      "status",
+      "company_name"
+     ]
+    },
+    {
+     "id": "table:public.countries",
+     "columns": [
+      "region_id",
+      "country_code",
+      "currency_code",
+      "country_name"
+     ]
+    },
+    {
+     "id": "table:public.currencies",
+     "columns": [
+      "currency_code",
+      "currency_name"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:analytics.web_sessions",
+     [
+      "country_code"
+     ],
+     "table:public.countries",
+     [
+      "country_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:crm.leads",
+     [
+      "campaign_id"
+     ],
+     "table:marketing.campaigns",
+     [
+      "campaign_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:crm.leads",
+     [
+      "country_code"
+     ],
+     "table:public.countries",
+     [
+      "country_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:finance.gl_entries",
+     [
+      "currency_code"
+     ],
+     "table:public.currencies",
+     [
+      "currency_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:public.countries",
+     [
+      "currency_code"
+     ],
+     "table:public.currencies",
+     [
+      "currency_code"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:public.fx_rates",
+     [
+      "currency_code"
+     ],
+     "table:public.currencies",
+     [
+      "currency_code"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": false,
+   "bytes": 1623
+  }
+ },
+ "vg_churn": {
+  "question": "Why are customers leaving?",
+  "context": {
+   "interpreted": [
+    "leaving~leave"
+   ],
+   "relations": [
+    {
+     "id": "table:sales.customers",
+     "columns": [
+      "customer_code",
+      "customer_name",
+      "account_id",
+      "cust_id",
+      "price_list_id",
+      "territory_id",
+      "billing_country",
+      "default_currency",
+      "shipping_country"
+     ]
+    },
+    {
+     "id": "table:hr.time_off",
+     "columns": [
+      "leave_type",
+      "approver_id",
+      "employee_id",
+      "request_id",
+      "status"
+     ]
+    },
+    {
+     "id": "table:crm.accounts",
+     "columns": [
+      "account_id",
+      "owner_employee_id",
+      "parent_account_id",
+      "region_id",
+      "support_tier_id",
+      "account_number",
+      "country_code",
+      "preferred_currency",
+      "account_name"
+     ]
+    },
+    {
+     "id": "table:hr.employees",
+     "columns": [
+      "cost_center_id",
+      "department_id",
+      "employee_id",
+      "manager_id",
+      "employee_number",
+      "employment_type",
+      "job_level",
+      "location_country",
+      "salary_currency",
+      "work_mode"
+     ]
+    }
+   ],
+   "joins": [
+    [
+     "table:crm.accounts",
+     [
+      "owner_employee_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:hr.time_off",
+     [
+      "employee_id"
+     ],
+     "table:hr.employees",
+     [
+      "employee_id"
+     ],
+     "foreign_key"
+    ],
+    [
+     "table:sales.customers",
+     [
+      "account_id"
+     ],
+     "table:crm.accounts",
+     [
+      "account_id"
+     ],
+     "foreign_key"
+    ]
+   ],
+   "connected": true,
+   "bytes": 1025
+  }
+ }
+}
