@@ -258,8 +258,8 @@ def privacy_page() -> str:
              "<li>Your database provider is contacted only with the read-only user you supply.</li></ul>")),
             ("Your choices", ("<p>Remove any saved database at any time on your private manage page (ask your assistant for "
              "&ldquo;the TableFox link to manage my databases&rdquo;). Disconnecting TableFox in your assistant stops all access. "
-             "To delete everything associated with your account, open an issue on "
-             "<a class=link href='https://github.com/Adhrit-Verma/TableFox/issues'>GitHub</a>.</p>")),
+             "To delete everything associated with your account, email "
+             "<a class=link href='mailto:works.omen@gmail.com'>works.omen@gmail.com</a>.</p>")),
             ("Security", ("<p>Connections require SSL and a public address; only read-only database users are accepted; "
              "every query runs inside a read-only transaction with timeouts; personal-data columns such as emails and "
              "passwords are blocked from results.</p>")),
@@ -281,6 +281,6 @@ def terms_page() -> str:
             ("Liability", ("<p>To the extent permitted by law, the authors are not liable for any loss arising from use "
              "of TableFox.</p>")),
             ("Contact", ("<p>Questions and requests: "
-             "<a class=link href='https://github.com/Adhrit-Verma/TableFox/issues'>GitHub issues</a>.</p>")),
+             "<a class=link href='mailto:works.omen@gmail.com'>works.omen@gmail.com</a>.</p>")),
         ],
     )
