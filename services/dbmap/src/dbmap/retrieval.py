@@ -20,7 +20,165 @@ STOP_WORDS = {
     "is", "last", "list", "made", "make", "me", "most", "my", "of", "recently",
     "show", "the", "their", "they", "to", "was", "were", "what", "which", "who",
     "with", "year",
+    # Conversational filler in vague questions; never schema vocabulary worth matching.
+    "us", "our", "ours", "we", "how", "why", "do", "does", "did", "any", "anything", "anybody",
+    "there", "this", "that", "these", "those", "so", "far", "right", "now", "just", "actually",
+    "even", "keep", "kept", "got", "going", "be", "being", "on", "at", "by", "or", "it", "its",
+    "stuff", "thing", "things", "lot", "lots", "really", "kind", "anyone", "someone", "anywhere",
 }
+
+
+# Everyday business words mapped to the words schemas tend to use. Generic on purpose:
+# it must help any business database, so nothing here names a specific table.
+CONCEPTS: dict[tuple[str, ...], tuple[str, ...]] = {
+    ("owe", "owed", "owes", "owing", "debt", "debts", "outstanding", "unpaid", "receivable", "receivables"): (
+        "invoice", "balance", "due", "outstanding", "unpaid", "receivable", "payment",
+    ),
+    ("paid", "pay", "pays", "payment", "payments", "collect", "collected", "collections"): (
+        "payment", "paid", "invoice", "amount",
+    ),
+    ("churn", "churned", "churning", "leaving", "left", "quit", "quitting", "lost", "cancel", "cancelled",
+     "canceled", "cancellation", "cancellations", "unsubscribe", "unsubscribed"): (
+        "churn", "cancel", "cancelled", "canceled", "cancellation", "subscription", "ended", "reason",
+    ),
+    ("complain", "complaining", "complaint", "complaints", "unhappy", "angry", "upset", "issue", "issues",
+     "problem", "problems", "escalation", "escalations"): (
+        "ticket", "complaint", "issue", "case", "support", "escalation", "priority",
+    ),
+    ("satisfaction", "satisfied", "nps", "rating", "ratings", "review", "reviews", "feedback", "happy"): (
+        "rating", "review", "satisfaction", "csat", "nps", "feedback", "score",
+    ),
+    ("seller", "sellers", "salesperson", "salespeople", "salesman", "rep", "reps", "closer", "closers"): (
+        "rep", "salesperson", "employee", "owner", "order", "opportunity",
+    ),
+    ("customer", "customers", "client", "clients", "buyer", "buyers"): ("customer", "client", "account", "buyer"),
+    ("revenue", "sales", "income", "earn", "earned", "earnings", "turnover", "sold", "selling"): (
+        "revenue", "amount", "total", "order", "invoice", "price",
+    ),
+    ("spend", "spending", "spent", "cost", "costs", "expense", "expenses", "bleeding", "burn", "burning"): (
+        "expense", "cost", "amount", "spend", "purchase", "debit", "budget",
+    ),
+    ("profit", "profitable", "margin", "margins"): ("margin", "cost", "price", "revenue"),
+    ("stock", "inventory", "shortage", "shortages", "reorder", "restock", "stockout"): (
+        "stock", "inventory", "hand", "quantity", "qty", "reorder", "warehouse", "available", "reserved",
+    ),
+    ("ship", "shipping", "shipped", "shipment", "shipments", "deliver", "delivery", "deliveries", "delivered"): (
+        "shipment", "shipping", "delivery", "delivered", "shipped", "carrier", "tracking",
+    ),
+    ("late", "delay", "delayed", "delays", "overdue", "slow", "behind", "missed"): (
+        "due", "expected", "late", "delay", "overdue", "sla", "breach",
+    ),
+    ("employee", "employees", "staff", "team", "teams", "headcount", "hire", "hires", "hired",
+     "hiring", "fired", "workforce"): ("employee", "staff", "headcount", "hire", "hired", "department", "team"),
+    ("salary", "salaries", "payroll", "compensation", "wage", "wages", "paycheck"): (
+        "salary", "payroll", "compensation", "pay", "net", "gross",
+    ),
+    ("suspicious", "hack", "hacked", "hacker", "breach", "attack", "attacks", "fraud", "security", "intrusion",
+     "bruteforce", "fishy", "shady", "sketchy", "unusual", "anomaly", "anomalies"): (
+        "login", "auth", "failed", "attempt", "event", "audit", "ip", "blocked",
+    ),
+    ("login", "logins", "signin", "logon", "password", "passwords"): ("login", "auth", "failed", "attempt", "session"),
+    ("campaign", "campaigns", "marketing", "ads", "advert", "advertising", "promo", "promotion", "promotions",
+     "newsletter", "funnel", "conversion", "conversions", "lead", "leads"): (
+        "campaign", "marketing", "lead", "conversion", "email", "promo", "click", "open",
+    ),
+    ("website", "site", "traffic", "visitor", "visitors", "visit", "visits", "pageviews", "browsing", "bounce"): (
+        "session", "page", "view", "visit", "web", "traffic",
+    ),
+    ("product", "products", "item", "items", "sku", "skus", "goods", "merchandise"): ("product", "item", "sku"),
+    ("return", "returns", "returned", "refund", "refunds", "refunded"): ("return", "refund", "reason"),
+    ("deal", "deals", "pipeline", "quota", "quotas", "forecast", "prospect", "prospects"): (
+        "opportunity", "pipeline", "deal", "stage", "forecast", "quota",
+    ),
+    ("usage", "adoption", "feature", "features", "engagement", "engaged", "active"): (
+        "usage", "feature", "active", "event", "session",
+    ),
+    ("subscription", "subscriptions", "plan", "plans", "mrr", "arr", "recurring", "renew", "renewal", "renewals"): (
+        "subscription", "plan", "mrr", "renewal", "recurring",
+    ),
+    ("supplier", "suppliers", "vendor", "vendors", "procurement", "purchasing", "sourcing"): (
+        "supplier", "vendor", "purchase", "po",
+    ),
+    ("error", "errors", "fail", "failing", "failed", "failure", "failures", "broken", "outage", "outages",
+     "down", "bug", "bugs", "crash", "crashes"): ("error", "failed", "status", "incident", "log", "request"),
+    ("audit", "change", "changed", "edited", "modified", "tampered", "history"): ("audit", "change", "history", "log"),
+    ("export", "exported", "exporting", "download", "downloaded", "extract", "extracted", "pulling"): (
+        "export", "download", "audit", "action",
+    ),
+    ("delete", "deleted", "deleting", "deletion", "removed", "wiped"): ("delete", "deleted", "audit", "action"),
+    ("quiet", "silent", "inactive", "contacted", "talked", "touch", "reached", "interaction", "interactions"): (
+        "activity", "activities", "contact", "interaction", "last",
+    ),
+    ("promise", "promises", "promised", "commitment", "commitments", "response", "respond", "responded"): (
+        "sla", "breach", "response", "target",
+    ),
+    ("anymore", "discontinued", "dead", "obsolete", "retired", "sunset"): (
+        "discontinued", "active", "status", "inactive",
+    ),
+    ("using", "use", "uses", "used"): ("usage", "feature", "event"),
+    ("longest", "slowest", "fastest", "quickest", "duration", "turnaround"): (
+        "delivered", "shipped", "resolved", "closed", "duration",
+    ),
+    ("region", "regions", "country", "countries", "territory", "territories", "market", "markets", "geo"): (
+        "region", "country", "territory",
+    ),
+}
+CONCEPT_PHRASES: dict[str, tuple[str, ...]] = {
+    "log in": ("login", "auth", "attempt", "failed"),
+    "logged in": ("login", "auth", "attempt"),
+    "sign in": ("login", "auth", "attempt", "failed"),
+    "sending back": ("return", "refund", "reason"),
+    "send back": ("return", "refund", "reason"),
+    "sent back": ("return", "refund", "reason"),
+    "flying off": ("order", "item", "quantity", "qty", "product"),
+    "best seller": ("order", "item", "quantity", "qty", "product"),
+    "best selling": ("order", "item", "quantity", "qty", "product"),
+    "running low": ("stock", "inventory", "hand", "reorder", "quantity", "available"),
+    "run out": ("stock", "inventory", "hand", "reorder", "quantity", "available"),
+    "out of stock": ("stock", "inventory", "hand", "reorder", "quantity", "available"),
+    "low on": ("stock", "inventory", "hand", "reorder", "quantity", "available"),
+    "sign up": ("signup", "registration", "created"),
+    "signed up": ("signup", "registration", "created"),
+}
+# Words that ask for a ranking, a total or a trend. Such questions need the table where
+# the transactions live (amounts, dates, many foreign keys), which they rarely name.
+AGGREGATE_INTENT = {
+    "best", "top", "biggest", "largest", "most", "highest", "worst", "lowest", "least", "fewest",
+    "total", "totals", "revenue", "trend", "trending", "trends", "growth", "growing", "grow", "declining",
+    "monthly", "weekly", "daily", "quarterly", "yearly", "average", "compare", "valuable", "loyal",
+    "spend", "spent", "much", "many", "volume",
+}
+MONEY_OR_COUNT_TERMS = {
+    "amt", "amount", "total", "price", "revenue", "cost", "value", "balance", "fee", "subtotal",
+    "net", "gross", "qty", "quantity", "units",
+}
+NUMERIC_TYPES = {"bigint", "decimal", "double precision", "integer", "numeric", "real", "smallint", "money"}
+CONCEPT_WEIGHT = 0.7
+# A business word the schema already uses is understood; expand it only lightly.
+KNOWN_CONCEPT_WEIGHT = 0.35
+# "Who ..." asks about a party: a customer, employee, account, supplier.
+PARTY_TERMS = {
+    "customer", "customers", "client", "clients", "account", "accounts", "employee", "employees",
+    "user", "users", "member", "members", "person", "people", "contact", "contacts", "supplier",
+    "suppliers", "vendor", "vendors", "agent", "agents", "rep", "reps", "staff", "buyer", "buyers",
+}
+
+
+def _stem(word: str) -> str:
+    """Light suffix stripping so inflections match ("leaving"/"leave", "handled"/"handle")."""
+    for suffix in ("ies", "ing", "ers", "ed", "er", "es", "s"):
+        if word.endswith(suffix) and len(word) - len(suffix) >= 3:
+            word = word[: -len(suffix)] + ("y" if suffix == "ies" else "")
+            break
+    return word[:-1] if word.endswith("e") and len(word) > 4 else word
+
+
+CONCEPT_INDEX: dict[str, tuple[str, ...]] = {}
+for _triggers, _terms in CONCEPTS.items():
+    for _trigger in _triggers:
+        # Keyed by the word and its stem, so "changing" finds the "changed" concept.
+        for _key in {_trigger, _stem(_trigger)}:
+            CONCEPT_INDEX[_key] = tuple(dict.fromkeys(CONCEPT_INDEX.get(_key, ()) + _terms))
 
 
 def _tokens(value: Any) -> list[str]:
@@ -109,24 +267,64 @@ class RetrievalIndex:
 
         self.document_frequency = document_frequency
         self.vocabulary = set(document_frequency)
+        self.stems: dict[str, set[str]] = {}
+        for token in self.vocabulary:
+            self.stems.setdefault(_stem(token), set()).add(token)
         self.average_length = sum(lengths) / max(1, len(lengths))
+
+        # Foreign-key neighbours and a "transaction table" score, used when a question asks
+        # for a ranking, total or trend without naming the table that holds the facts.
+        self.neighbours: dict[str, set[str]] = {key: set() for key in self.relations}
+        outgoing: Counter[str] = Counter()
+        for edge in snapshot.edges:
+            if edge.kind == "foreign_key" and edge.source in self.relations and edge.target in self.relations:
+                self.neighbours[edge.source].add(edge.target)
+                self.neighbours[edge.target].add(edge.source)
+                outgoing[edge.source] += 1
+        row_counts = sorted(int(rel.metadata.get("row_estimate") or 0) for rel in self.relations.values())
+        median_rows = row_counts[len(row_counts) // 2] if row_counts else 0
+        self.fact_scores: dict[str, float] = {}
+        for relation_id, relation in self.relations.items():
+            money = dated = False
+            for column in self.columns[relation_id]:
+                data_type = str(column.metadata.get("data_type") or "")
+                if data_type in NUMERIC_TYPES and self.column_terms[relation_id].get(str(column.name), set()) & MONEY_OR_COUNT_TERMS:
+                    money = True
+                if data_type.startswith(("date", "timestamp")):
+                    dated = True
+            rows = int(relation.metadata.get("row_estimate") or 0)
+            self.fact_scores[relation_id] = (
+                float(money) + float(dated) + min(outgoing[relation_id], 3) / 3 + (0.5 if rows > median_rows else 0.0)
+            )
 
     def _expanded_terms(
         self,
         question: str,
-    ) -> tuple[list[str], dict[str, str], dict[str, str]]:
-        original = list(dict.fromkeys(_tokens(question)))
+    ) -> tuple[dict[str, float], dict[str, str], dict[str, str]]:
+        """Question terms with weights: exact words count fully, guesses count less."""
+        # Two-letter words are only acronyms when written that way ("US", not "us"), and a
+        # word written in capitals is kept even if it is normally conversational filler.
+        upper = {token.lower() for token in re.findall(r"\b[A-Z]{2,}\b", question)}
+        original = list(dict.fromkeys([*_tokens(question), *sorted(upper)]))
         original_set = set(original)
-        expanded = []
+        weights: dict[str, float] = {}
         fuzzy: dict[str, str] = {}
         acronyms: dict[str, str] = {}
+
+        def add(term: str, weight: float) -> None:
+            if weight > weights.get(term, 0.0):
+                weights[term] = weight
+
         for term in original:
             in_vocabulary = term in self.vocabulary
             if in_vocabulary:
-                expanded.append(term)
+                add(term, 1.0)
+            has_digit = any(char.isdigit() for char in term)
             # Only treat a term as an acronym when the schema does not already use it as
             # a word, otherwise ordinary words expand into unrelated column phrases.
-            phrases = None if in_vocabulary else self.acronym_phrases.get(term)
+            phrases = None
+            if not in_vocabulary and not has_digit and (len(term) >= 3 or term in upper):
+                phrases = self.acronym_phrases.get(term)
             if phrases:
                 phrase, _ = max(
                     phrases.items(),
@@ -137,30 +335,41 @@ class RetrievalIndex:
                         item[0],
                     ),
                 )
-                expanded.extend(phrase)
+                for part in phrase:
+                    add(part, 0.9)
                 acronyms[term] = " ".join(phrase)
                 continue
+            if has_digit:
+                # Numbers (years, ids) are never typos of other numbers.
+                continue
             # Singular/plural are the same word in both directions, never a typo.
-            variants = sorted(
+            variants = [] if len(term) < 3 else sorted(
                 token
                 for token in self.vocabulary
                 if token in {f"{term}s", f"{term}es"}
                 or (term.endswith("s") and token == term[:-1])
                 or (term.endswith("es") and token == term[:-2])
             )
-            if variants:
-                expanded.extend(variants[:3])
+            for token in variants[:3]:
+                add(token, 1.0)
             if in_vocabulary or variants:
+                continue
+            stem_matches = sorted(self.stems.get(_stem(term), set())) if len(term) >= 4 else []
+            for token in stem_matches[:3]:
+                add(token, 0.8)
+            if stem_matches:
+                fuzzy[term] = stem_matches[0]
                 continue
             abbreviations = sorted(
                 token
                 for token in self.vocabulary
                 if len(token) >= 3 and term.startswith(token)
             )
+            for token in abbreviations[:3]:
+                add(token, 0.5)
             if abbreviations:
-                expanded.extend(abbreviations[:3])
                 fuzzy[term] = abbreviations[0]
-            if len(term) < 4:
+            if len(term) < 5:
                 # Short tokens produce noise ("all" scoring against "allow"), and the scan
                 # below costs a full vocabulary pass, so skip them.
                 continue
@@ -171,10 +380,27 @@ class RetrievalIndex:
                 ((_similarity(term, token), token) for token in self.vocabulary),
             )
             for score, token in matches:
-                if score >= 0.55:
-                    expanded.append(token)
+                # Typos only: near-identical spelling, so "generated" never becomes "general".
+                if score >= 0.75 and abs(len(token) - len(term)) <= 2:
+                    add(token, 0.6)
                     fuzzy[term] = token
-        return list(dict.fromkeys(expanded)), fuzzy, acronyms
+
+        # Business vocabulary: everyday words to the words schemas use.
+        question_lower = question.lower()
+        concept_terms: dict[str, float] = {}
+        for term in original:
+            weight = KNOWN_CONCEPT_WEIGHT if term in self.vocabulary else CONCEPT_WEIGHT
+            for concept in CONCEPT_INDEX.get(term, CONCEPT_INDEX.get(_stem(term), ())):
+                concept_terms[concept] = max(concept_terms.get(concept, 0.0), weight)
+        for phrase, terms in CONCEPT_PHRASES.items():
+            if phrase in question_lower:
+                for concept in terms:
+                    concept_terms[concept] = max(concept_terms.get(concept, 0.0), CONCEPT_WEIGHT)
+        for term, weight in concept_terms.items():
+            for token in [term, *(self.stems.get(_stem(term), set()) if len(term) >= 4 else ())]:
+                if token in self.vocabulary:
+                    add(token, weight)
+        return weights, fuzzy, acronyms
 
     def _foreign_key_neighbours(self, relation_id: str, limit: int) -> list[str]:
         """Relations reachable by one declared foreign key, targets before sources."""
@@ -197,7 +423,8 @@ class RetrievalIndex:
         question: str,
         limit: int,
     ) -> tuple[list[tuple[float, str]], list[str], dict[str, str], dict[str, str]]:
-        terms, fuzzy, acronyms = self._expanded_terms(question)
+        weights, fuzzy, acronyms = self._expanded_terms(question)
+        terms = list(weights)
         ranked = []
         question_lower = question.lower()
         historical = any(
@@ -217,11 +444,11 @@ class RetrievalIndex:
                 denominator = frequency + 1.2 * (
                     0.25 + 0.75 * length / max(1, self.average_length)
                 )
-                score += inverse * frequency * 2.2 / denominator
+                score += weights[term] * inverse * frequency * 2.2 / denominator
             relation = self.relations[relation_id]
             relation_name = str(relation.name).lower()
             relation_name_terms = set(_tokens(relation_name))
-            score += 0.75 * len(relation_name_terms & set(terms))
+            score += 0.75 * sum(weights[term] for term in relation_name_terms & weights.keys())
             if relation_name in question_lower:
                 score += 5
             row_estimate = int(relation.metadata.get("row_estimate") or 0)
@@ -253,6 +480,38 @@ class RetrievalIndex:
                 score += 0.1
             if score:
                 ranked.append((score, relation_id))
+        # "top-level category" is a hierarchy, not a ranking.
+        question_words = set(re.findall(r"[a-z]+", question_lower.replace("top-level", "")))
+        aggregate = bool(question_words & AGGREGATE_INTENT)
+        asks_who = bool(question_words & {"who", "whom", "whose"})
+        if ranked and (aggregate or asks_who):
+            scores = {relation_id: score for score, relation_id in ranked}
+            leaders = {relation_id: score for score, relation_id in heapq.nlargest(4, ranked)}
+            nearby = set().union(*(self.neighbours[relation_id] for relation_id in leaders))
+            for relation_id in set(scores) | nearby:
+                relation = self.relations[relation_id]
+                # How strongly the matches this table joins to were matched.
+                support = sum(
+                    score for leader, score in leaders.items()
+                    if leader != relation_id and relation_id in self.neighbours[leader]
+                )
+                bonus = 0.0
+                if aggregate:
+                    # "Who are our best customers?" names customers but needs the orders
+                    # table: boost transaction tables among the matches and their neighbours.
+                    fact = self.fact_scores[relation_id]
+                    bonus += 1.2 * fact + 0.3 * support * min(1.0, fact / 3)
+                    if relation.kind != "table":
+                        bonus *= 0.5
+                if asks_who and set(_tokens(relation.name)) & PARTY_TERMS:
+                    # The party joined to the strongest matches is usually who is meant.
+                    bonus += 0.5 * support
+                if relation_id not in scores:
+                    if not bonus:
+                        continue
+                    bonus *= 0.9
+                scores[relation_id] = scores.get(relation_id, 0.0) + bonus
+            ranked = [(score, relation_id) for relation_id, score in scores.items()]
         return heapq.nlargest(limit, ranked), terms, fuzzy, acronyms
 
     def context(
@@ -295,10 +554,15 @@ class RetrievalIndex:
                 ] += 1
             ranked = diverse
         terminal_ids = [relation_id for _, relation_id in ranked]
-        subgraph = GraphEngine.join_subgraph(self.snapshot, terminal_ids)
-        relation_ids = terminal_ids + [
-            node for node in subgraph["nodes"] if node not in terminal_ids
-        ]
+        # Prefer real foreign-key joins: a view's dependency links are not join paths and
+        # otherwise act as shortcuts that skip the tables a query must actually join.
+        subgraph = GraphEngine.join_subgraph(self.snapshot, terminal_ids, edge_kinds=frozenset({"foreign_key"}))
+        if not subgraph["connected"]:
+            subgraph = GraphEngine.join_subgraph(self.snapshot, terminal_ids)
+        connectors = [node for node in subgraph["nodes"] if node not in terminal_ids]
+        # Tables that join the strongest matches are required for the answer; list them
+        # before lower-ranked, speculative matches.
+        relation_ids = terminal_ids[:3] + connectors + terminal_ids[3:]
         if len(terminal_ids) == 1:
             # A single confident match still needs its lookup tables, and join_subgraph
             # returns early for one terminal, so add direct foreign-key neighbours.

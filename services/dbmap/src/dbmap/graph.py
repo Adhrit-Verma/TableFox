@@ -310,7 +310,13 @@ class GraphEngine:
         return GraphSnapshot.create(snapshot.database, nodes, edges)
 
     @staticmethod
-    def join_path(snapshot: GraphSnapshot, source: str, target: str, max_hops: int = 6) -> dict:
+    def join_path(
+        snapshot: GraphSnapshot,
+        source: str,
+        target: str,
+        max_hops: int = 6,
+        edge_kinds: frozenset[str] = frozenset({"foreign_key", "depends_on"}),
+    ) -> dict:
         relation_ids = {
             node.id
             for node in snapshot.nodes
@@ -322,7 +328,7 @@ class GraphEngine:
         edges = [
             edge
             for edge in snapshot.edges
-            if edge.kind in {"foreign_key", "depends_on"}
+            if edge.kind in edge_kinds
             and edge.source in relation_ids
             and edge.target in relation_ids
         ]
@@ -356,6 +362,7 @@ class GraphEngine:
         snapshot: GraphSnapshot,
         terminals: list[str],
         max_hops: int = 6,
+        edge_kinds: frozenset[str] = frozenset({"foreign_key", "depends_on"}),
     ) -> dict:
         terminals = list(dict.fromkeys(terminals))
         if len(terminals) < 2:
@@ -364,7 +371,7 @@ class GraphEngine:
         paths = []
         for index, source in enumerate(terminals):
             for target in terminals[index + 1 :]:
-                path = GraphEngine.join_path(snapshot, source, target, max_hops)
+                path = GraphEngine.join_path(snapshot, source, target, max_hops, edge_kinds)
                 if path.get("found"):
                     paths.append((len(path["edges"]), source, target, path))
 

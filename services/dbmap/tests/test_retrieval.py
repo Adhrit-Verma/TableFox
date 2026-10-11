@@ -53,6 +53,84 @@ def build_index():
     return RetrievalIndex(GraphEngine("testdb").build(sample_metadata()))
 
 
+def shop_metadata():
+    """A small shop schema whose words differ from how people ask about it."""
+    def column(table, name, data_type="integer"):
+        return {"schema": "public", "table": table, "name": name, "data_type": data_type}
+
+    def fk(table, col, target):
+        return {
+            "schema": "public", "table": table, "name": f"{table}_{col}_fkey", "type": "FOREIGN KEY",
+            "columns": [col], "foreign_schema": "public", "foreign_table": target, "foreign_columns": ["id"],
+        }
+
+    return {
+        "relations": [
+            {"schema": "public", "name": name, "kind": "table", "row_estimate": rows}
+            for name, rows in (
+                ("customers", 5_000), ("orders", 900_000), ("invoices", 400_000),
+                ("tickets", 80_000), ("subscriptions", 20_000), ("utm_sources", 50), ("fx_rates", 200),
+            )
+        ],
+        "columns": [
+            column("customers", "id"), column("customers", "name", "text"),
+            column("orders", "id"), column("orders", "customer_id"), column("orders", "ordered_at", "timestamp with time zone"),
+            column("orders", "total_amt", "numeric"),
+            column("invoices", "id"), column("invoices", "customer_id"), column("invoices", "balance_due", "numeric"),
+            column("invoices", "due_dt", "date"),
+            column("tickets", "id"), column("tickets", "customer_id"), column("tickets", "priority", "text"),
+            column("subscriptions", "id"), column("subscriptions", "customer_id"),
+            column("subscriptions", "cancel_reason", "text"), column("subscriptions", "cancelled_at", "date"),
+            column("utm_sources", "id"), column("utm_sources", "utm_source", "text"),
+            column("fx_rates", "id"), column("fx_rates", "rate_2020", "numeric"),
+        ],
+        "constraints": [
+            fk("orders", "customer_id", "customers"), fk("invoices", "customer_id", "customers"),
+            fk("tickets", "customer_id", "customers"), fk("subscriptions", "customer_id", "customers"),
+        ],
+        "indexes": [], "dependencies": [], "usage": [], "usage_status": "disabled",
+    }
+
+
+def shop_index():
+    return RetrievalIndex(GraphEngine("shopdb").build(shop_metadata()))
+
+
+def top(index, question, n=3):
+    return [item["id"] for item in index.context(question, max_relations=6)["relations"][:n]]
+
+
+class VagueQuestionTests(unittest.TestCase):
+    def test_business_words_reach_schema_words(self):
+        index = shop_index()
+        self.assertEqual(top(index, "Who owes us money?", 1), ["table:public.invoices"])
+        self.assertIn("table:public.subscriptions", top(index, "Why are customers leaving?", 2))
+        self.assertIn("table:public.tickets", top(index, "Which clients are complaining the most?"))
+
+    def test_who_questions_bring_the_party_table(self):
+        self.assertIn("table:public.customers", top(shop_index(), "Who owes us money?"))
+
+    def test_ranking_questions_bring_the_transaction_table(self):
+        ids = top(shop_index(), "Who are our best customers?")
+        self.assertIn("table:public.customers", ids)
+        self.assertIn("table:public.orders", ids)
+
+    def test_small_words_and_years_are_not_rewritten(self):
+        index = shop_index()
+        weights, fuzzy, acronyms = index._expanded_terms("what do they owe us in 2026")
+        self.assertNotIn("us", acronyms)
+        self.assertNotIn("2026", fuzzy)
+        self.assertNotIn("utm", weights)
+        self.assertNotIn("2020", weights)
+        # Written as an acronym, it may still expand.
+        _, _, acronyms = index._expanded_terms("orders from US campaigns")
+        self.assertIn("us", acronyms)
+
+    def test_unrelated_word_is_not_a_typo(self):
+        _, fuzzy, _ = shop_index()._expanded_terms("who generated the most orders")
+        self.assertNotIn("generated", fuzzy)
+
+
 class TermExpansionTests(unittest.TestCase):
     def test_plurals_are_matched_without_being_reported_as_typos(self):
         index = build_index()
@@ -75,7 +153,7 @@ class TermExpansionTests(unittest.TestCase):
 
         terms, fuzzy, acronyms = index._expanded_terms("what is all of the")
 
-        self.assertEqual(terms, [])
+        self.assertEqual(terms, {})
         self.assertEqual(fuzzy, {})
         self.assertEqual(acronyms, {})
 
